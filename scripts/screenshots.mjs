@@ -1,7 +1,7 @@
 import { chromium } from 'playwright-core';
 import { mkdir } from 'node:fs/promises';
 
-const exe = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
+const exe = process.env.EDGE_PATH ?? 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
 const url = process.env.ASTERIA_URL ?? 'http://localhost:4173/';
 const out = 'screenshots';
 await mkdir(out, { recursive: true });
@@ -35,15 +35,21 @@ if (bar) {
   await page.mouse.click(bar.x + bar.width * 0.19, bar.y + bar.height / 2);
 }
 await page.waitForTimeout(1400);
+await page.mouse.move(720, 70);
+await page.waitForTimeout(420);
 await page.screenshot({ path: `${out}/02-desktop-playing.png` });
 
 await page.locator('.queue-button').click();
 await page.waitForSelector('.queue-panel');
 await page.waitForTimeout(500);
+await page.mouse.move(720, 70);
+await page.waitForTimeout(420);
 await page.screenshot({ path: `${out}/03-queue-sidebar.png` });
 
 await page.getByRole('button', { name: '展开' }).click();
 await page.waitForTimeout(600);
+await page.mouse.move(720, 70);
+await page.waitForTimeout(420);
 await page.screenshot({ path: `${out}/04-queue-full.png` });
 
 await page.getByRole('button', { name: '关闭' }).last().click();
@@ -51,11 +57,15 @@ await page.waitForTimeout(400);
 await page.getByRole('button', { name: '设置' }).click();
 await page.waitForSelector('.settings-panel');
 await page.waitForTimeout(600);
+await page.mouse.move(720, 70);
+await page.waitForTimeout(420);
 await page.screenshot({ path: `${out}/05-settings.png` });
 await page.keyboard.press('Escape');
 
 await page.locator('.volume-slot .icon-button').click();
 await page.waitForTimeout(400);
+await page.mouse.move(720, 70);
+await page.waitForTimeout(500);
 await page.screenshot({ path: `${out}/06-volume.png` });
 await page.keyboard.press('Escape');
 
@@ -91,9 +101,13 @@ await page.setViewportSize({ width: 390, height: 844 });
 await page.emulateMedia({ colorScheme: 'dark' });
 await page.reload({ waitUntil: 'networkidle' });
 await page.waitForTimeout(1000);
+await page.mouse.move(40, 70);
+await page.waitForTimeout(420);
 await page.screenshot({ path: `${out}/09-mobile.png` });
 await page.locator('.queue-button').click();
 await page.waitForTimeout(500);
+await page.mouse.move(40, 70);
+await page.waitForTimeout(420);
 await page.screenshot({ path: `${out}/10-mobile-queue.png` });
 await page.keyboard.press('Escape');
 await page.getByRole('button', { name: '设置' }).click();
@@ -108,8 +122,13 @@ await page.waitForTimeout(900);
 await page.locator('.queue-button').click();
 await page.waitForTimeout(400);
 await page.getByText('Chromatic Fields', { exact: true }).first().click();
-await page.waitForTimeout(1800);
+await page.waitForTimeout(300);
+await page.getByRole('button', { name: '关闭' }).last().click();
+await page.waitForTimeout(2600);
 await page.screenshot({ path: `${out}/12-video.png` });
+await page.getByRole('button', { name: '全屏' }).first().click();
+await page.waitForTimeout(700);
+await page.screenshot({ path: `${out}/13-video-fullscreen.png` });
 
 await context.close();
 await browser.close();
