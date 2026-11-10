@@ -26,6 +26,8 @@ export function useAppearance(): 'dark' | 'light' {
     root.dataset.theme = resolved;
     root.dataset.glass = liquidGlass ? 'on' : 'off';
     root.style.colorScheme = resolved;
+    const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    if (meta) meta.content = resolved === 'dark' ? '#070a10' : '#e8edf4';
   }, [resolved, liquidGlass]);
 
   return resolved;

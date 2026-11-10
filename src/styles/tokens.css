@@ -101,7 +101,7 @@
   :root { --bottom-bar-height: 120px; }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 820px) {
   :root { --bottom-bar-height: 138px; }
 }
 

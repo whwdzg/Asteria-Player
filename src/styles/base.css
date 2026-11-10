@@ -384,6 +384,25 @@ svg {
   letter-spacing: -0.05em;
 }
 
+[data-theme="light"] .boot-screen {
+  background:
+    radial-gradient(70% 60% at 50% 20%, rgba(58, 152, 220, 0.16), transparent 62%),
+    #e8edf4;
+  color: #101827;
+}
+
+[data-theme="light"] .boot-message {
+  color: #3f4c60;
+}
+
+[data-theme="light"] .boot-detail {
+  color: #5e6c80;
+}
+
+[data-theme="light"] .boot-progress {
+  background: rgba(16, 24, 39, 0.12);
+}
+
 .boot-title {
   font-family: var(--font-display);
   font-size: 14px;
@@ -1000,8 +1019,9 @@ svg {
 }
 
 .menu-check {
+  width: 13px;
+  height: 13px;
   color: var(--accent);
-  font-size: 12px;
 }
 
 .menu-chevron {

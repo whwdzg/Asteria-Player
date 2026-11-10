@@ -12,6 +12,13 @@ const VIDEO_EXTENSIONS = new Set(['mp4', 'm4v', 'webm', 'mkv', 'mov', 'avi', 'og
 const LYRIC_EXTENSIONS = new Set(['lrc', 'spl', 'txt']);
 const SUBTITLE_EXTENSIONS = new Set(['srt', 'vtt', 'ass', 'ssa']);
 const IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif']);
+const SIDECAR_EXTENSIONS = new Set([
+  ...LYRIC_EXTENSIONS,
+  ...SUBTITLE_EXTENSIONS,
+  ...IMAGE_EXTENSIONS,
+  'xml',
+  'json',
+]);
 const DANMAKU_HINTS = /(danmaku|danmu|弹幕|comment|chat)/i;
 
 export interface ImportedTrackGroup {
@@ -28,6 +35,9 @@ type ProgressCallback = (done: number, total: number, name: string) => void;
 
 function kindOf(file: File): MediaKind | undefined {
   const extension = extensionOf(file.name);
+  // Chromium maps `.spl` to `audio/soundpadlist`, and some platforms report
+  // odd MIME types for subtitles. Extension wins for known sidecar files.
+  if (SIDECAR_EXTENSIONS.has(extension)) return undefined;
   if (AUDIO_EXTENSIONS.has(extension)) {
     if (extension === 'webm' && file.type.startsWith('video/')) return 'video';
     return 'audio';
@@ -250,10 +260,14 @@ export async function collectDroppedFiles(dataTransfer: DataTransfer): Promise<F
     }
     if (entry.isDirectory) {
       const reader = (entry as FileSystemDirectoryEntry).createReader();
-      const children = await new Promise<FileSystemEntry[]>((resolve, reject) => {
-        reader.readEntries(resolve, reject);
-      });
-      for (const child of children) await readEntry(child);
+      // Directory readers return entries in batches; keep reading until empty.
+      for (;;) {
+        const children = await new Promise<FileSystemEntry[]>((resolve, reject) => {
+          reader.readEntries(resolve, reject);
+        });
+        if (!children.length) break;
+        for (const child of children) await readEntry(child);
+      }
     }
   };
 

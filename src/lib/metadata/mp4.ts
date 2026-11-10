@@ -118,21 +118,22 @@ export function parseMp4(bytes: Uint8Array): MediaTags | null {
 export function parseWav(bytes: Uint8Array): MediaTags | null {
   if (ascii(bytes, 0, 4) !== 'RIFF' || ascii(bytes, 8, 4) !== 'WAVE') return null;
   const tags: MediaTags = {};
+  let channels = 2;
   let cursor = 12;
   while (cursor + 8 <= bytes.length) {
     const type = ascii(bytes, cursor, 4);
     const size = bytes[cursor + 4] | (bytes[cursor + 5] << 8) | (bytes[cursor + 6] << 16) | (bytes[cursor + 7] << 24);
     const start = cursor + 8;
     if (type === 'fmt ' && start + 16 <= bytes.length) {
-      const channels = bytes[start + 2] | (bytes[start + 3] << 8);
+      channels = bytes[start + 2] | (bytes[start + 3] << 8);
       const sampleRate = bytes[start + 4] | (bytes[start + 5] << 8) | (bytes[start + 6] << 16) | (bytes[start + 7] << 24);
       const bits = bytes[start + 14] | (bytes[start + 15] << 8);
       if (sampleRate) tags.sampleRate = sampleRate;
       if (bits) tags.bitDepth = bits;
       if (channels > 2) tags.format = `WAV · ${channels}ch`;
     }
-    if (type === 'data' && tags.sampleRate && tags.bitDepth) {
-      const bytesPerSecond = tags.sampleRate * (tags.bitDepth / 8) * 2;
+    if (type === 'data' && tags.sampleRate && tags.bitDepth && channels > 0) {
+      const bytesPerSecond = tags.sampleRate * (tags.bitDepth / 8) * channels;
       if (bytesPerSecond > 0) tags.duration = size / bytesPerSecond;
     }
     if (size <= 0) break;

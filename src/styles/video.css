@@ -28,16 +28,44 @@
   z-index: 0;
   display: grid;
   place-items: center;
+  overflow: hidden;
   background: #000;
 }
 
+.video-media::before {
+  content: "";
+  position: absolute;
+  inset: -40px;
+  z-index: 0;
+  background-image: var(--video-cover, none);
+  background-position: center;
+  background-size: cover;
+  filter: blur(46px) brightness(0.38) saturate(1.35);
+  opacity: 0.82;
+  transform: scale(1.1);
+}
+
+.video-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(70% 70% at 50% 50%, transparent, rgba(0, 0, 0, 0.45));
+}
+
 .player-video {
+  position: relative;
+  z-index: 1;
   width: 100%;
   height: 100%;
   object-fit: contain;
-  background: #000;
+  background: transparent;
   filter: brightness(var(--media-brightness));
   transition: filter 160ms linear;
+}
+
+.video-meta-card {
+  display: none;
 }
 
 .video-backdrop-glow {

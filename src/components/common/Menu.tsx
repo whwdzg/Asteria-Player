@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronLeft24Regular, ChevronRight24Regular } from '@fluentui/react-icons';
+import { Checkmark24Regular, ChevronLeft24Regular, ChevronRight24Regular } from '@fluentui/react-icons';
 
 export interface MenuAnchor {
   rect: DOMRect;
@@ -33,9 +33,9 @@ const MENU_MARGIN = 8;
 
 export function Menu({ open, anchor, items, onClose, label, width = 232 }: MenuProps): React.ReactElement | null {
   const panelRef = useRef<HTMLDivElement>(null);
-  const [stack, setStack] = useState<MenuItemDef[][]>([]);
+  const [stack, setStack] = useState<Array<{ label: string; items: MenuItemDef[] }>>([]);
   const [position, setPosition] = useState({ top: 0, left: 0 });
-  const activeItems = stack.length ? stack[stack.length - 1] : items;
+  const activeItems = stack.length ? stack[stack.length - 1].items : items;
 
   useEffect(() => {
     if (!open) setStack([]);
@@ -122,7 +122,7 @@ export function Menu({ open, anchor, items, onClose, label, width = 232 }: MenuP
           onClick={() => setStack((current) => current.slice(0, -1))}
         >
           <ChevronLeft24Regular />
-          <span>{stack[stack.length - 1][0]?.label ?? ''}</span>
+          <span>{stack[stack.length - 1].label}</span>
         </button>
       ) : null}
       {activeItems.map((item) => {
@@ -137,7 +137,7 @@ export function Menu({ open, anchor, items, onClose, label, width = 232 }: MenuP
             disabled={item.disabled}
             onClick={() => {
               if (item.submenu) {
-                setStack((current) => [...current, item.submenu!]);
+                setStack((current) => [...current, { label: item.label, items: item.submenu! }]);
                 return;
               }
               onClose();
@@ -146,7 +146,7 @@ export function Menu({ open, anchor, items, onClose, label, width = 232 }: MenuP
           >
             <span className="menu-icon" aria-hidden="true">{item.icon}</span>
             <span className="menu-label">{item.label}</span>
-            {item.checked ? <span className="menu-check" aria-hidden="true">✓</span> : null}
+            {item.checked ? <Checkmark24Regular className="menu-check" aria-hidden="true" /> : null}
             {item.submenu ? <ChevronRight24Regular className="menu-chevron" aria-hidden="true" /> : null}
           </button>
         );

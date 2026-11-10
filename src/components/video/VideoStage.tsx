@@ -3,6 +3,7 @@ import {
   ClosedCaption24Regular,
   FullScreenMaximize24Regular,
   FullScreenMinimize24Regular,
+  Info24Regular,
   Play24Filled,
   SpinnerIos20Regular,
 } from '@fluentui/react-icons';
@@ -32,9 +33,10 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
   const patch = useSettingsStore((state) => state.patch);
   const danmakuEnabled = useSettingsStore((state) => state.danmakuEnabled);
   const fullscreen = useUiStore((state) => state.fullscreen);
+  const setDetailsTrackId = useUiStore((state) => state.setDetailsTrackId);
   const { t } = useI18n();
   const hostRef = useRef<HTMLDivElement>(null);
-  const [menu, setMenu] = useState<{ anchor: MenuAnchor; kind: 'subtitle' | 'danmaku' } | null>(null);
+  const [subtitleMenu, setSubtitleMenu] = useState<MenuAnchor | null>(null);
 
   useEffect(() => {
     const element = player.videoElement;
@@ -81,6 +83,7 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
     <section className="video-view" aria-label={track.title}>
       <div
         className="video-frame"
+        style={{ '--video-cover': track.cover ? `url("${track.cover}")` : 'none' } as React.CSSProperties}
         onClick={(event) => {
           if ((event.target as HTMLElement).closest('button, .video-top-tools')) return;
           player.toggle();
@@ -103,15 +106,15 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
                   label={`${t('np.subtitles')} · ${subtitleLabel}`}
                   tooltip={t('np.subtitles')}
                   active={subtitleLang !== 'off'}
-                  onClick={(event) => setMenu({ anchor: { rect: event.currentTarget.getBoundingClientRect(), element: event.currentTarget }, kind: 'subtitle' })}
+                  onClick={(event) => setSubtitleMenu({ rect: event.currentTarget.getBoundingClientRect(), element: event.currentTarget })}
                 >
                   <ClosedCaption24Regular />
                 </IconButton>
                 <Menu
-                  open={menu?.kind === 'subtitle'}
-                  anchor={menu?.anchor ?? null}
+                  open={Boolean(subtitleMenu)}
+                  anchor={subtitleMenu}
                   items={subtitleMenuItems}
-                  onClose={() => setMenu(null)}
+                  onClose={() => setSubtitleMenu(null)}
                   label={t('np.subtitles')}
                 />
               </>
@@ -153,6 +156,23 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
 
         <DanmakuLayer track={track} />
         <SubtitleOverlay track={track} />
+      </div>
+
+      <div className="video-meta-card">
+        <div className="video-meta-heading">
+          <span className="video-badge"><span className="live-dot" /> {t('np.video')}</span>
+          <h2>{track.title}</h2>
+          <p>{track.artist}{track.album ? ` · ${track.album}` : ''}</p>
+        </div>
+        <div className="video-meta-chips">
+          {track.format ? <span>{track.format}</span> : null}
+          {track.videoWidth && track.videoHeight ? <span>{track.videoWidth} × {track.videoHeight}</span> : null}
+          {track.subtitles?.length ? <span>{t('np.subtitles')} · {subtitleLabel}</span> : null}
+          {hasDanmaku(track) ? <span>{t('np.danmaku')} · {danmakuEnabled ? t('common.on') : t('common.off')}</span> : null}
+        </div>
+        <button type="button" className="text-button video-detail-button" onClick={() => setDetailsTrackId(track.id)}>
+          <Info24Regular /> {t('details.title')}
+        </button>
       </div>
     </section>
   );

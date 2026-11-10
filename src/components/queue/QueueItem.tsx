@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { MoreHorizontal24Regular } from '@fluentui/react-icons';
+import { Checkmark24Regular, MoreHorizontal24Regular } from '@fluentui/react-icons';
 import type { Track } from '../../lib/types';
 import { formatDuration } from '../../lib/format';
 import { CoverArt } from '../common/CoverArt';
@@ -39,7 +39,7 @@ export const QueueItem = memo(function QueueItem({
           aria-label={`${t('queue.select')}: ${track.title}`}
           onClick={() => onToggleSelect(track.id)}
         >
-          {selected ? <span aria-hidden="true">✓</span> : null}
+          {selected ? <Checkmark24Regular aria-hidden="true" /> : null}
         </button>
       ) : null}
       <button type="button" className="queue-row-main" onClick={() => (batch ? onToggleSelect(track.id) : onPlay(track))}>

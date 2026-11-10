@@ -53,7 +53,7 @@ export const useUiStore = create<UiState>()((set) => ({
   openQueue: (view = 'sidebar') => set({ queueView: view, settingsOpen: false, popover: null }),
   setQueueView: (queueView) => set({ queueView }),
   setSettingsOpen: (settingsOpen) => set({ settingsOpen, popover: null, queueView: 'closed' }),
-  setPopover: (popover) => set({ popover, settingsOpen: false }),
+  setPopover: (popover) => set({ popover, settingsOpen: false, queueView: 'closed' }),
   setDetailsTrackId: (detailsTrackId) => set({ detailsTrackId }),
   openPlaylistDialog: (playlistDialogTrackIds = []) => set({ playlistDialogOpen: true, playlistDialogTrackIds }),
   closePlaylistDialog: () => set({ playlistDialogOpen: false, playlistDialogTrackIds: [] }),

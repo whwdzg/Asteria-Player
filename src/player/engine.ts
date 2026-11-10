@@ -405,18 +405,29 @@ export class PlayerEngine {
     const library = useLibraryStore.getState();
     const removingCurrent = library.currentId ? ids.includes(library.currentId) : false;
     const removed = library.tracks.filter((track) => ids.includes(track.id));
+    const wasPlaying = usePlaybackStore.getState().isPlaying;
+    const idSet = new Set(ids);
+    const order = library.queue.length ? library.queue : library.tracks.map((track) => track.id);
+    const index = library.currentId ? order.indexOf(library.currentId) : -1;
+    const nextCandidate = [
+      ...order.slice(index + 1),
+      ...order.slice(0, Math.max(0, index)).reverse(),
+    ].find((id) => !idSet.has(id));
     library.removeTracks(ids);
     removed.forEach((track) => revokeTrackUrls(track));
     if (removingCurrent) {
       this.loadedTrackId = null;
-      const next = useLibraryStore.getState().tracks[0];
-      if (next) this.load(next, { autoplay: false });
+      const next = nextCandidate
+        ? useLibraryStore.getState().tracks.find((track) => track.id === nextCandidate)
+        : useLibraryStore.getState().tracks[0];
+      if (next) this.load(next, { autoplay: wasPlaying });
       else {
         this.active?.pause();
         this.active?.removeAttribute('src');
         this.active?.load();
         this.active = null;
         usePlaybackStore.getState().setPlaying(false);
+        usePlaybackStore.getState().setLoading(false);
         useClockStore.getState().reset();
       }
     }
@@ -485,6 +496,7 @@ export class PlayerEngine {
     if (!tracks.length) {
       this.active?.pause();
       usePlaybackStore.getState().setPlaying(false);
+      usePlaybackStore.getState().setLoading(false);
       useClockStore.getState().reset();
       return;
     }

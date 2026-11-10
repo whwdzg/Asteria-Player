@@ -21,6 +21,7 @@ export function useActiveSubtitle(track: Track | undefined): { source?: Subtitle
       return;
     }
     let cancelled = false;
+    setCues([]);
     if (source.text) {
       setCues(parseSubtitle(source.text, source.format).cues);
       return;

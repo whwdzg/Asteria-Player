@@ -2,10 +2,14 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
+  base: './',
   plugins: [react()],
   server: {
     port: 4173,
     strictPort: true,
+    watch: {
+      ignored: ['**/screenshots/**', '**/*.tmpdir/**', '**/dist/**'],
+    },
   },
   preview: {
     port: 4173,
