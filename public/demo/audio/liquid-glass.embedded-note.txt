@@ -1,0 +1,1 @@
+Lyrics for Liquid Glass are stored in the ID3 USLT frame of the MP3, not in a sidecar.
