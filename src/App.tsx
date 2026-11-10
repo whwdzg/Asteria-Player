@@ -1,0 +1,257 @@
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { ArrowDownload24Regular, ArrowImport24Regular, FolderOpen24Regular } from '@fluentui/react-icons';
+import './styles/index.css';
+import { BottomBar } from './components/chrome/BottomBar';
+import { NowPlaying } from './components/nowplaying/NowPlaying';
+import { VideoStage } from './components/video/VideoStage';
+import { Toasts } from './components/overlays/Toasts';
+import { DetailsDialog } from './components/overlays/DetailsDialog';
+import { PlaylistDialog } from './components/overlays/PlaylistDialog';
+import { useAppearance } from './hooks/useTheme';
+import { useFullscreen } from './hooks/useFullscreen';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { useAutoHideChrome } from './hooks/useAutoHideChrome';
+import { useI18n } from './i18n/I18nProvider';
+import { loadDemoLibrary } from './lib/demo';
+import { coverFallback } from './lib/cover';
+import { collectDroppedFiles } from './lib/importer';
+import { player } from './player/engine';
+import { useImporter } from './player/ImportProvider';
+import { useLibraryStore } from './state/library';
+import { usePlaybackStore } from './state/playback';
+import { useSettingsStore } from './state/settings';
+import { useUiStore } from './state/ui';
+
+const LazyQueuePanel = lazy(() => import('./components/queue/QueuePanel').then((module) => ({ default: module.QueuePanel })));
+
+function AmbientBackdrop({ cover, accent }: { cover?: string; accent: string }): React.ReactElement {
+  return (
+    <div className="ambient" aria-hidden="true" style={{ '--ambient-accent': accent } as React.CSSProperties}>
+      {cover ? <div className="ambient-cover" style={{ backgroundImage: `url("${cover}")` }} /> : null}
+      <div className="ambient-orb orb-a" />
+      <div className="ambient-orb orb-b" />
+      <div className="ambient-grid" />
+      <div className="ambient-grain" />
+    </div>
+  );
+}
+
+function AppHeader({ isVideo }: { isVideo: boolean }): React.ReactElement {
+  const { t } = useI18n();
+  const track = useLibraryStore((state) => state.tracks.find((item) => item.id === state.currentId));
+  return (
+    <header className="app-header">
+      <div className="brand">
+        <span className="brand-mark" aria-hidden="true"><span>A</span></span>
+        <div className="brand-copy">
+          <span className="brand-name">{t('app.name')}</span>
+          <span className="brand-tagline">{t('app.tagline')}</span>
+        </div>
+      </div>
+      <div className="header-status">
+        <span className={`status-pill ${isVideo ? 'is-video' : ''}`.trim()}>
+          <span className="status-dot" aria-hidden="true" />
+          {isVideo ? t('np.video') : t('np.eyebrow')}
+        </span>
+        {track ? <span className="header-track">{track.artist || t('common.unknownArtist')}</span> : null}
+      </div>
+    </header>
+  );
+}
+
+function StageSkeleton(): React.ReactElement {
+  return (
+    <div className="stage-skeleton" aria-hidden="true">
+      <div className="skeleton-art" />
+      <div className="skeleton-lyrics">
+        <span style={{ width: '38%' }} />
+        <span style={{ width: '72%' }} />
+        <span style={{ width: '60%' }} />
+        <span style={{ width: '80%' }} />
+        <span style={{ width: '52%' }} />
+      </div>
+    </div>
+  );
+}
+
+function EmptyStage(): React.ReactElement {
+  const { t } = useI18n();
+  const { openFiles, openFolder } = useImporter();
+  return (
+    <section className="empty-stage">
+      <div className="empty-orb" aria-hidden="true">
+        <span className="empty-orbit" />
+        <span className="empty-mark">A</span>
+      </div>
+      <h1>{t('empty.title')}</h1>
+      <p>{t('empty.hint')}</p>
+      <div className="empty-actions">
+        <button type="button" className="fluent-button primary" onClick={openFiles}>
+          <ArrowImport24Regular /> {t('menu.importFiles')}
+        </button>
+        <button type="button" className="fluent-button" onClick={openFolder}>
+          <FolderOpen24Regular /> {t('menu.importFolder')}
+        </button>
+      </div>
+      <div className="empty-formats">
+        <span>MP3</span><span>FLAC</span><span>WAV</span><span>M4A</span><span>MP4</span><span>WEBM</span>
+        <span>LRC</span><span>SPL</span><span>SRT</span><span>VTT</span><span>ASS</span><span>XML</span>
+      </div>
+    </section>
+  );
+}
+
+function DropOverlay(): React.ReactElement | null {
+  const active = useUiStore((state) => state.dragActive);
+  const { t } = useI18n();
+  if (!active) return null;
+  return (
+    <div className="drop-overlay">
+      <div className="drop-card">
+        <span className="drop-icon"><ArrowDownload24Regular /></span>
+        <h2>{t('drop.title')}</h2>
+        <p>{t('drop.hint')}</p>
+      </div>
+    </div>
+  );
+}
+
+export default function App(): React.ReactElement {
+  useAppearance();
+  const { t } = useI18n();
+  const appRef = useRef<HTMLDivElement>(null);
+  const { fullscreen, toggleFullscreen, exitFullscreen } = useFullscreen(appRef);
+  const { importFiles } = useImporter();
+  const current = useLibraryStore((state) => state.tracks.find((item) => item.id === state.currentId));
+  const tracks = useLibraryStore((state) => state.tracks);
+  const loaded = useLibraryStore((state) => state.loaded);
+  const queueView = useUiStore((state) => state.queueView);
+  const chromeVisible = useUiStore((state) => state.chromeVisible);
+  const brightness = useSettingsStore((state) => state.brightness);
+  const playbackError = usePlaybackStore((state) => state.error);
+  const setError = usePlaybackStore((state) => state.setError);
+  const [bootError, setBootError] = useState(false);
+  const dragCounter = useRef(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadDemoLibrary()
+      .then((demoTracks) => {
+        if (cancelled) return;
+        useLibraryStore.getState().setDemoTracks(demoTracks);
+        player.initialize();
+        player.ensureCurrent();
+      })
+      .catch((error: unknown) => {
+        console.error(error);
+        if (cancelled) return;
+        useLibraryStore.getState().setLoaded(true);
+        setBootError(true);
+        player.initialize();
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    if (!bootError) return;
+    useUiStore.getState().pushToast(t('toast.error'), 'error');
+  }, [bootError, t]);
+
+  useEffect(() => {
+    if (!playbackError) return;
+    useUiStore.getState().pushToast(playbackError === 'blocked' ? t('toast.playBlocked') : t('toast.error'), 'error');
+    setError(null);
+  }, [playbackError, setError, t]);
+
+  useEffect(() => {
+    const accent = current?.accent ?? (current ? coverFallback(current).accent : '#6fd6ff');
+    document.documentElement.style.setProperty('--track-accent', accent);
+    document.documentElement.style.setProperty('--media-brightness', String(brightness));
+  }, [current, brightness]);
+
+  const isVideo = current?.kind === 'video';
+  useAutoHideChrome(fullscreen, Boolean(isVideo));
+  useKeyboardShortcuts({ toggleFullscreen, exitFullscreen });
+
+  useEffect(() => {
+    const hasFiles = (event: DragEvent): boolean => Array.from(event.dataTransfer?.types ?? []).includes('Files');
+    const onDragEnter = (event: DragEvent): void => {
+      if (!hasFiles(event)) return;
+      event.preventDefault();
+      dragCounter.current += 1;
+      useUiStore.getState().setDragActive(true);
+    };
+    const onDragOver = (event: DragEvent): void => {
+      if (!hasFiles(event)) return;
+      event.preventDefault();
+      if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+    };
+    const onDragLeave = (event: DragEvent): void => {
+      if (!hasFiles(event)) return;
+      dragCounter.current = Math.max(0, dragCounter.current - 1);
+      if (dragCounter.current === 0) useUiStore.getState().setDragActive(false);
+    };
+    const onDrop = (event: DragEvent): void => {
+      if (!hasFiles(event)) return;
+      event.preventDefault();
+      dragCounter.current = 0;
+      useUiStore.getState().setDragActive(false);
+      if (!event.dataTransfer) return;
+      void collectDroppedFiles(event.dataTransfer).then((files) => importFiles(files));
+    };
+    window.addEventListener('dragenter', onDragEnter);
+    window.addEventListener('dragover', onDragOver);
+    window.addEventListener('dragleave', onDragLeave);
+    window.addEventListener('drop', onDrop);
+    return () => {
+      window.removeEventListener('dragenter', onDragEnter);
+      window.removeEventListener('dragover', onDragOver);
+      window.removeEventListener('dragleave', onDragLeave);
+      window.removeEventListener('drop', onDrop);
+    };
+  }, [importFiles]);
+
+  useEffect(() => {
+    document.body.classList.toggle('is-fullscreen', fullscreen);
+    return () => document.body.classList.remove('is-fullscreen');
+  }, [fullscreen]);
+
+  const rootClasses = [
+    'app',
+    fullscreen ? 'is-fullscreen' : '',
+    fullscreen && isVideo ? 'is-video-fullscreen' : '',
+    chromeVisible ? 'chrome-visible' : 'chrome-hidden',
+    isVideo ? 'is-video-mode' : 'is-audio-mode',
+    queueView === 'full' ? 'queue-is-full' : '',
+    queueView !== 'closed' ? 'queue-is-open' : '',
+  ].filter(Boolean).join(' ');
+
+  return (
+    <div ref={appRef} className={rootClasses} data-kind={isVideo ? 'video' : 'audio'}>
+      <AmbientBackdrop cover={current?.cover} accent={current?.accent ?? '#6fd6ff'} />
+      <AppHeader isVideo={Boolean(isVideo)} />
+      <main className="app-main">
+        {!loaded ? <StageSkeleton /> : !tracks.length ? <EmptyStage /> : current?.kind === 'video' ? (
+          <VideoStage onToggleFullscreen={toggleFullscreen} />
+        ) : (
+          <NowPlaying />
+        )}
+      </main>
+
+      <BottomBar onToggleFullscreen={toggleFullscreen} />
+
+      {queueView !== 'closed' ? (
+        <Suspense fallback={null}>
+          <LazyQueuePanel variant={queueView === 'full' ? 'full' : 'sidebar'} />
+        </Suspense>
+      ) : null}
+
+      <Toasts />
+      <Suspense fallback={null}>
+        <DetailsDialog />
+        <PlaylistDialog />
+      </Suspense>
+      <DropOverlay />
+    </div>
+  );
+}

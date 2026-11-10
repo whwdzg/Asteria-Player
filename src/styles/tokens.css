@@ -1,0 +1,110 @@
+:root {
+  --font-display: "Segoe UI Variable Display", "Segoe UI", "Microsoft YaHei UI", "PingFang SC", "Noto Sans SC", system-ui, sans-serif;
+  --font-text: "Segoe UI Variable Text", "Segoe UI", "Microsoft YaHei UI", "PingFang SC", "Noto Sans SC", system-ui, sans-serif;
+  --bottom-bar-height: 112px;
+  --track-accent: #6fd6ff;
+  --accent: #4cc2ff;
+  --accent-soft: rgba(76, 194, 255, 0.16);
+  --accent-ink: #03121c;
+  --danger: #ff9aa6;
+  --success: #7ce3bb;
+  --radius-xs: 6px;
+  --radius-sm: 9px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 26px;
+  --ease-fluent: cubic-bezier(0.33, 0, 0, 1);
+  --ease-swift: cubic-bezier(0.22, 1, 0.36, 1);
+  --glass-blur: 38px;
+  --glass-saturate: 185%;
+  --glass-opacity: 0.62;
+  --media-brightness: 1;
+}
+
+:root,
+[data-theme="dark"] {
+  --bg: #070a10;
+  --bg-deep: #05070c;
+  --surface-1: rgba(20, 26, 38, 0.58);
+  --surface-2: rgba(255, 255, 255, 0.06);
+  --surface-3: rgba(255, 255, 255, 0.1);
+  --surface-solid: #141a26;
+  --panel: rgba(18, 24, 36, 0.88);
+  --chrome-bg: rgba(15, 20, 30, 0.68);
+  --text: #f3f7fd;
+  --text-2: #b8c2d1;
+  --text-3: #7e8b9f;
+  --text-4: #5b6779;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.15);
+  --shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  --shadow-soft: 0 14px 40px rgba(0, 0, 0, 0.32);
+  --accent: #4cc2ff;
+  --accent-soft: rgba(76, 194, 255, 0.15);
+  --accent-ink: #03121c;
+  --lyric-dim: rgba(196, 209, 227, 0.36);
+  --lyric-past: rgba(196, 209, 227, 0.24);
+  --lyric-sung: #f8fbff;
+  --lyric-highlight: color-mix(in srgb, var(--track-accent) 74%, #ffffff 26%);
+  --selection-bg: rgba(76, 194, 255, 0.28);
+  --menu-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --bg: #e8edf4;
+  --bg-deep: #dfe6ef;
+  --surface-1: rgba(255, 255, 255, 0.62);
+  --surface-2: rgba(15, 27, 44, 0.06);
+  --surface-3: rgba(15, 27, 44, 0.1);
+  --surface-solid: #f7f9fc;
+  --panel: rgba(250, 252, 255, 0.92);
+  --chrome-bg: rgba(251, 253, 255, 0.7);
+  --text: #101827;
+  --text-2: #3f4c60;
+  --text-3: #5e6c80;
+  --text-4: #7a8799;
+  --border: rgba(15, 27, 44, 0.09);
+  --border-strong: rgba(15, 27, 44, 0.16);
+  --shadow: 0 30px 80px rgba(25, 43, 70, 0.22);
+  --shadow-soft: 0 14px 40px rgba(25, 43, 70, 0.14);
+  --accent: #0067c0;
+  --accent-soft: rgba(0, 103, 192, 0.12);
+  --accent-ink: #ffffff;
+  --lyric-dim: rgba(32, 49, 73, 0.4);
+  --lyric-past: rgba(32, 49, 73, 0.26);
+  --lyric-sung: #0d1726;
+  --lyric-highlight: color-mix(in srgb, var(--track-accent) 55%, #0b2a40 45%);
+  --selection-bg: rgba(0, 103, 192, 0.2);
+  --menu-shadow: 0 24px 60px rgba(25, 43, 70, 0.24);
+  color-scheme: light;
+}
+
+[data-glass="off"] {
+  --glass-blur: 18px;
+  --glass-saturate: 110%;
+  --glass-opacity: 0.88;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (max-width: 1000px) {
+  :root { --bottom-bar-height: 120px; }
+}
+
+@media (max-width: 720px) {
+  :root { --bottom-bar-height: 138px; }
+}
+
+@media (max-width: 380px) {
+  :root { --bottom-bar-height: 134px; }
+}
