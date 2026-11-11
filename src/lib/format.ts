@@ -45,6 +45,10 @@ export function percent(value: number): string {
   return `${Math.round(value * 100)}%`;
 }
 
+export function formatRate(rate: number): string {
+  return `${Number(rate.toFixed(2))}×`;
+}
+
 export function isEditableTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
   return (

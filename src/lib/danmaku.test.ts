@@ -16,6 +16,18 @@ describe('danmaku', () => {
     expect(lowerBound(comments, 2)).toBe(1);
   });
 
+  it('turns imported ASS dialogue into scrolling danmaku', () => {
+    const comments = parseDanmaku(`[Script Info]
+Title: Test
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:02.00,0:00:05.00,Default,,0,0,0,,{\\an8}Top line\\Nsecond
+`);
+    expect(comments).toHaveLength(1);
+    expect(comments[0]).toMatchObject({ time: 2, mode: 'scroll', text: 'Top line second' });
+  });
+
   it('parses JSON danmaku arrays', () => {
     const comments = parseDanmaku(JSON.stringify([
       { time: 1.5, text: 'One', mode: 'top', color: '#00ff00', size: 25 },

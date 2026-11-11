@@ -54,6 +54,7 @@ export class PlayerEngine {
     this.settingsUnsubscribe = useSettingsStore.subscribe((state, previous) => {
       if (state.volume !== previous.volume || state.muted !== previous.muted) this.applyVolume();
       if (state.eqEnabled !== previous.eqEnabled || state.eqGains !== previous.eqGains) this.applyEq();
+      if (state.playbackRate !== previous.playbackRate) this.applyPlaybackRate();
     });
     this.setupMediaSession();
 
@@ -217,6 +218,12 @@ export class PlayerEngine {
     });
   }
 
+  private applyPlaybackRate(): void {
+    const { playbackRate } = useSettingsStore.getState();
+    if (this.audio) this.audio.playbackRate = playbackRate;
+    if (this.video) this.video.playbackRate = playbackRate;
+  }
+
   load(track: Track, options: { autoplay?: boolean; position?: number } = {}): void {
     this.initialize();
     const element = this.elementFor(track);
@@ -234,6 +241,7 @@ export class PlayerEngine {
       element.load();
     }
     this.active = element;
+    element.playbackRate = useSettingsStore.getState().playbackRate;
     useLibraryStore.getState().setCurrent(track.id);
     useSettingsStore.getState().setLastTrack(track.id);
     usePlaybackStore.getState().setError(null);
@@ -293,6 +301,11 @@ export class PlayerEngine {
   toggle(): void {
     if (usePlaybackStore.getState().isPlaying) this.pause();
     else this.play();
+  }
+
+  setPlaybackRate(rate: number): void {
+    useSettingsStore.getState().setPlaybackRate(rate);
+    this.applyPlaybackRate();
   }
 
   playPause(): void {

@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { uid } from '../lib/format';
 
 export type QueueView = 'closed' | 'sidebar' | 'full';
-export type PopoverId = 'volume' | 'brightness' | null;
+export type PopoverId = 'volume' | 'brightness' | 'speed' | null;
 
 interface Toast {
   id: string;

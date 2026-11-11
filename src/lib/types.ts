@@ -1,6 +1,32 @@
 export type MediaKind = 'audio' | 'video';
 export type PlayMode = 'one' | 'all' | 'none' | 'shuffle';
 
+export type FontChoice = 'display' | 'sans' | 'serif' | 'rounded' | 'mono';
+
+export type ShortcutAction =
+  | 'playPause'
+  | 'previous'
+  | 'next'
+  | 'rewind10'
+  | 'forward10'
+  | 'cycleMode'
+  | 'seekBack5'
+  | 'seekForward5'
+  | 'fullscreen'
+  | 'mute'
+  | 'queue'
+  | 'settings';
+
+export interface ShortcutSpec {
+  code: string;
+  ctrl: boolean;
+  alt: boolean;
+  shift: boolean;
+  meta: boolean;
+}
+
+export type ShortcutMap = Record<ShortcutAction, ShortcutSpec | null>;
+
 export interface SubtitleSource {
   id: string;
   lang: string;
@@ -40,6 +66,7 @@ export interface Track {
   sampleRate?: number;
   bitDepth?: number;
   bitrate?: number;
+  bpm?: number;
   format?: string;
   fileName?: string;
   fileSize?: number;
@@ -118,19 +145,34 @@ export interface Settings {
   theme: 'dark' | 'light' | 'system';
   language: string;
   liquidGlass: boolean;
+  dynamicBackground: boolean;
+  backgroundBpm: boolean;
+  backgroundVideo: boolean;
   lyricSize: number;
   lyricWeight: number;
+  lyricTranslationSize: number;
+  lyricBlur: boolean;
+  lyricFont: FontChoice;
   showTranslation: boolean;
   subtitleLang: string;
+  subtitleBgOpacity: number;
+  subtitleTextOpacity: number;
+  subtitleFont: FontChoice;
   danmakuEnabled: boolean;
   danmakuTop: boolean;
   danmakuScroll: boolean;
+  danmakuWeight: number;
+  danmakuOpacity: number;
+  danmakuSpeed: number;
+  danmakuFont: FontChoice;
   volume: number;
   brightness: number;
   muted: boolean;
   playMode: PlayMode;
+  playbackRate: number;
   eqEnabled: boolean;
   eqGains: number[];
+  shortcuts: ShortcutMap;
   lastTrackId?: string;
   lastPosition?: number;
   reduceMotion?: boolean;

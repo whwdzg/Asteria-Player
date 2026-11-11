@@ -5,6 +5,7 @@ import { resolveDanmaku } from '../../lib/media';
 import { useClockStore } from '../../state/clock';
 import { useSettingsStore } from '../../state/settings';
 import { usePlaybackStore } from '../../state/playback';
+import { fontStack } from '../../lib/fonts';
 
 interface ActiveComment extends DanmakuComment {
   uid: string;
@@ -24,6 +25,7 @@ export function useDanmaku(track: Track | undefined): {
   const enabled = useSettingsStore((state) => state.danmakuEnabled);
   const showTop = useSettingsStore((state) => state.danmakuTop);
   const showScroll = useSettingsStore((state) => state.danmakuScroll);
+  const speed = useSettingsStore((state) => state.danmakuSpeed);
   const [comments, setComments] = useState<DanmakuComment[]>([]);
   const [active, setActive] = useState<ActiveComment[]>([]);
   const commentsRef = useRef<DanmakuComment[]>([]);
@@ -65,7 +67,7 @@ export function useDanmaku(track: Track | undefined): {
     setActive([]);
     spawned.current.clear();
     lastTime.current = useClockStore.getState().time;
-  }, [track?.id, enabled, showTop, showScroll]);
+  }, [track?.id, enabled, showTop, showScroll, speed]);
 
   useEffect(() => {
     if (!enabled || !showScroll && !showTop) {
@@ -100,10 +102,11 @@ export function useDanmaku(track: Track | undefined): {
           ? laneCursor.current.top++ % TOP_LANES
           : laneCursor.current.scroll++ % SCROLL_LANES;
         sequence.current += 1;
+        const baseDuration = comment.mode === 'top' ? 4.4 : Math.min(14, Math.max(8, 8 + comment.text.length * 0.12));
         additions.push({
           ...comment,
           uid: `${key}:${sequence.current}`,
-          duration: comment.mode === 'top' ? 4.4 : Math.min(14, Math.max(8, 8 + comment.text.length * 0.12)),
+          duration: baseDuration / Math.max(0.5, speed),
           lane,
         });
       }
@@ -119,7 +122,7 @@ export function useDanmaku(track: Track | undefined): {
       unsubscribe();
       setActive([]);
     };
-  }, [enabled, showTop, showScroll, track?.id, comments]);
+  }, [enabled, showTop, showScroll, speed, track?.id, comments]);
 
   return {
     comments,
@@ -131,6 +134,9 @@ export function useDanmaku(track: Track | undefined): {
 export function DanmakuLayer({ track }: { track: Track }): React.ReactElement {
   const { active, remove } = useDanmaku(track);
   const enabled = useSettingsStore((state) => state.danmakuEnabled);
+  const weight = useSettingsStore((state) => state.danmakuWeight);
+  const opacity = useSettingsStore((state) => state.danmakuOpacity);
+  const font = useSettingsStore((state) => state.danmakuFont);
   const isPlaying = usePlaybackStore((state) => state.isPlaying);
   if (!enabled) return <div className="danmaku-layer" aria-hidden="true" />;
   return (
@@ -142,8 +148,11 @@ export function DanmakuLayer({ track }: { track: Track }): React.ReactElement {
           style={{
             '--lane': comment.lane,
             '--danmaku-duration': `${comment.duration}s`,
+            '--danmaku-weight': weight,
+            '--danmaku-opacity': opacity,
             color: comment.color,
             fontSize: `${comment.size}px`,
+            fontFamily: fontStack(font),
           } as React.CSSProperties}
           onAnimationEnd={() => remove(comment.uid)}
         >

@@ -7,15 +7,18 @@ import {
   WeatherSunny24Regular,
 } from '@fluentui/react-icons';
 import { lazy, Suspense, useRef, type ReactNode } from 'react';
+import { formatRate } from '../../lib/format';
 import { usePlaybackStore } from '../../state/playback';
 import { useSettingsStore } from '../../state/settings';
 import { useUiStore, type PopoverId } from '../../state/ui';
 import { useI18n } from '../../i18n/I18nProvider';
 import { useDismiss } from '../../hooks/useDismiss';
+import { useShortcutHint } from '../../hooks/useShortcuts';
 import { IconButton } from '../common/IconButton';
 import { PopoverCard } from '../common/PopoverCard';
 import { VolumePanel } from '../settings/VolumePanel';
 import { BrightnessPanel } from '../settings/BrightnessPanel';
+import { PlaybackRatePanel } from '../settings/PlaybackRatePanel';
 
 const SettingsPanel = lazy(() => import('../settings/SettingsPanel').then((module) => ({ default: module.SettingsPanel })));
 
@@ -66,6 +69,7 @@ interface UtilityBarProps {
 export function UtilityBar({ onToggleFullscreen }: UtilityBarProps): React.ReactElement {
   const volume = useSettingsStore((state) => state.volume);
   const muted = useSettingsStore((state) => state.muted);
+  const playbackRate = useSettingsStore((state) => state.playbackRate);
   const fullscreen = useUiStore((state) => state.fullscreen);
   const popover = useUiStore((state) => state.popover);
   const setPopover = useUiStore((state) => state.setPopover);
@@ -76,8 +80,15 @@ export function UtilityBar({ onToggleFullscreen }: UtilityBarProps): React.React
   const setQueueView = useUiStore((state) => state.setQueueView);
   const isLoading = usePlaybackStore((state) => state.isLoading);
   const { t } = useI18n();
+  const fullscreenHint = useShortcutHint('fullscreen');
+  const queueHint = useShortcutHint('queue');
+  const settingsHint = useShortcutHint('settings');
 
   const volumeLabel = muted ? t('player.unmute') : `${t('player.volume')} · ${Math.round(volume * 100)}%`;
+  const fullscreenLabel = `${fullscreen ? t('player.exitFullscreen') : t('player.fullscreen')}${fullscreenHint}`;
+  const queueLabel = `${t('player.queue')}${queueHint}`;
+  const settingsLabel = `${t('player.settings')}${settingsHint}`;
+  const speedLabel = `${t('player.playbackRate')} · ${formatRate(playbackRate)}`;
 
   const togglePopover = (id: PopoverId): void => {
     setPopover(popover === id ? null : id);
@@ -85,6 +96,15 @@ export function UtilityBar({ onToggleFullscreen }: UtilityBarProps): React.React
 
   return (
     <div className="utility-bar" role="group" aria-label={t('player.settings')}>
+      <UtilitySlot
+        open={popover === 'speed'}
+        onClose={() => setPopover(null)}
+        onClick={() => togglePopover('speed')}
+        label={speedLabel}
+        trigger={<span className="speed-glyph">{formatRate(playbackRate)}</span>}
+        className="speed-slot"
+        panel={<PopoverCard label={t('speed.title')}><PlaybackRatePanel /></PopoverCard>}
+      />
       <UtilitySlot
         open={popover === 'volume'}
         onClose={() => setPopover(null)}
@@ -104,8 +124,8 @@ export function UtilityBar({ onToggleFullscreen }: UtilityBarProps): React.React
         panel={<PopoverCard label={t('brightness.title')}><BrightnessPanel /></PopoverCard>}
       />
       <IconButton
-        label={fullscreen ? t('player.exitFullscreen') : t('player.fullscreen')}
-        tooltip={fullscreen ? t('player.exitFullscreen') : t('player.fullscreen')}
+        label={fullscreenLabel}
+        tooltip={fullscreenLabel}
         active={fullscreen}
         onClick={onToggleFullscreen}
         className="fullscreen-button"
@@ -113,8 +133,8 @@ export function UtilityBar({ onToggleFullscreen }: UtilityBarProps): React.React
         {fullscreen ? <FullScreenMinimize24Regular /> : <FullScreenMaximize24Regular />}
       </IconButton>
       <IconButton
-        label={t('player.queue')}
-        tooltip={t('player.queue')}
+        label={queueLabel}
+        tooltip={queueLabel}
         active={queueView !== 'closed'}
         onClick={() => (queueView === 'closed' ? openQueue('sidebar') : setQueueView('closed'))}
         className="queue-button"
@@ -125,7 +145,7 @@ export function UtilityBar({ onToggleFullscreen }: UtilityBarProps): React.React
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
         onClick={() => setSettingsOpen(!settingsOpen)}
-        label={t('player.settings')}
+        label={settingsLabel}
         trigger={<Settings24Regular className={isLoading ? 'spin-slow' : ''} />}
         className="settings-slot"
         panel={

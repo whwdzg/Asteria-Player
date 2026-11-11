@@ -26,7 +26,7 @@ await page.waitForTimeout(800);
 // -------- transport & modes
 await page.locator('.play-button').click();
 await page.waitForTimeout(500);
-check(await page.locator('.play-button').getAttribute('aria-label') === '暂停', 'play toggles to pause');
+check((await page.locator('.play-button').getAttribute('aria-label')).includes('暂停'), 'play toggles to pause');
 const modes = [];
 for (let i = 0; i < 4; i += 1) {
   await page.locator('.mode-button').click();
@@ -45,18 +45,20 @@ check(await page.locator('.eq-glyph.is-on').count() === 1, 'tuner preset enables
 await page.keyboard.press('Escape');
 
 // -------- settings + language
-await page.getByRole('button', { name: '设置' }).click();
+await page.locator('.settings-slot .icon-button').click();
 await page.waitForSelector('.settings-panel');
 check(await page.locator('.settings-section').count() >= 4, 'settings sections render');
 await page.getByRole('button', { name: '浅色' }).click();
 await page.waitForTimeout(300);
 check(await page.evaluate(() => document.documentElement.dataset.theme) === 'light', 'light theme applies');
-const languageSelect = page.locator('.setting-row .fluent-select select').first();
-await languageSelect.selectOption('en');
+const languageSelect = page.locator('.settings-panel .fluent-select').first();
+await languageSelect.click();
+await page.getByRole('option', { name: 'English' }).click();
 await page.waitForTimeout(700);
 check((await page.locator('.settings-header h2').textContent()) === 'Settings', 'English language pack applies');
 await page.screenshot({ path: 'screenshots/qa-english-settings.png' });
-await languageSelect.selectOption('zh-CN');
+await page.locator('.settings-panel .fluent-select').first().click();
+await page.getByRole('option', { name: '简体中文' }).click();
 await page.waitForTimeout(500);
 await page.getByRole('button', { name: '深色' }).click();
 await page.keyboard.press('Escape');
@@ -107,8 +109,8 @@ await localRow.locator('.queue-row-main').click();
 await page.waitForTimeout(1100);
 await page.locator('.queue-panel .queue-toolbar-actions .icon-button').last().click();
 await page.waitForTimeout(500);
-check((await page.locator('.lyrics-badges').textContent()).includes('同名文件'), 'local SPL sidecar lyrics loaded');
-check(await page.locator('.lyric-line').count() > 5, 'local lyrics render');
+check((await page.locator('.np-source-note').textContent()).includes('本地导入'), 'local SPL track selected');
+check(await page.locator('.lyric-line').count() > 5, 'local SPL sidecar lyrics render');
 
 // -------- import embedded lyrics
 await page.locator('input[type=file]').first().setInputFiles([
@@ -121,12 +123,15 @@ await glassRow.locator('.queue-row-main').click();
 await page.waitForTimeout(1000);
 await page.locator('.queue-panel .queue-toolbar-actions .icon-button').last().click();
 await page.waitForTimeout(500);
-check((await page.locator('.lyrics-badges').textContent()).includes('音频标签'), 'embedded ID3 lyrics loaded');
+check((await page.locator('.np-source-note').textContent()).includes('本地导入'), 'embedded-lyrics track selected');
+check(await page.locator('.lyric-line').count() > 5, 'embedded ID3 lyrics render');
 
 // -------- item menu actions
 await page.locator('.queue-button').click();
+await page.waitForTimeout(350);
 const firstRow = page.locator('.queue-row').first();
 await firstRow.locator('.queue-more').click();
+await page.waitForTimeout(250);
 check(await page.getByRole('menuitem', { name: '下一个播放' }).count() === 1, 'item menu has play next');
 await page.getByRole('menuitem', { name: '查看详细信息' }).click();
 await page.waitForSelector('.modal-panel');
@@ -137,12 +142,14 @@ await page.keyboard.press('Escape');
 // -------- video + subtitles + danmaku
 await page.locator('.queue-button').click();
 await page.waitForTimeout(300);
-await page.getByText('Chromatic Fields', { exact: true }).first().click();
+await page.locator('.queue-row').filter({ hasText: 'Chromatic Fields' }).first().locator('.queue-row-main').click();
 await page.waitForTimeout(500);
 await page.locator('.queue-toolbar-actions button[aria-label="关闭"]').click();
 await page.waitForTimeout(1400);
 check(await page.locator('.danmaku-item').count() > 0, 'danmaku renders on video');
 check(await page.locator('.subtitle-cue').count() === 1, 'default subtitle renders');
+await page.mouse.move(700, 250);
+await page.waitForTimeout(250);
 const ccButton = page.locator('.video-quick-tools .icon-button').first();
 await ccButton.click();
 await page.waitForTimeout(200);
@@ -154,19 +161,21 @@ check((await page.locator('.subtitle-cue').textContent()).includes('Light flows'
 await page.screenshot({ path: 'screenshots/qa-video-english-subtitle.png' });
 
 // -------- fullscreen auto-hide
-await page.getByRole('button', { name: '全屏' }).first().click();
+await page.locator('.fullscreen-button').click();
 await page.waitForTimeout(600);
 check(await page.evaluate(() => Boolean(document.fullscreenElement)), 'native fullscreen entered');
 await page.waitForTimeout(3300);
 check((await page.locator('.app').getAttribute('class')).includes('chrome-hidden'), 'chrome auto-hides in fullscreen video');
-await page.mouse.move(700, 860);
-await page.waitForTimeout(400);
-check((await page.locator('.app').getAttribute('class')).includes('chrome-visible'), 'chrome reveals near the bottom edge');
 await page.mouse.move(700, 300);
-await page.waitForTimeout(300);
-check((await page.locator('.app').getAttribute('class')).includes('chrome-hidden'), 'chrome hides when the pointer leaves the bottom');
+await page.waitForTimeout(400);
+check((await page.locator('.app').getAttribute('class')).includes('chrome-visible'), 'pointer movement anywhere reveals fullscreen chrome');
+check((await page.locator('.video-top-tools').evaluate((el) => getComputedStyle(el).opacity)) === '1', 'fullscreen top tools reveal with the bar');
+await page.waitForTimeout(3300);
+check((await page.locator('.app').getAttribute('class')).includes('chrome-hidden'), 'fullscreen chrome hides again after idle');
 await page.keyboard.press('Escape');
 await page.waitForTimeout(400);
+if (await page.evaluate(() => Boolean(document.fullscreenElement))) await page.evaluate(() => document.exitFullscreen());
+await page.waitForTimeout(300);
 
 // -------- mobile layout
 await page.setViewportSize({ width: 390, height: 844 });

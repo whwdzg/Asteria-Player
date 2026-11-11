@@ -1,4 +1,5 @@
 import type { DanmakuComment, DanmakuMode } from './types';
+import { parseAss } from './subtitles';
 
 const XML_ENTITY = /&(#x?[0-9a-f]+|amp|lt|gt|quot|apos|nbsp);/gi;
 
@@ -37,12 +38,27 @@ function modeFromNumber(mode: number): DanmakuMode {
 }
 
 /**
- * Parses Bilibili-style XML (`<d p="time,mode,size,color,...">text</d>`) and
- * JSON arrays ({time,text,mode,color,size}). Returns comments sorted by time.
+ * Parses Bilibili-style XML (`<d p="time,mode,size,color,...">text</d>`),
+ * JSON arrays ({time,text,mode,color,size}) and imported ASS/SSA scripts.
+ * Returns comments sorted by time.
  */
 export function parseDanmaku(raw: string): DanmakuComment[] {
   const trimmed = raw.replace(/^\uFEFF/, '').trim();
   const comments: DanmakuComment[] = [];
+
+  if (/^\[(script info|events)\]/im.test(trimmed) || /^dialogue\s*:/im.test(trimmed)) {
+    return parseAss(trimmed)
+      .map((cue, index) => ({
+        id: `a${index}`,
+        time: cue.start,
+        text: cue.text.replace(/\s*\n\s*/g, ' ').trim(),
+        mode: 'scroll' as DanmakuMode,
+        color: '#ffffff',
+        size: 20,
+      }))
+      .filter((comment) => comment.text.length > 0)
+      .sort((a, b) => a.time - b.time);
+  }
 
   if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
     try {

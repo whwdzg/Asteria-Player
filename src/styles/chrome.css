@@ -86,12 +86,39 @@
 }
 
 /* ------------------------------------------------------------------ progress */
+.progress-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  height: 20px;
+  margin: -3px 2px 1px;
+}
+
+.progress-time {
+  flex: none;
+  width: 38px;
+  color: var(--text-3);
+  font-size: 9.5px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.progress-time.is-current {
+  text-align: left;
+}
+
+.progress-time.is-total {
+  text-align: right;
+}
+
 .progress-shell {
   position: relative;
   z-index: 3;
-  flex: none;
+  flex: 1;
   height: 18px;
-  margin: -3px 2px 1px;
+  min-width: 0;
   cursor: pointer;
   touch-action: none;
   outline-offset: 4px;
@@ -173,6 +200,10 @@
   position: absolute;
   bottom: calc(100% + 5px);
   z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
   padding: 4px 7px;
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -185,6 +216,26 @@
   pointer-events: none;
   transform: translateX(-50%);
   animation: fade-in 100ms var(--ease-fluent);
+}
+
+.progress-tooltip.has-preview {
+  bottom: calc(100% + 7px);
+  width: 174px;
+  padding: 4px;
+  border-radius: 9px;
+}
+
+.progress-preview-video {
+  width: 164px;
+  height: 92px;
+  border-radius: 5px;
+  background: #000;
+  object-fit: cover;
+}
+
+.progress-tooltip-time {
+  padding: 1px 3px;
+  line-height: 1.2;
 }
 
 /* ------------------------------------------------------------------ identity */
@@ -311,6 +362,17 @@
 .transport-controls {
   display: flex;
   align-items: center;
+  gap: 6px;
+  width: max-content;
+  margin: 0 auto;
+  /* Keeps the play button at the exact centre of the bar while the mode
+     button sits to its right. */
+  padding-left: 42px;
+}
+
+.transport-main {
+  display: flex;
+  align-items: center;
   gap: 2px;
   padding: 4px;
   border: 1px solid var(--border);
@@ -329,11 +391,13 @@
   height: 19px;
 }
 
-.transport-divider {
-  width: 1px;
-  height: 18px;
-  margin: 0 3px;
-  background: var(--border);
+.transport-mode {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-color: var(--border);
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--surface-1) 42%, transparent);
 }
 
 .mode-button.is-active {
@@ -413,6 +477,78 @@
   position: relative;
 }
 
+.speed-slot .icon-button {
+  width: 42px;
+}
+
+.speed-glyph {
+  font-size: 10.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+}
+
+.panel-heading .number-field {
+  width: 68px;
+  height: 30px;
+}
+
+.panel-title-icon {
+  width: 15px;
+  height: 15px;
+  margin-right: 4px;
+  vertical-align: -2px;
+  color: var(--text-3);
+}
+
+.speed-panel .panel-heading h3 {
+  display: flex;
+  align-items: center;
+}
+
+.speed-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.speed-chip {
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  transition: background 130ms var(--ease-fluent), color 130ms var(--ease-fluent), border-color 130ms var(--ease-fluent);
+}
+
+.speed-chip:hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.speed-chip.is-selected {
+  border-color: color-mix(in srgb, var(--accent) 38%, transparent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.speed-custom-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.speed-custom-row > span {
+  flex: 1;
+  color: var(--text-3);
+  font-size: 10.5px;
+}
+
 .utility-item.is-open > .icon-button {
   border-color: color-mix(in srgb, var(--accent) 26%, transparent);
   background: var(--accent-soft);
@@ -424,9 +560,9 @@
 }
 
 .settings-popover {
-  width: 400px;
+  width: 424px;
   max-width: calc(100vw - 24px);
-  height: min(72vh, 660px);
+  height: min(78vh, 720px);
   padding: 0;
   overflow: hidden;
 }

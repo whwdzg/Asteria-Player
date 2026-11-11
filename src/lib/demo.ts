@@ -17,6 +17,7 @@ interface DemoTrack {
   lyrics?: string;
   lyricsFormat?: 'lrc' | 'spl';
   duration?: number;
+  bpm?: number;
   sampleRate?: number;
   bitDepth?: number;
   bitrate?: number;
@@ -57,6 +58,7 @@ async function fetchDemoLibrary(): Promise<Track[]> {
     src: absolute(entry.src),
     cover: entry.cover ? absolute(entry.cover) : undefined,
     duration: entry.duration ?? 0,
+    bpm: entry.bpm,
     sampleRate: entry.sampleRate,
     bitDepth: entry.bitDepth,
     bitrate: entry.bitrate,

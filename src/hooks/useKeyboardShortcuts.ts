@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 import { isEditableTarget } from '../lib/format';
+import { matchesShortcut, SHORTCUT_ACTIONS } from '../lib/shortcuts';
+import type { ShortcutAction } from '../lib/types';
 import { player } from '../player/engine';
 import { useSettingsStore } from '../state/settings';
 import { useUiStore } from '../state/ui';
@@ -10,65 +12,61 @@ interface ShortcutOptions {
 }
 
 export function useKeyboardShortcuts({ toggleFullscreen, exitFullscreen }: ShortcutOptions): void {
+  const shortcuts = useSettingsStore((state) => state.shortcuts);
+
   useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent): void => {
-      const target = event.target;
-      if (isEditableTarget(target)) return;
+    const run = (action: ShortcutAction): void => {
       const ui = useUiStore.getState();
+      const settings = useSettingsStore.getState();
+      switch (action) {
+        case 'playPause': player.toggle(); break;
+        case 'previous': player.previous(); break;
+        case 'next': player.next(); break;
+        case 'rewind10': player.rewind(); break;
+        case 'forward10': player.forward(); break;
+        case 'cycleMode': {
+          const modes = ['all', 'one', 'none', 'shuffle'] as const;
+          const index = modes.indexOf(settings.playMode);
+          settings.patch({ playMode: modes[(index + 1) % modes.length] });
+          break;
+        }
+        case 'seekBack5': player.seekBy(-5); break;
+        case 'seekForward5': player.seekBy(5); break;
+        case 'fullscreen': toggleFullscreen(); break;
+        case 'mute': settings.toggleMute(); break;
+        case 'queue':
+          if (ui.queueView === 'closed') ui.openQueue('sidebar');
+          else ui.setQueueView('closed');
+          break;
+        case 'settings': ui.setSettingsOpen(!ui.settingsOpen); break;
+        default: break;
+      }
+    };
+
+    const onKeyDown = (event: KeyboardEvent): void => {
+      if (isEditableTarget(event.target) || event.repeat) return;
+      const ui = useUiStore.getState();
+
       if (event.key === 'Escape') {
-        if (ui.detailsTrackId) return;
-        if (ui.playlistDialogOpen) return;
-        if (ui.settingsOpen) {
-          ui.setSettingsOpen(false);
-          return;
-        }
-        if (ui.popover) {
-          ui.setPopover(null);
-          return;
-        }
-        if (ui.queueView !== 'closed') {
-          ui.setQueueView('closed');
-          return;
-        }
-        if (ui.fullscreen && !document.fullscreenElement) {
-          exitFullscreen();
-        }
+        if (ui.detailsTrackId || ui.playlistDialogOpen) return;
+        if (ui.settingsOpen) { ui.setSettingsOpen(false); return; }
+        if (ui.popover) { ui.setPopover(null); return; }
+        if (ui.queueView !== 'closed') { ui.setQueueView('closed'); return; }
+        if (ui.fullscreen && !document.fullscreenElement) exitFullscreen();
         return;
       }
       if (ui.detailsTrackId || ui.playlistDialogOpen) return;
 
-      const interactive = target instanceof HTMLElement && target.closest('button, a, [role="button"], [role="slider"], [role="menuitem"]');
-      if (event.code === 'Space' || event.key === ' ') {
-        if (interactive) return;
-        event.preventDefault();
-        player.toggle();
-        return;
-      }
-      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-        if (interactive) return;
-        event.preventDefault();
-        const step = event.shiftKey ? 30 : 5;
-        player.seekBy(event.key === 'ArrowLeft' ? -step : step);
-        return;
-      }
-      if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-        if (interactive) return;
-        event.preventDefault();
-        const settings = useSettingsStore.getState();
-        const delta = event.key === 'ArrowUp' ? 0.05 : -0.05;
-        settings.setVolume(Math.min(1.2, Math.max(0, settings.volume + delta)));
-        return;
-      }
-      if (event.key.toLowerCase() === 'm') {
-        useSettingsStore.getState().toggleMute();
-      } else if (event.key.toLowerCase() === 'f') {
-        toggleFullscreen();
-      } else if (event.key.toLowerCase() === 'q') {
-        if (ui.queueView === 'closed') ui.openQueue('sidebar');
-        else ui.setQueueView('closed');
-      }
+      const action = SHORTCUT_ACTIONS.find((candidate) => matchesShortcut(event, shortcuts[candidate]));
+      if (!action) return;
+      const interactive = event.target instanceof HTMLElement
+        && event.target.closest('button, a, [role="button"], [role="slider"], [role="menuitem"], [role="option"]');
+      if (interactive && (event.code === 'Space' || event.code === 'Enter' || event.code === 'NumpadEnter')) return;
+      event.preventDefault();
+      run(action);
     };
+
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [exitFullscreen, toggleFullscreen]);
+  }, [exitFullscreen, shortcuts, toggleFullscreen]);
 }

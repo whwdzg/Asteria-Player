@@ -8,7 +8,7 @@ import { useLibraryStore } from '../../state/library';
 import { useSettingsStore } from '../../state/settings';
 import { player } from '../../player/engine';
 import { useI18n } from '../../i18n/I18nProvider';
-import { formatTime } from '../../lib/format';
+import { fontStack } from '../../lib/fonts';
 
 interface LyricLineProps {
   line: LyricLine;
@@ -16,6 +16,8 @@ interface LyricLineProps {
   active: boolean;
   past: boolean;
   next: boolean;
+  distance: number;
+  blurEnabled: boolean;
   time: number;
   showTranslation: boolean;
   onClick: (line: LyricLine) => void;
@@ -28,12 +30,18 @@ const LyricLineItem = memo(function LyricLineItem({
   active,
   past,
   next,
+  distance,
+  blurEnabled,
   time,
   showTranslation,
   onClick,
   setRef,
 }: LyricLineProps): React.ReactElement {
   const words = active ? getWordProgress(line, time) : null;
+  const blur = blurEnabled && !active ? Math.min(2.8, Math.max(0, distance - 1) * 0.55) : 0;
+  const opacity = active || (next && distance === 0)
+    ? 1
+    : Math.max(0.18, 0.78 - Math.max(0, distance - 1) * 0.13);
   return (
     <button
       type="button"
@@ -42,6 +50,7 @@ const LyricLineItem = memo(function LyricLineItem({
       aria-current={active ? 'true' : undefined}
       onClick={() => onClick(line)}
       data-line-index={index}
+      style={{ '--lyric-blur': `${blur}px`, '--line-opacity': opacity } as React.CSSProperties}
     >
       <span className="lyric-text">
         {words
@@ -176,27 +185,21 @@ export function LyricsView(): React.ReactElement {
     player.seek(line.start);
   }, []);
 
-  const translationVisible = settings.showTranslation && Boolean(document?.lines.some((line) => line.translation));
-  const wordTimed = Boolean(document?.lines.some((line) => line.words.length > 1));
-  const sourceLabel = document?.source === 'embedded' ? t('np.embedded') : t('np.sidecar');
-
   return (
     <section
       className="lyrics-panel"
       aria-label={t('np.lyrics')}
+      data-font={settings.lyricFont}
       style={{
         '--lyric-scale': settings.lyricSize,
         '--lyric-weight': settings.lyricWeight,
+        '--lyric-translation-scale': settings.lyricTranslationSize,
+        '--lyric-font-family': fontStack(settings.lyricFont),
       } as React.CSSProperties}
     >
       <header className="lyrics-header">
         <div className="lyrics-heading">
           <span className="section-eyebrow">{t('np.lyrics')}</span>
-          <div className="lyrics-badges">
-            {document ? <span className="soft-badge">{sourceLabel}</span> : null}
-            {wordTimed ? <span className="soft-badge accent">{t('np.wordByWord')}</span> : null}
-            {translationVisible ? <span className="soft-badge">{t('np.translation')}</span> : null}
-          </div>
         </div>
         <button
           type="button"
@@ -247,6 +250,8 @@ export function LyricsView(): React.ReactElement {
                   active={index === activeIndex}
                   past={index < activeIndex}
                   next={index === activeIndex + 1}
+                  distance={Math.abs(index - Math.max(0, activeIndex))}
+                  blurEnabled={settings.lyricBlur}
                   time={index === activeIndex ? time : 0}
                   showTranslation={settings.showTranslation}
                   onClick={seekToLine}
@@ -257,14 +262,6 @@ export function LyricsView(): React.ReactElement {
           </div>
         )}
       </div>
-
-      <footer className="lyrics-footer">
-        <span>{activeIndex >= 0 && document?.lines[activeIndex] ? formatTime(document.lines[activeIndex].start) : '—'}</span>
-        <span className="lyrics-progress-line" aria-hidden="true">
-          <i style={{ width: `${document?.synced && activeIndex >= 0 ? Math.min(100, Math.max(0, ((time - document.lines[activeIndex].start) / Math.max(0.1, document.lines[activeIndex].end - document.lines[activeIndex].start)) * 100)) : 0}%` }} />
-        </span>
-        <span>{document?.synced ? formatTime(document.lines[document.lines.length - 1]?.end ?? 0) : '—'}</span>
-      </footer>
     </section>
   );
 }

@@ -120,6 +120,144 @@
   margin-top: -2px;
 }
 
+.control-with-number {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.control-with-number .range-slider {
+  flex: 1;
+  min-width: 0;
+}
+
+.setting-inline-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: min(200px, 58%);
+}
+
+.setting-inline-control .range-slider {
+  flex: 1;
+  min-width: 0;
+}
+
+.setting-inline-control .number-field {
+  width: 54px;
+}
+
+.setting-subhead {
+  color: var(--text-3);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.inline-icon {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  margin-right: 2px;
+  vertical-align: -2px;
+  color: var(--text-3);
+}
+
+.setting-caption {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  color: var(--text-4);
+  font-size: 9px;
+}
+
+.setting-caption svg {
+  width: 12px;
+  height: 12px;
+}
+
+.shortcut-capture-hint {
+  margin-top: 7px;
+  color: var(--text-4);
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.shortcut-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.shortcut-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 36px;
+  padding: 4px 10px;
+  background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+}
+
+.shortcut-row + .shortcut-row {
+  border-top: 1px solid var(--border);
+}
+
+.shortcut-row > span {
+  color: var(--text-2);
+  font-size: 10.5px;
+}
+
+.shortcut-key {
+  min-width: 96px;
+  height: 25px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-3);
+  color: var(--text);
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  transition: border-color 140ms var(--ease-fluent), background 140ms var(--ease-fluent);
+}
+
+.shortcut-key:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-solid);
+}
+
+.shortcut-key.is-recording {
+  border-color: color-mix(in srgb, var(--accent) 62%, transparent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  animation: recording-pulse 1.3s ease-in-out infinite;
+}
+
+.shortcut-key.is-unset {
+  color: var(--text-4);
+}
+
+@keyframes recording-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 28%, transparent); }
+  50% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 10%, transparent); }
+}
+
+.shortcut-reset {
+  margin-top: 9px;
+  margin-left: -8px;
+  color: var(--text-3);
+  font-size: 10px;
+}
+
 .setting-subgroup {
   margin: 0 0 6px 12px;
   padding-left: 12px;

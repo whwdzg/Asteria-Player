@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { ArrowDownload24Regular, ArrowImport24Regular, FolderOpen24Regular } from '@fluentui/react-icons';
 import './styles/index.css';
+import type { Track } from './lib/types';
 import { BottomBar } from './components/chrome/BottomBar';
 import { NowPlaying } from './components/nowplaying/NowPlaying';
 import { VideoStage } from './components/video/VideoStage';
@@ -11,9 +12,12 @@ import { useAppearance } from './hooks/useTheme';
 import { useFullscreen } from './hooks/useFullscreen';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useAutoHideChrome } from './hooks/useAutoHideChrome';
+import { useTouchDevice } from './hooks/useTouchDevice';
+import { useOrientationFullscreen } from './hooks/useOrientationFullscreen';
 import { useI18n } from './i18n/I18nProvider';
 import { loadDemoLibrary } from './lib/demo';
 import { coverFallback } from './lib/cover';
+import { clamp } from './lib/format';
 import { collectDroppedFiles } from './lib/importer';
 import { player } from './player/engine';
 import { useImporter } from './player/ImportProvider';
@@ -24,10 +28,67 @@ import { useUiStore } from './state/ui';
 
 const LazyQueuePanel = lazy(() => import('./components/queue/QueuePanel').then((module) => ({ default: module.QueuePanel })));
 
-function AmbientBackdrop({ cover, accent }: { cover?: string; accent: string }): React.ReactElement {
+function AmbientBackdrop({ track, accent }: { track?: Track; accent: string }): React.ReactElement {
+  const dynamic = useSettingsStore((state) => state.dynamicBackground);
+  const followVideo = useSettingsStore((state) => state.backgroundVideo);
+  const bpmMotion = useSettingsStore((state) => state.backgroundBpm);
+  const videoLayer = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const layer = videoLayer.current;
+    if (!layer) return;
+    layer.classList.remove('is-live');
+    layer.style.backgroundImage = '';
+    if (!dynamic || !followVideo || track?.kind !== 'video') return;
+
+    const video = player.videoElement;
+    if (!video) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = 80;
+    canvas.height = 45;
+    const context = canvas.getContext('2d');
+    if (!context) return;
+
+    let disposed = false;
+    const update = (): void => {
+      if (disposed || video.readyState < 2 || !video.videoWidth) return;
+      try {
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const frame = canvas.toDataURL('image/jpeg', 0.55);
+        layer.style.backgroundImage = `url(${frame})`;
+        layer.classList.add('is-live');
+      } catch {
+        // Cross-origin frames taint the canvas; keep the static thumbnail.
+      }
+    };
+    update();
+    const timer = window.setInterval(update, 1100);
+    return () => {
+      disposed = true;
+      window.clearInterval(timer);
+      layer.classList.remove('is-live');
+      layer.style.backgroundImage = '';
+    };
+  }, [dynamic, followVideo, track?.id, track?.kind]);
+
+  const beat = 60 / (track?.bpm ?? 92);
+  const breathe = dynamic && bpmMotion ? `${clamp(beat * 24, 11, 20)}s` : '16s';
+  const driftA = dynamic && bpmMotion ? `${clamp(beat * 44, 22, 38)}s` : '30s';
+  const driftB = dynamic && bpmMotion ? `${clamp(beat * 54, 28, 46)}s` : '36s';
+
   return (
-    <div className="ambient" aria-hidden="true" style={{ '--ambient-accent': accent } as React.CSSProperties}>
-      {cover ? <div className="ambient-cover" style={{ backgroundImage: `url("${cover}")` }} /> : null}
+    <div
+      className="ambient"
+      aria-hidden="true"
+      style={{
+        '--ambient-accent': accent,
+        '--ambient-breathe': breathe,
+        '--ambient-drift-a': driftA,
+        '--ambient-drift-b': driftB,
+      } as React.CSSProperties}
+    >
+      {track?.cover ? <div className="ambient-cover" style={{ backgroundImage: `url("${track.cover}")` }} /> : null}
+      <div className="ambient-video" ref={videoLayer} />
       <div className="ambient-orb orb-a" />
       <div className="ambient-orb orb-b" />
       <div className="ambient-grid" />
@@ -36,9 +97,8 @@ function AmbientBackdrop({ cover, accent }: { cover?: string; accent: string }):
   );
 }
 
-function AppHeader({ isVideo }: { isVideo: boolean }): React.ReactElement {
+function AppHeader(): React.ReactElement {
   const { t } = useI18n();
-  const track = useLibraryStore((state) => state.tracks.find((item) => item.id === state.currentId));
   return (
     <header className="app-header">
       <div className="brand">
@@ -47,13 +107,6 @@ function AppHeader({ isVideo }: { isVideo: boolean }): React.ReactElement {
           <span className="brand-name">{t('app.name')}</span>
           <span className="brand-tagline">{t('app.tagline')}</span>
         </div>
-      </div>
-      <div className="header-status">
-        <span className={`status-pill ${isVideo ? 'is-video' : ''}`.trim()}>
-          <span className="status-dot" aria-hidden="true" />
-          {isVideo ? t('np.video') : t('np.eyebrow')}
-        </span>
-        {track ? <span className="header-track">{track.artist || t('common.unknownArtist')}</span> : null}
       </div>
     </header>
   );
@@ -128,6 +181,7 @@ export default function App(): React.ReactElement {
   const queueView = useUiStore((state) => state.queueView);
   const chromeVisible = useUiStore((state) => state.chromeVisible);
   const brightness = useSettingsStore((state) => state.brightness);
+  const dynamicBackground = useSettingsStore((state) => state.dynamicBackground);
   const playbackError = usePlaybackStore((state) => state.error);
   const setError = usePlaybackStore((state) => state.setError);
   const [bootError, setBootError] = useState(false);
@@ -170,7 +224,9 @@ export default function App(): React.ReactElement {
   }, [current, brightness]);
 
   const isVideo = current?.kind === 'video';
-  useAutoHideChrome(fullscreen, Boolean(isVideo));
+  const isTouch = useTouchDevice();
+  useAutoHideChrome(fullscreen, Boolean(isVideo), isTouch);
+  useOrientationFullscreen(Boolean(isVideo), exitFullscreen);
   useKeyboardShortcuts({ toggleFullscreen, exitFullscreen });
 
   useEffect(() => {
@@ -224,12 +280,14 @@ export default function App(): React.ReactElement {
     isVideo ? 'is-video-mode' : 'is-audio-mode',
     queueView === 'full' ? 'queue-is-full' : '',
     queueView !== 'closed' ? 'queue-is-open' : '',
+    dynamicBackground ? 'has-dynamic-bg' : 'is-static-bg',
+    isTouch ? 'is-touch' : 'is-desktop',
   ].filter(Boolean).join(' ');
 
   return (
     <div ref={appRef} className={rootClasses} data-kind={isVideo ? 'video' : 'audio'}>
-      <AmbientBackdrop cover={current?.cover} accent={current?.accent ?? '#6fd6ff'} />
-      <AppHeader isVideo={Boolean(isVideo)} />
+      <AmbientBackdrop track={current} accent={current?.accent ?? '#6fd6ff'} />
+      <AppHeader />
       <main className="app-main">
         {!loaded ? <StageSkeleton /> : !tracks.length ? <EmptyStage /> : current?.kind === 'video' ? (
           <VideoStage onToggleFullscreen={toggleFullscreen} />

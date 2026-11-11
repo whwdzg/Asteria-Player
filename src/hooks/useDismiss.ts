@@ -10,6 +10,9 @@ export function useDismiss(
     const onPointerDown = (event: PointerEvent): void => {
       const target = event.target;
       if (!(target instanceof Node)) return;
+      // Portalled dropdown options are logically inside the popover that owns
+      // them; clicking one must not dismiss the popover itself.
+      if (target instanceof Element && target.closest('.fluent-dropdown')) return;
       if (ref.current && !ref.current.contains(target)) onClose();
     };
     const onKeyDown = (event: KeyboardEvent): void => {

@@ -16,7 +16,7 @@ const FALLBACK_LANGUAGES: LanguagePack[] = [
   { code: 'en', label: 'English', nativeLabel: 'English', file: 'en.json' },
 ];
 
-interface I18nValue {
+export interface I18nValue {
   t: (key: string, values?: Record<string, string | number>) => string;
   language: string;
   preference: string;

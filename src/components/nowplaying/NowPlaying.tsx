@@ -1,24 +1,27 @@
-import { MusicNote224Regular } from '@fluentui/react-icons';
+import {
+  ChevronDown24Regular,
+  Info24Regular,
+  MusicNote224Regular,
+} from '@fluentui/react-icons';
+import { useState } from 'react';
 import { useI18n } from '../../i18n/I18nProvider';
 import { useLibraryStore } from '../../state/library';
 import { useClockStore } from '../../state/clock';
+import { useUiStore } from '../../state/ui';
 import { formatTime } from '../../lib/format';
 import { CoverArt } from '../common/CoverArt';
+import { ArtworkLightbox } from './ArtworkLightbox';
 import { LyricsView } from './LyricsView';
-
-function qualityOf(track: { sampleRate?: number; bitDepth?: number; format?: string }): 'hires' | 'lossless' | null {
-  const lossless = /flac|wav|aiff|alac/i.test(track.format ?? '');
-  if ((track.sampleRate ?? 0) >= 48000 && (track.bitDepth ?? 0) >= 24) return 'hires';
-  if (lossless) return 'lossless';
-  return null;
-}
 
 export function ArtworkPanel(): React.ReactElement | null {
   const track = useLibraryStore((state) => state.tracks.find((item) => item.id === state.currentId));
   const duration = useClockStore((state) => state.duration);
+  const setDetailsTrackId = useUiStore((state) => state.setDetailsTrackId);
   const { t } = useI18n();
+  const [techOpen, setTechOpen] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   if (!track) return null;
-  const quality = qualityOf(track);
+
   const tech = [
     { label: t('np.sampleRate'), value: track.sampleRate ? `${(track.sampleRate / 1000).toFixed(track.sampleRate % 1000 === 0 ? 0 : 1)} kHz` : '—' },
     { label: t('np.bitDepth'), value: track.bitDepth ? `${track.bitDepth}-bit` : '—' },
@@ -28,7 +31,12 @@ export function ArtworkPanel(): React.ReactElement | null {
 
   return (
     <div className="np-art-column">
-      <div className="np-artwork-shell">
+      <button
+        type="button"
+        className="np-artwork-shell"
+        onClick={() => setLightboxOpen(true)}
+        aria-label={t('np.viewArtwork')}
+      >
         <div className="np-glow" aria-hidden="true" />
         <CoverArt
           track={track}
@@ -38,12 +46,7 @@ export function ArtworkPanel(): React.ReactElement | null {
           showKind
         />
         <div className="np-cover-sheen" aria-hidden="true" />
-        {quality ? (
-          <span className={`quality-pill ${quality}`.trim()}>
-            {quality === 'hires' ? t('np.hires') : t('np.lossless')}
-          </span>
-        ) : null}
-      </div>
+      </button>
 
       <div className="np-track-copy">
         <div className="np-kicker">
@@ -58,13 +61,37 @@ export function ArtworkPanel(): React.ReactElement | null {
         </p>
       </div>
 
-      <div className="np-tech" aria-label={t('np.technical')}>
-        {tech.map((item) => (
-          <div className="np-tech-item" key={item.label}>
-            <span>{item.label}</span>
-            <strong>{item.value}</strong>
+      <div className={`np-tech-wrap ${techOpen ? 'is-open' : ''}`.trim()}>
+        {techOpen ? (
+          <div className="np-tech" aria-label={t('np.technical')}>
+            {tech.map((item) => (
+              <div className="np-tech-item" key={item.label}>
+                <span>{item.label}</span>
+                <strong>{item.value}</strong>
+              </div>
+            ))}
           </div>
-        ))}
+        ) : null}
+        <div className="np-actions">
+          <button
+            type="button"
+            className={`np-tech-toggle ${techOpen ? 'is-open' : ''}`.trim()}
+            onClick={() => setTechOpen((value) => !value)}
+            aria-expanded={techOpen}
+          >
+            <MusicNote224Regular />
+            {t('np.techToggle')}
+            <ChevronDown24Regular className="np-tech-chevron" />
+          </button>
+          <button
+            type="button"
+            className="np-tech-toggle"
+            onClick={() => setDetailsTrackId(track.id)}
+          >
+            <Info24Regular />
+            {t('np.trackInfo')}
+          </button>
+        </div>
       </div>
 
       <div className="np-source-note">
@@ -73,6 +100,8 @@ export function ArtworkPanel(): React.ReactElement | null {
         <span className="np-source-sep" aria-hidden="true">·</span>
         <span>{track.fileName ?? track.format ?? t('np.video')}</span>
       </div>
+
+      {lightboxOpen ? <ArtworkLightbox track={track} onClose={() => setLightboxOpen(false)} /> : null}
     </div>
   );
 }

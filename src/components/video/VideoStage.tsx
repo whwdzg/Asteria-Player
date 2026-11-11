@@ -4,18 +4,25 @@ import {
   FullScreenMaximize24Regular,
   FullScreenMinimize24Regular,
   Info24Regular,
+  Pause24Filled,
   Play24Filled,
+  Speaker224Regular,
   SpinnerIos20Regular,
+  WeatherSunny24Regular,
 } from '@fluentui/react-icons';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Track } from '../../lib/types';
 import { languageLabel } from '../../lib/subtitles';
+import { formatTime } from '../../lib/format';
 import { useLibraryStore } from '../../state/library';
 import { usePlaybackStore } from '../../state/playback';
 import { useSettingsStore } from '../../state/settings';
 import { useUiStore } from '../../state/ui';
 import { player } from '../../player/engine';
 import { useI18n } from '../../i18n/I18nProvider';
+import { useShortcutHint } from '../../hooks/useShortcuts';
+import { useTouchDevice } from '../../hooks/useTouchDevice';
+import { useVideoGestures } from '../../hooks/useVideoGestures';
 import { IconButton } from '../common/IconButton';
 import { Menu, type MenuAnchor } from '../common/Menu';
 import { DanmakuLayer } from './DanmakuLayer';
@@ -37,6 +44,39 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
   const { t } = useI18n();
   const hostRef = useRef<HTMLDivElement>(null);
   const [subtitleMenu, setSubtitleMenu] = useState<MenuAnchor | null>(null);
+  const isTouch = useTouchDevice();
+  const fullscreenHint = useShortcutHint('fullscreen');
+  const [toolsHidden, setToolsHidden] = useState(false);
+  const toolsTimer = useRef(0);
+
+  const showTools = useCallback((): void => {
+    window.clearTimeout(toolsTimer.current);
+    setToolsHidden(false);
+    if (!fullscreen && !isTouch && isPlaying) {
+      toolsTimer.current = window.setTimeout(() => setToolsHidden(true), 2800);
+    }
+  }, [fullscreen, isPlaying, isTouch]);
+
+  const holdTools = useCallback((): void => {
+    window.clearTimeout(toolsTimer.current);
+    setToolsHidden(false);
+  }, []);
+
+  useEffect(() => {
+    if (fullscreen || isTouch) {
+      setToolsHidden(false);
+      return;
+    }
+    showTools();
+    return () => window.clearTimeout(toolsTimer.current);
+  }, [fullscreen, isTouch, showTools, track?.id]);
+
+  useEffect(() => {
+    if (subtitleMenu) showTools();
+  }, [showTools, subtitleMenu]);
+
+  const gestures = useVideoGestures({ track, isTouch });
+  const hud = gestures.hud;
 
   useEffect(() => {
     const element = player.videoElement;
@@ -82,18 +122,37 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
   return (
     <section className="video-view" aria-label={track.title}>
       <div
-        className="video-frame"
+        className={`video-frame ${toolsHidden && !fullscreen && !isTouch ? 'tools-hidden' : ''}`.trim()}
         style={{ '--video-cover': track.cover ? `url("${track.cover}")` : 'none' } as React.CSSProperties}
         onClick={(event) => {
+          if (isTouch) return;
           if ((event.target as HTMLElement).closest('button, .video-top-tools')) return;
           player.toggle();
+        }}
+        onContextMenu={(event) => { if (isTouch) event.preventDefault(); }}
+        {...gestures.handlers}
+        onPointerMove={(event) => {
+          gestures.handlers.onPointerMove(event);
+          showTools();
+        }}
+        onPointerLeave={() => {
+          if (!fullscreen && !isTouch && isPlaying && !subtitleMenu) setToolsHidden(true);
         }}
       >
         <div className="video-media" ref={hostRef} />
         <div className="video-backdrop-glow" aria-hidden="true" />
         <div className="video-scrim" aria-hidden="true" />
 
-        <div className="video-top-tools" onClick={(event) => event.stopPropagation()}>
+        <div
+          className="video-top-tools"
+          onClick={(event) => event.stopPropagation()}
+          onPointerEnter={holdTools}
+          onPointerMove={(event) => {
+            event.stopPropagation();
+            holdTools();
+          }}
+          onPointerLeave={showTools}
+        >
           <div className="video-identity">
             <span className="video-badge"><span className="live-dot" /> {t('np.video')}</span>
             <h1>{track.title}</h1>
@@ -130,8 +189,8 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
               </IconButton>
             ) : null}
             <IconButton
-              label={fullscreen ? t('player.exitFullscreen') : t('player.fullscreen')}
-              tooltip={fullscreen ? t('player.exitFullscreen') : t('player.fullscreen')}
+              label={`${fullscreen ? t('player.exitFullscreen') : t('player.fullscreen')}${fullscreenHint}`}
+              tooltip={`${fullscreen ? t('player.exitFullscreen') : t('player.fullscreen')}${fullscreenHint}`}
               onClick={onToggleFullscreen}
             >
               {fullscreen ? <FullScreenMinimize24Regular /> : <FullScreenMaximize24Regular />}
@@ -156,6 +215,31 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
 
         <DanmakuLayer track={track} />
         <SubtitleOverlay track={track} />
+
+        {hud ? (
+          <div className={`gesture-hud is-${hud.kind}`} aria-live="polite">
+            {hud.kind === 'seek' ? (
+              <>
+                <strong>{formatTime(hud.current)}</strong>
+                <span>{hud.delta >= 0 ? '+' : ''}{Math.round(hud.delta)}s</span>
+              </>
+            ) : hud.kind === 'volume' || hud.kind === 'brightness' ? (
+              <>
+                {hud.kind === 'volume' ? <Speaker224Regular /> : <WeatherSunny24Regular />}
+                <span>{Math.round(hud.value * 100)}%</span>
+                <span className="gesture-bar" aria-hidden="true">
+                  <i style={{ width: `${Math.min(100, (hud.value / (hud.kind === 'volume' ? 1.2 : 1)) * 100)}%` }} />
+                </span>
+              </>
+            ) : hud.kind === 'speed' ? (
+              <><strong>{hud.value}×</strong><span>{t('player.playbackRate')}</span></>
+            ) : hud.kind === 'play' ? (
+              <><Play24Filled /><span>{t('player.play')}</span></>
+            ) : (
+              <><Pause24Filled /><span>{t('player.pause')}</span></>
+            )}
+          </div>
+        ) : null}
       </div>
 
       <div className="video-meta-card">

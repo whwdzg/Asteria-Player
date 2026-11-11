@@ -1,23 +1,25 @@
-import type { MediaKind, SubtitleSource, Track } from './types';
+import type { DanmakuComment, MediaKind, SubtitleSource, Track } from './types';
 import {
   extensionOf,
   guessTagsFromFileName,
   readMediaTags,
 } from './metadata';
 import { languageLabel, subtitleFormatFromName, subtitleLanguageFromName } from './subtitles';
+import { parseDanmaku } from './danmaku';
 import { baseName, uid } from './format';
 
 const AUDIO_EXTENSIONS = new Set(['mp3', 'flac', 'wav', 'm4a', 'aac', 'ogg', 'oga', 'opus', 'weba', 'webm', 'aiff', 'aif', 'wma']);
 const VIDEO_EXTENSIONS = new Set(['mp4', 'm4v', 'webm', 'mkv', 'mov', 'avi', 'ogv']);
 const LYRIC_EXTENSIONS = new Set(['lrc', 'spl', 'txt']);
-const SUBTITLE_EXTENSIONS = new Set(['srt', 'vtt', 'ass', 'ssa']);
+// ASS is intentionally handled as danmaku, as requested by the product spec.
+const SUBTITLE_EXTENSIONS = new Set(['srt', 'vtt']);
+const DANMAKU_EXTENSIONS = new Set(['xml', 'json', 'ass', 'ssa']);
 const IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif']);
 const SIDECAR_EXTENSIONS = new Set([
   ...LYRIC_EXTENSIONS,
   ...SUBTITLE_EXTENSIONS,
+  ...DANMAKU_EXTENSIONS,
   ...IMAGE_EXTENSIONS,
-  'xml',
-  'json',
 ]);
 const DANMAKU_HINTS = /(danmaku|danmu|弹幕|comment|chat)/i;
 
@@ -48,9 +50,19 @@ function kindOf(file: File): MediaKind | undefined {
 }
 
 function isDanmaku(name: string, text?: string): boolean {
+  const extension = extensionOf(name);
+  if (extension === 'ass' || extension === 'ssa') return true;
+  if (extension === 'xml') return true;
   if (DANMAKU_HINTS.test(name)) return true;
   if (!text) return false;
   return /<d\s+p="/.test(text) || (/^\s*\[/.test(text) && /"time"\s*:/.test(text) && /"text"\s*:/.test(text));
+}
+
+function danmakuBase(name: string): string {
+  const stem = name.slice(0, name.lastIndexOf('.'));
+  const language = subtitleLanguageFromName(name);
+  const base = language.lang ? language.base : stem;
+  return normalizeStem(base.replace(/[.\-_\s]+(?:danmaku|danmu|弹幕|comments?)$/i, ''));
 }
 
 function normalizeStem(name: string): string {
@@ -96,9 +108,8 @@ function groupFiles(files: File[]): { groups: MediaGroup[]; orphans: string[] } 
     return (
       LYRIC_EXTENSIONS.has(extension) ||
       SUBTITLE_EXTENSIONS.has(extension) ||
-      IMAGE_EXTENSIONS.has(extension) ||
-      extension === 'xml' ||
-      extension === 'json'
+      DANMAKU_EXTENSIONS.has(extension) ||
+      IMAGE_EXTENSIONS.has(extension)
     );
   });
   const orphans: string[] = [];
@@ -112,8 +123,8 @@ function groupFiles(files: File[]): { groups: MediaGroup[]; orphans: string[] } 
       candidate = lyricBase(name).base;
     } else if (SUBTITLE_EXTENSIONS.has(extension)) {
       candidate = normalizeStem(subtitleLanguageFromName(name).base);
-    } else if (extension === 'xml' || extension === 'json') {
-      candidate = normalizeStem(name.slice(0, name.lastIndexOf('.')));
+    } else if (DANMAKU_EXTENSIONS.has(extension)) {
+      candidate = danmakuBase(name);
     } else if (IMAGE_EXTENSIONS.has(extension)) {
       candidate = normalizeStem(name.slice(0, name.lastIndexOf('.')));
     }
@@ -187,16 +198,21 @@ export async function importFiles(files: File[], onProgress?: ProgressCallback):
           format: subtitleFormatFromName(file.name),
         });
       }
-      let danmakuText: string | undefined;
+      const danmakuComments: DanmakuComment[] = [];
       for (const file of group.sidecars) {
         const extension = extensionOf(file.name);
-        if (extension !== 'xml' && extension !== 'json') continue;
+        if (!DANMAKU_EXTENSIONS.has(extension)) continue;
         const text = await readText(file);
-        if (isDanmaku(file.name, text)) {
-          danmakuText = text;
-          break;
+        if (!isDanmaku(file.name, text)) continue;
+        try {
+          danmakuComments.push(...parseDanmaku(text));
+        } catch {
+          // A malformed XML/JSON/ASS file should not block the media import.
         }
       }
+      const danmakuText = danmakuComments.length
+        ? JSON.stringify(danmakuComments)
+        : undefined;
       const coverFile = coverFromSidecars(group.sidecars);
       const cover = coverFile ? URL.createObjectURL(coverFile) : tags.cover;
       const guessed = guessTagsFromFileName(group.media.name);

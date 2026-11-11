@@ -9,7 +9,9 @@ import {
 import { useState } from 'react';
 import { useSettingsStore, EQ_FREQUENCIES } from '../../state/settings';
 import { useI18n } from '../../i18n/I18nProvider';
+import { useShortcutTooltip } from '../../hooks/useShortcuts';
 import { IconButton } from '../common/IconButton';
+import { NumberField } from '../common/NumberField';
 import { RangeSlider } from '../common/RangeSlider';
 import { Switch } from '../common/Switch';
 
@@ -40,6 +42,7 @@ export function VolumePanel(): React.ReactElement {
   const patch = useSettingsStore((state) => state.patch);
   const [expanded, setExpanded] = useState(eqEnabled);
   const { t } = useI18n();
+  const muteTooltip = useShortcutTooltip('mute', muted ? t('player.unmute') : t('player.mute'));
 
   const setPreset = (name: string): void => {
     patch({ eqEnabled: true, eqGains: [...PRESETS[name]] });
@@ -53,12 +56,21 @@ export function VolumePanel(): React.ReactElement {
           <h3>{t('volume.title')}</h3>
           <p className="panel-hint">{t('volume.hint')}</p>
         </div>
-        <span className="panel-value">{Math.round(volume * 100)}%</span>
+        <NumberField
+          value={Math.round(volume * 100)}
+          min={0}
+          max={120}
+          step={1}
+          suffix="%"
+          ariaLabel={t('volume.title')}
+          onChange={(value) => setVolume(value / 100)}
+        />
       </div>
 
       <div className="volume-row">
         <IconButton
-          label={muted ? t('player.unmute') : t('player.mute')}
+          label={muteTooltip}
+          tooltip={muteTooltip}
           variant="subtle"
           size="sm"
           onClick={toggleMute}
