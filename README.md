@@ -30,6 +30,7 @@
 - 支持音频标签内嵌歌词：ID3 `USLT` / `TXXX`、FLAC `LYRICS` / `UNSYNCEDLYRICS`、MP4 `©lyr`。
 - 支持同名翻译文件（如 `song.trans.lrc`）与独立字幕、弹幕文件。
 - 音频全屏时自动切换为更宽松的双栏布局，封面、歌词与标题同步放大。
+- 歌曲属性中的「在线匹配」参考 [LDDC](https://github.com/TonyTown6033/LDDC) 的搜索/候选/应用流程：合并 iTunes（封面与专辑信息）和 LRCLIB（逐行/同步歌词）结果，按标题、艺术家和时长评分。缺少封面的项目会自动展开并开始搜索；已有封面的项目只在用户点击时展开。
 
 ### 视频
 
@@ -41,6 +42,8 @@
 - 手机 / 平板：左侧上滑调亮度、右侧上滑调音量、横滑调进度、长按 2× 倍速、双击播放 / 暂停、单击显示或隐藏底栏；无操作后自动隐藏。
 - 手机 / 平板旋转至横屏时自动进入沉浸式全屏视频布局，转回竖屏自动退出。
 - 手机 / 平板上使用 16:9 视频卡片 + 媒体信息卡，避免竖屏黑边。
+- 文件夹导入时，若视频名为 `P1` / `P2` / `Part 3` / `第4P` 等分 P 名称，则用上一级文件夹名作为标题，文件名作为副标题；普通视频不受影响。
+- 视频右上角在字幕、弹幕按钮旁提供「视频属性」按钮；属性页内可按标题搜索 B 站视频，并匹配该视频的 XML 弹幕或字幕（字幕会转换为 WebVTT）。B 站接口受跨域限制，可在属性页填写 CORS 代理前缀，格式见下文。
 
 ### 播放列表
 
@@ -62,7 +65,11 @@
 - 歌词：字号、翻译字号、字重、字体、是否显示翻译、是否开启远景模糊。
 - 视频：字幕语言 / 关闭、字幕背景透明度、字幕文本透明度、字幕字体；弹幕开关、顶部 / 滚动弹幕、弹幕粗细、透明度、速度、字体。
 - 快捷键：12 项播放操作均可自定义，支持捕获按键、清空、恢复默认；提示会同步显示在对应按钮的悬浮窗口中。
+- 数据与备份：设置以 JSON 保存，可在内置 JSON 编辑器中直接修改当前设置，支持导入/导出文件、复制、填入默认值；默认值来自 `src/config/default-settings.json`。
+- 语言包导入：在「外观 → 导入语言包」选择外部 JSON，导入后立即出现在语言下拉并持久化；未翻译的键回退到英文。
 - 版本信息与语言包说明。
+
+设置 JSON 与语言包 JSON 的完整格式分别见 [docs/settings-json.md](docs/settings-json.md) 和 [docs/language-pack-json.md](docs/language-pack-json.md)。
 
 ### 响应式
 
@@ -111,6 +118,8 @@ npm run preview
 
 ASS / SSA / XML 导入后一律进入弹幕层，不会出现在字幕语言选项里。多个同名弹幕文件会解析并合并。
 
+分 P 视频约定：文件夹 `My Show/P1.mp4` 会显示标题 `My Show`、副标题 `P1`；`P2 片头.mp4` 同理。
+
 ### 歌词规范
 
 SPL 语法按 [Salt Player Lyrics 标准](https://moriafly.com/standards/spl.html) 实现，兼容增强型 LRC：
@@ -125,6 +134,19 @@ SPL 语法按 [Salt Player Lyrics 标准](https://moriafly.com/standards/spl.htm
 - 仅含时间戳的行是显式结束标记，不生成歌词行。
 - 支持 `[offset:500]`。
 - 自动忽略 LX Music `[awlrc:...]` 兼容字段。
+
+### 设置 JSON 与语言包
+
+- 设置默认值文件：`src/config/default-settings.json`
+- 当前设置：**设置 → 数据与备份 → 打开 JSON 编辑器**
+- 导入/导出使用 `{ "version": 1, "settings": { ... } }` 文档结构；也接受裸设置对象
+- 语言包导入：**设置 → 外观 → 导入语言包**
+- 格式说明：[设置 JSON](docs/settings-json.md) · [语言包 JSON](docs/language-pack-json.md)
+
+### 在线匹配
+
+- 歌曲：打开歌曲属性（媒体信息），缺少封面时自动打开在线匹配；已有封面时点击「在线匹配」。结果来自 iTunes Search 与 LRCLIB，可选择候选并一次性应用封面、歌词和元数据。
+- 视频：打开视频属性，输入标题搜索 B 站；结果可分别匹配弹幕或字幕。B 站 API 通常拒绝跨域请求，属性页提供代理输入框，示例 `https://your-proxy.example/?url={url}`（`{url}` 会替换为编码后的目标地址）。
 
 ### 快捷键
 
@@ -166,6 +188,8 @@ SPL 语法按 [Salt Player Lyrics 标准](https://moriafly.com/standards/spl.htm
 
 「跟随系统」会根据 `navigator.languages` 匹配语言包，并正确处理 `zh-Hans` / `zh-Hant`、`en-US` 等区域变体。
 
+也可以在 **设置 → 外观 → 导入语言包** 中直接导入上述格式的 JSON；导入包保存在 `localStorage`，无需重新构建。未翻译的键会回退到英文。完整格式见 [docs/language-pack-json.md](docs/language-pack-json.md)。
+
 ## PWA 与缓存
 
 - `public/manifest.webmanifest` 提供安装信息、主题色与 192 / 512 图标。
@@ -189,14 +213,16 @@ SPL 语法按 [Salt Player Lyrics 标准](https://moriafly.com/standards/spl.htm
 ```text
 src/
 ├─ App.tsx                     # 应用装配、拖放、全屏与外观副作用
+├─ config/
+│  └─ default-settings.json    # 默认设置单一来源
 ├─ components/
 │  ├─ chrome/                  # 底栏、进度条、传输控制、工具入口
 │  ├─ common/                  # 图标按钮、滑块、开关、分段控件、下拉、数值输入、菜单、弹层
 │  ├─ nowplaying/              # 封面 / 技术参数 / 大图查看、歌词视图
 │  ├─ queue/                   # 侧边栏 / 全页队列、虚拟列表、批量操作
-│  ├─ settings/                # 外观 / 歌词 / 视频 / 快捷键分组，音量 / 亮度 / 倍速卡片
+│  ├─ settings/                # 外观 / 歌词 / 视频 / 快捷键 / 数据分组，JSON 编辑器
 │  ├─ video/                   # 视频层、字幕、弹幕
-│  └─ overlays/                # 详情、新建序列、Toast、拖放提示
+│  └─ overlays/                # 详情、歌曲/B站在线匹配、新建序列、Toast、拖放提示
 ├─ hooks/                      # 主题、全屏、自动隐藏、触摸手势、横竖屏、快捷键、外部关闭
 ├─ i18n/                       # 外部语言包加载
 ├─ lib/
@@ -204,6 +230,10 @@ src/
 │  ├─ subtitles.ts             # SRT / VTT 解析与语言识别
 │  ├─ danmaku.ts               # XML / JSON / ASS 弹幕解析
 │  ├─ shortcuts.ts             # 快捷键动作、格式化、匹配与默认值
+│  ├─ settingsJson.ts          # 默认设置、JSON 校验/导入导出
+│  ├─ languagePacks.ts         # 外部语言包解析、校验与持久化
+│  ├─ onlineMatch.ts           # iTunes / LRCLIB 搜索与候选合并
+│  ├─ bilibili.ts              # B 站搜索、弹幕、字幕与分 P
 │  ├─ fonts.ts                 # 歌词 / 字幕 / 弹幕字体栈
 │  ├─ metadata/                # ID3 / FLAC / MP4 / WAV 标签读取
 │  ├─ importer.ts              # 文件分组、同名资源配对、元数据
@@ -250,7 +280,7 @@ python scripts/generate-demo.py
 ## 验证
 
 ```bash
-npm test        # 23 个解析器 / 元数据单元测试
+npm test        # 44 个解析器 / 设置 / 在线匹配 / B 站单元测试
 npm run qa       # 桌面端到端交互检查（需要本机 Edge 与运行中的 dev server）
 npm run qa:touch # 手机触摸手势、横竖屏与视频自动隐藏检查
 npm run shots    # 输出桌面 / 平板 / 手机 / 视频 / 全屏截图
@@ -268,6 +298,9 @@ npm run shots    # 输出桌面 / 平板 / 手机 / 视频 / 全屏截图
 - SPL 的 `awlrc` 字段按规范忽略；SYLT 帧不做解析，优先 `USLT`。
 - iOS Safari 的标准 Fullscreen API 对普通元素支持有限，播放器会回退到页面内「伪全屏」；旋转自动全屏同样使用伪全屏，以避开浏览器手势限制。
 - 离线缓存包含应用外壳与图片 / 语言包，不包含体积较大的音频 / 视频文件。
+- B 站接口没有稳定的公开 CORS 头；静态部署时应配置自己的代理，或使用允许跨域的代理服务。
+- 在线匹配结果来自第三方公共目录，网络、区域和版权可用性会影响返回结果；应用前请确认候选内容。
+- 语言包导入仅保存字符串字典，不执行脚本；部分语言包缺失的键回退到英文。
 
 ## License
 
