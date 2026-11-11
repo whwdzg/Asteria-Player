@@ -46,6 +46,8 @@ export interface Track {
   title: string;
   artist: string;
   album?: string;
+  /** Optional secondary label, e.g. the P1/P2 filename under a folder title. */
+  subtitle?: string;
   src: string;
   duration: number;
   cover?: string;
@@ -176,6 +178,8 @@ export interface Settings {
   lastTrackId?: string;
   lastPosition?: number;
   reduceMotion?: boolean;
+  /** Optional CORS proxy prefix/template for Bilibili API calls. */
+  bilibiliProxy: string;
 }
 
 export interface LanguagePack {
@@ -183,4 +187,7 @@ export interface LanguagePack {
   label: string;
   nativeLabel?: string;
   file: string;
+  /** Present for runtime-imported packs, absent for remote manifest packs. */
+  translations?: Record<string, string>;
+  source?: 'remote' | 'imported';
 }

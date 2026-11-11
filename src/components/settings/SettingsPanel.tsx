@@ -1,3 +1,7 @@
+/**
+ * Settings shell. Each feature owns its section component; the panel only
+ * composes them so the file stays readable as settings grow.
+ */
 import {
   Dismiss24Regular,
   Info24Regular,
@@ -6,6 +10,7 @@ import {
 import { useI18n } from '../../i18n/I18nProvider';
 import { IconButton } from '../common/IconButton';
 import { AppearanceSettings } from './AppearanceSettings';
+import { DataSettings } from './DataSettings';
 import { LyricsSettings } from './LyricsSettings';
 import { ShortcutSettings } from './ShortcutSettings';
 import { VideoSettings } from './VideoSettings';
@@ -34,6 +39,7 @@ export function SettingsPanel({ onClose }: SettingsPanelProps): React.ReactEleme
         <LyricsSettings />
         <VideoSettings />
         <ShortcutSettings />
+        <DataSettings />
 
         <section className="settings-section about-section" aria-labelledby="settings-about">
           <h3 id="settings-about" className="section-title">

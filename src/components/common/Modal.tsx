@@ -23,6 +23,7 @@ export function Modal({ open, onClose, title, children, footer, size = 'md', clo
     const onKeyDown = (event: KeyboardEvent): void => {
       if (event.key === 'Escape') {
         event.preventDefault();
+        event.stopPropagation();
         onClose();
         return;
       }

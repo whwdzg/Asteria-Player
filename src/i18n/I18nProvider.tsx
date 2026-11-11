@@ -8,6 +8,12 @@ import {
   type ReactNode,
 } from 'react';
 import type { LanguagePack } from '../lib/types';
+import {
+  loadImportedLanguagePacks,
+  mergeLanguagePacks,
+  saveImportedLanguagePacks,
+  type ImportedLanguagePack,
+} from '../lib/languagePacks';
 import { useSettingsStore } from '../state/settings';
 
 const FALLBACK_LANGUAGES: LanguagePack[] = [
@@ -22,9 +28,14 @@ export interface I18nValue {
   preference: string;
   languages: LanguagePack[];
   setLanguage: (code: string) => void;
+  importLanguagePack: (pack: ImportedLanguagePack) => void;
   loading: boolean;
 }
 
+/**
+ * Runtime i18n: built-in packs come from public/locales, imported packs come
+ * from localStorage and fall back to English for missing keys.
+ */
 const I18nContext = createContext<I18nValue | null>(null);
 const dictionaries = new Map<string, Record<string, string>>();
 
@@ -70,9 +81,12 @@ async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
 export function I18nProvider({ children }: { children: ReactNode }): ReactNode {
   const preference = useSettingsStore((state) => state.language);
   const patchSettings = useSettingsStore((state) => state.patch);
-  const [languages, setLanguages] = useState<LanguagePack[]>(FALLBACK_LANGUAGES);
+  const [remoteLanguages, setRemoteLanguages] = useState<LanguagePack[]>(FALLBACK_LANGUAGES);
+  const [importedPacks, setImportedPacks] = useState<ImportedLanguagePack[]>(loadImportedLanguagePacks);
+  const languages = useMemo(() => mergeLanguagePacks(remoteLanguages, importedPacks), [remoteLanguages, importedPacks]);
   const [systemLanguages, setSystemLanguages] = useState<string[]>(currentSystemLanguages);
   const [dictionary, setDictionary] = useState<Record<string, string> | null>(null);
+  const [fallback, setFallback] = useState<Record<string, string> | null>(() => dictionaries.get('en') ?? null);
   const [error, setError] = useState<string | null>(null);
   const [reloadToken, setReloadToken] = useState(0);
 
@@ -81,7 +95,7 @@ export function I18nProvider({ children }: { children: ReactNode }): ReactNode {
     fetchJson<{ languages?: LanguagePack[] }>(new URL('manifest.json', baseUrl()).href)
       .then((manifest) => {
         if (!cancelled && Array.isArray(manifest.languages) && manifest.languages.length) {
-          setLanguages(manifest.languages);
+          setRemoteLanguages(manifest.languages);
         }
       })
       .catch(() => {
@@ -95,6 +109,21 @@ export function I18nProvider({ children }: { children: ReactNode }): ReactNode {
     window.addEventListener('languagechange', update);
     return () => window.removeEventListener('languagechange', update);
   }, []);
+
+  // Imported packs are allowed to be partial; English is the readable fallback
+  // for keys the author has not translated yet.
+  useEffect(() => {
+    if (fallback) return;
+    let cancelled = false;
+    fetchJson<Record<string, string>>(new URL('en.json', baseUrl()).href)
+      .then((payload) => {
+        if (cancelled) return;
+        dictionaries.set('en', payload);
+        setFallback(payload);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [fallback]);
 
   const language = useMemo(() => {
     if (preference !== 'system' && languages.some((item) => item.code === preference)) return preference;
@@ -111,6 +140,11 @@ export function I18nProvider({ children }: { children: ReactNode }): ReactNode {
       return () => { cancelled = true; controller.abort(); };
     }
     const pack = languages.find((item) => item.code === language) ?? languages[0];
+    if (pack.translations) {
+      dictionaries.set(language, pack.translations);
+      setDictionary(pack.translations);
+      return () => { cancelled = true; controller.abort(); };
+    }
     fetchJson<Record<string, string>>(new URL(pack.file, baseUrl()).href, controller.signal)
       .then((payload) => {
         if (cancelled) return;
@@ -132,18 +166,29 @@ export function I18nProvider({ children }: { children: ReactNode }): ReactNode {
   }, [language]);
 
   const t = useCallback((key: string, values?: Record<string, string | number>): string => {
-    let text = dictionary?.[key] ?? key;
+    let text = dictionary?.[key] ?? fallback?.[key] ?? key;
     if (values) {
       for (const [name, value] of Object.entries(values)) {
         text = text.split(`{${name}}`).join(String(value));
       }
     }
     return text;
-  }, [dictionary]);
+  }, [dictionary, fallback]);
 
   const setLanguage = useCallback((code: string) => {
     patchSettings({ language: code });
   }, [patchSettings]);
+
+  const importLanguagePack = useCallback((pack: ImportedLanguagePack): void => {
+    setImportedPacks((current) => {
+      const next = [...current.filter((item) => item.code !== pack.code), pack];
+      saveImportedLanguagePacks(next);
+      return next;
+    });
+    dictionaries.set(pack.code, pack.translations);
+    if (language === pack.code) setDictionary(pack.translations);
+    patchSettings({ language: pack.code });
+  }, [language, patchSettings]);
 
   const value = useMemo<I18nValue>(() => ({
     t,
@@ -151,8 +196,9 @@ export function I18nProvider({ children }: { children: ReactNode }): ReactNode {
     preference,
     languages,
     setLanguage,
+    importLanguagePack,
     loading: !dictionary,
-  }), [t, language, preference, languages, setLanguage, dictionary]);
+  }), [t, language, preference, languages, setLanguage, importLanguagePack, dictionary]);
 
   if (error && !dictionary) {
     return (

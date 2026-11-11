@@ -1,13 +1,20 @@
+/**
+ * Appearance, language, ambient background and runtime language-pack import.
+ */
 import {
+  ArrowImport24Regular,
   Desktop24Regular,
   Globe24Regular,
   PaintBrush24Regular,
   WeatherMoon24Regular,
   WeatherSunny24Regular,
 } from '@fluentui/react-icons';
+import { useRef } from 'react';
 import type { Settings } from '../../lib/types';
+import { parseLanguagePackJson } from '../../lib/languagePacks';
 import { useI18n } from '../../i18n/I18nProvider';
 import { useSettingsStore } from '../../state/settings';
+import { useUiStore } from '../../state/ui';
 import { Dropdown } from '../common/Dropdown';
 import { Segmented } from '../common/Segmented';
 import { Switch } from '../common/Switch';
@@ -15,7 +22,9 @@ import { Switch } from '../common/Switch';
 export function AppearanceSettings(): React.ReactElement {
   const settings = useSettingsStore();
   const patch = useSettingsStore((state) => state.patch);
-  const { t, languages, setLanguage, preference } = useI18n();
+  const { t, languages, setLanguage, preference, importLanguagePack } = useI18n();
+  const pushToast = useUiStore((state) => state.pushToast);
+  const languageFileRef = useRef<HTMLInputElement>(null);
 
   const languageOptions = [
     { value: 'system', label: t('common.system') },
@@ -24,6 +33,16 @@ export function AppearanceSettings(): React.ReactElement {
 
   const set = <K extends keyof Settings>(key: K, value: Settings[K]): void => {
     patch({ [key]: value } as Partial<Settings>);
+  };
+
+  const importLanguageFile = async (file: File): Promise<void> => {
+    try {
+      const pack = parseLanguagePackJson(await file.text(), file.name);
+      importLanguagePack(pack);
+      pushToast(t('settings.languageImported'));
+    } catch (reason) {
+      pushToast(`${t('settings.languageImportInvalid')}: ${reason instanceof Error ? reason.message : String(reason)}`, 'error');
+    }
   };
 
   return (
@@ -57,6 +76,28 @@ export function AppearanceSettings(): React.ReactElement {
           ariaLabel={t('settings.language')}
           menuLabel={t('settings.language')}
           icon={<Globe24Regular />}
+        />
+      </div>
+
+      <div className="setting-row">
+        <div className="setting-label">
+          <span>{t('settings.languageImport')}</span>
+          <small>{t('settings.languageImportHint')}</small>
+        </div>
+        <button type="button" className="fluent-button" onClick={() => languageFileRef.current?.click()}>
+          <ArrowImport24Regular /> {t('settings.languageImport')}
+        </button>
+        <input
+          ref={languageFileRef}
+          type="file"
+          accept="application/json,.json"
+          hidden
+          aria-label={t('settings.languageImport')}
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            if (file) void importLanguageFile(file);
+            event.target.value = '';
+          }}
         />
       </div>
 

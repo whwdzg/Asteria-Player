@@ -1,0 +1,53 @@
+import { describe, expect, it } from 'vitest';
+import {
+  DEFAULT_SETTINGS,
+  normalizeSettings,
+  parseSettingsJson,
+  serializeSettings,
+  settingsDocument,
+} from './settingsJson';
+
+describe('settings JSON', () => {
+  it('loads the documented defaults file', () => {
+    expect(DEFAULT_SETTINGS.theme).toBe('system');
+    expect(DEFAULT_SETTINGS.eqGains).toHaveLength(5);
+    expect(DEFAULT_SETTINGS.shortcuts.playPause?.code).toBe('Space');
+    expect(DEFAULT_SETTINGS.bilibiliProxy).toBe('');
+  });
+
+  it('exports a versioned, method-free document', () => {
+    const document = settingsDocument(DEFAULT_SETTINGS);
+    expect(document.version).toBe(1);
+    expect(document.settings.theme).toBe('system');
+    expect('patch' in document.settings).toBe(false);
+    expect('lastTrackId' in document.settings).toBe(false);
+    expect(JSON.parse(serializeSettings(DEFAULT_SETTINGS)).settings.volume).toBe(0.8);
+  });
+
+  it('accepts the wrapper and bare objects, clamping unsafe values', () => {
+    const wrapped = parseSettingsJson(JSON.stringify({
+      version: 1,
+      settings: { theme: 'light', volume: 9, lyricSize: 0.1, shortcuts: {} },
+    }));
+    expect(wrapped.settings.theme).toBe('light');
+    expect(wrapped.settings.volume).toBe(1.2);
+    expect(wrapped.settings.lyricSize).toBe(0.7);
+    expect(wrapped.settings.shortcuts.playPause?.code).toBe('Space');
+
+    const bare = parseSettingsJson(JSON.stringify({ theme: 'dark', language: 'en' }));
+    expect(bare.settings.theme).toBe('dark');
+    expect(bare.settings.language).toBe('en');
+  });
+
+  it('rejects malformed or unsupported input', () => {
+    expect(() => parseSettingsJson('{')).toThrow(/Invalid JSON/);
+    expect(() => parseSettingsJson(JSON.stringify({ version: 99, settings: { theme: 'dark' } }))).toThrow(/Unsupported/);
+    expect(() => parseSettingsJson('{}')).toThrow(/does not contain/);
+  });
+
+  it('keeps session fields out of imported settings', () => {
+    const settings = normalizeSettings({ theme: 'dark' }, { ...DEFAULT_SETTINGS, lastTrackId: 'keep-me', lastPosition: 42 });
+    expect(settings.lastTrackId).toBe('keep-me');
+    expect(settings.lastPosition).toBe(42);
+  });
+});

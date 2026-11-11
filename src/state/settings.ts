@@ -1,12 +1,16 @@
+/**
+ * Persisted settings store. The JSON document is the public interchange format;
+ * this store only adds immediate UI actions and normalisation on hydration.
+ */
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Settings, ShortcutAction, ShortcutSpec } from '../lib/types';
 import { clamp } from '../lib/format';
 import {
-  DEFAULT_SHORTCUTS,
-  isSameShortcut,
-  normalizeShortcuts,
-} from '../lib/shortcuts';
+  DEFAULT_SETTINGS,
+  normalizeSettings,
+} from '../lib/settingsJson';
+import { isSameShortcut } from '../lib/shortcuts';
 
 interface SettingsState extends Settings {
   patch: (patch: Partial<Settings>) => void;
@@ -17,48 +21,14 @@ interface SettingsState extends Settings {
   setPlaybackRate: (value: number) => void;
   setShortcut: (action: ShortcutAction, shortcut: ShortcutSpec | null) => void;
   resetShortcuts: () => void;
+  replaceSettings: (settings: Settings) => void;
+  resetSettings: () => void;
   setLastTrack: (id: string) => void;
   setLastPosition: (seconds: number) => void;
 }
 
 export const EQ_FREQUENCIES = [60, 230, 910, 3600, 14000] as const;
-
-export const DEFAULT_SETTINGS: Settings = {
-  theme: 'system',
-  language: 'system',
-  liquidGlass: true,
-  dynamicBackground: true,
-  backgroundBpm: true,
-  backgroundVideo: true,
-  lyricSize: 1,
-  lyricWeight: 400,
-  lyricTranslationSize: 0.62,
-  lyricBlur: true,
-  lyricFont: 'display',
-  showTranslation: true,
-  subtitleLang: 'auto',
-  subtitleBgOpacity: 0.35,
-  subtitleTextOpacity: 1,
-  subtitleFont: 'sans',
-  danmakuEnabled: true,
-  danmakuTop: true,
-  danmakuScroll: true,
-  danmakuWeight: 600,
-  danmakuOpacity: 1,
-  danmakuSpeed: 1,
-  danmakuFont: 'sans',
-  volume: 0.8,
-  brightness: 1,
-  muted: false,
-  playMode: 'all',
-  playbackRate: 1,
-  eqEnabled: false,
-  eqGains: [0, 0, 0, 0, 0],
-  shortcuts: DEFAULT_SHORTCUTS,
-  lastTrackId: undefined,
-  lastPosition: 0,
-  reduceMotion: false,
-};
+export { DEFAULT_SETTINGS } from '../lib/settingsJson';
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
@@ -84,7 +54,9 @@ export const useSettingsStore = create<SettingsState>()(
         shortcuts[action] = shortcut;
         return { shortcuts };
       }),
-      resetShortcuts: () => set({ shortcuts: { ...DEFAULT_SHORTCUTS } }),
+      resetShortcuts: () => set({ shortcuts: { ...DEFAULT_SETTINGS.shortcuts } }),
+      replaceSettings: (settings) => set(normalizeSettings(settings)),
+      resetSettings: () => set(normalizeSettings(DEFAULT_SETTINGS)),
       setLastTrack: (id) => set({ lastTrackId: id }),
       setLastPosition: (seconds) => set({ lastPosition: Math.max(0, seconds) }),
     }),
@@ -123,31 +95,11 @@ export const useSettingsStore = create<SettingsState>()(
         eqEnabled: state.eqEnabled,
         eqGains: state.eqGains,
         shortcuts: state.shortcuts,
+        bilibiliProxy: state.bilibiliProxy,
         lastTrackId: state.lastTrackId,
         lastPosition: state.lastPosition,
       }),
-      merge: (persisted, current) => {
-        const saved = (persisted ?? {}) as Partial<Settings>;
-        return {
-          ...current,
-          ...saved,
-          volume: clamp(saved.volume ?? current.volume, 0, 1.2),
-          brightness: clamp(saved.brightness ?? current.brightness, 0, 1),
-          playbackRate: clamp(saved.playbackRate ?? current.playbackRate, 0.25, 4),
-          lyricSize: clamp(saved.lyricSize ?? current.lyricSize, 0.7, 1.6),
-          lyricWeight: clamp(saved.lyricWeight ?? current.lyricWeight, 200, 800),
-          lyricTranslationSize: clamp(saved.lyricTranslationSize ?? current.lyricTranslationSize, 0.4, 1.2),
-          subtitleBgOpacity: clamp(saved.subtitleBgOpacity ?? current.subtitleBgOpacity, 0, 1),
-          subtitleTextOpacity: clamp(saved.subtitleTextOpacity ?? current.subtitleTextOpacity, 0.2, 1),
-          danmakuWeight: clamp(saved.danmakuWeight ?? current.danmakuWeight, 300, 800),
-          danmakuOpacity: clamp(saved.danmakuOpacity ?? current.danmakuOpacity, 0.2, 1),
-          danmakuSpeed: clamp(saved.danmakuSpeed ?? current.danmakuSpeed, 0.5, 2.5),
-          eqGains: Array.isArray(saved.eqGains) && saved.eqGains.length === 5
-            ? saved.eqGains.map((gain) => clamp(Number(gain) || 0, -12, 12))
-            : current.eqGains,
-          shortcuts: normalizeShortcuts(saved.shortcuts),
-        };
-      },
+      merge: (persisted, current) => ({ ...current, ...normalizeSettings(persisted, current) }),
     },
   ),
 );
