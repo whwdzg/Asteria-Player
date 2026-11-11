@@ -16,3 +16,21 @@ createRoot(root).render(
     </I18nProvider>
   </StrictMode>,
 );
+
+// Register the runtime cache in production. Navigation is network-first so a
+// new deployment is picked up on every visit, with the cached shell as fallback.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    const workerUrl = new URL('sw.js', document.baseURI);
+    navigator.serviceWorker.register(workerUrl, { scope: './' })
+      .then((registration) => {
+        void registration.update();
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') void registration.update();
+        });
+      })
+      .catch((error) => {
+        console.warn('Service worker registration failed', error);
+      });
+  });
+}
