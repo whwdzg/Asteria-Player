@@ -135,6 +135,7 @@ export function DanmakuLayer({ track }: { track: Track }): React.ReactElement {
   const { active, remove } = useDanmaku(track);
   const enabled = useSettingsStore((state) => state.danmakuEnabled);
   const weight = useSettingsStore((state) => state.danmakuWeight);
+  const size = useSettingsStore((state) => state.danmakuSize);
   const opacity = useSettingsStore((state) => state.danmakuOpacity);
   const font = useSettingsStore((state) => state.danmakuFont);
   const isPlaying = usePlaybackStore((state) => state.isPlaying);
@@ -151,7 +152,7 @@ export function DanmakuLayer({ track }: { track: Track }): React.ReactElement {
             '--danmaku-weight': weight,
             '--danmaku-opacity': opacity,
             color: comment.color,
-            fontSize: `${comment.size}px`,
+            fontSize: `${((comment.size > 0 ? comment.size : 25) * size / 25).toFixed(1)}px`,
             fontFamily: fontStack(font),
           } as React.CSSProperties}
           onAnimationEnd={() => remove(comment.uid)}

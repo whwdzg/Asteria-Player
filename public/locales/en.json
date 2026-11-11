@@ -299,5 +299,6 @@
   "details.videoTitle": "Video properties",
   "details.onlineMatch": "Match online",
   "match.applied": "Match applied",
-  "match.views": "{count} views"
+  "match.views": "{count} views",
+  "settings.danmakuSize": "Danmaku size"
 }

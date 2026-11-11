@@ -299,5 +299,6 @@
   "details.videoTitle": "影片屬性",
   "details.onlineMatch": "線上匹配",
   "match.applied": "匹配資訊已套用",
-  "match.views": "{count} 次播放"
+  "match.views": "{count} 次播放",
+  "settings.danmakuSize": "彈幕大小"
 }

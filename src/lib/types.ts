@@ -164,6 +164,8 @@ export interface Settings {
   danmakuTop: boolean;
   danmakuScroll: boolean;
   danmakuWeight: number;
+  /** Base danmaku font size in pixels at the authored 25px reference. */
+  danmakuSize: number;
   danmakuOpacity: number;
   danmakuSpeed: number;
   danmakuFont: FontChoice;

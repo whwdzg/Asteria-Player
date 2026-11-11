@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { deriveVideoLabels, isPartVideoName } from './importer';
+import { danmakuPriority, deriveVideoLabels, isPartVideoName, selectDanmakuFiles } from './importer';
 
 describe('video part naming', () => {
   it('recognises P1/P2/Part/第N P styles', () => {
@@ -24,5 +24,18 @@ describe('video part naming', () => {
 
   it('leaves ordinary video names alone', () => {
     expect(deriveVideoLabels('concert.mp4', 'My Show/concert.mp4')).toEqual({});
+  });
+});
+
+describe('danmaku sidecar priority', () => {
+  it('prefers XML over JSON and ASS/SSA', () => {
+    const files = ['video.ass', 'video.json', 'video.xml', 'video.ssa'].map((name) => ({ name } as File));
+    expect(selectDanmakuFiles(files).map((file) => file.name)).toEqual([
+      'video.xml',
+      'video.json',
+      'video.ass',
+      'video.ssa',
+    ]);
+    expect(danmakuPriority('video.xml')).toBeLessThan(danmakuPriority('video.json'));
   });
 });

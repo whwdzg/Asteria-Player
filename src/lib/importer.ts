@@ -3,7 +3,7 @@
  * names (P1/P2) inherit the parent folder title and keep the filename as a
  * subtitle.
  */
-import type { DanmakuComment, MediaKind, SubtitleSource, Track } from './types';
+import type { MediaKind, SubtitleSource, Track } from './types';
 import {
   extensionOf,
   guessTagsFromFileName,
@@ -27,6 +27,18 @@ const SIDECAR_EXTENSIONS = new Set([
   ...IMAGE_EXTENSIONS,
 ]);
 const DANMAKU_HINTS = /(danmaku|danmu|弹幕|comment|chat)/i;
+const DANMAKU_PRIORITY = ['xml', 'json', 'ass', 'ssa'] as const;
+
+/** Lower is preferred when a media file has multiple same-name danmaku files. */
+export function danmakuPriority(name: string): number {
+  const index = DANMAKU_PRIORITY.indexOf(extensionOf(name) as typeof DANMAKU_PRIORITY[number]);
+  return index === -1 ? DANMAKU_PRIORITY.length : index;
+}
+
+/** Stable priority order: XML, JSON, ASS, SSA, then unknown. */
+export function selectDanmakuFiles(files: File[]): File[] {
+  return [...files].sort((a, b) => danmakuPriority(a.name) - danmakuPriority(b.name) || a.name.localeCompare(b.name));
+}
 
 export interface ImportedTrackGroup {
   track: Track;
@@ -227,21 +239,23 @@ export async function importFiles(files: File[], onProgress?: ProgressCallback):
           format: subtitleFormatFromName(file.name),
         });
       }
-      const danmakuComments: DanmakuComment[] = [];
-      for (const file of group.sidecars) {
-        const extension = extensionOf(file.name);
-        if (!DANMAKU_EXTENSIONS.has(extension)) continue;
+      // Use exactly one danmaku file: XML > JSON > ASS > SSA. If the preferred
+      // file is empty/malformed, fall through to the next one without merging.
+      let danmakuText: string | undefined;
+      const danmakuFiles = selectDanmakuFiles(group.sidecars.filter((file) => DANMAKU_EXTENSIONS.has(extensionOf(file.name))));
+      for (const file of danmakuFiles) {
         const text = await readText(file);
         if (!isDanmaku(file.name, text)) continue;
         try {
-          danmakuComments.push(...parseDanmaku(text));
+          const comments = parseDanmaku(text);
+          if (comments.length) {
+            danmakuText = JSON.stringify(comments);
+            break;
+          }
         } catch {
           // A malformed XML/JSON/ASS file should not block the media import.
         }
       }
-      const danmakuText = danmakuComments.length
-        ? JSON.stringify(danmakuComments)
-        : undefined;
       const coverFile = coverFromSidecars(group.sidecars);
       const cover = coverFile ? URL.createObjectURL(coverFile) : tags.cover;
       const guessed = guessTagsFromFileName(group.media.name);

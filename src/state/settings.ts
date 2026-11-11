@@ -84,6 +84,7 @@ export const useSettingsStore = create<SettingsState>()(
         danmakuTop: state.danmakuTop,
         danmakuScroll: state.danmakuScroll,
         danmakuWeight: state.danmakuWeight,
+        danmakuSize: state.danmakuSize,
         danmakuOpacity: state.danmakuOpacity,
         danmakuSpeed: state.danmakuSpeed,
         danmakuFont: state.danmakuFont,

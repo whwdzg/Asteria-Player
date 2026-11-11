@@ -164,6 +164,30 @@ export function VideoSettings(): React.ReactElement {
           </span>
         </div>
         <div className="setting-row compact">
+          <div className="setting-label"><span>{t('settings.danmakuSize')}</span></div>
+          <span className="setting-inline-control">
+            <RangeSlider
+              value={settings.danmakuSize}
+              min={12}
+              max={48}
+              step={1}
+              onChange={(value) => set('danmakuSize', value)}
+              ariaLabel={t('settings.danmakuSize')}
+              ariaValueText={`${settings.danmakuSize}px`}
+              disabled={!settings.danmakuEnabled}
+            />
+            <NumberField
+              value={settings.danmakuSize}
+              min={12}
+              max={48}
+              step={1}
+              suffix="px"
+              ariaLabel={t('settings.danmakuSize')}
+              onChange={(value) => set('danmakuSize', value)}
+            />
+          </span>
+        </div>
+        <div className="setting-row compact">
           <div className="setting-label"><span>{t('settings.danmakuOpacity')}</span></div>
           <span className="setting-inline-control">
             <RangeSlider

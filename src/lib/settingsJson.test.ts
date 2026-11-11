@@ -13,6 +13,11 @@ describe('settings JSON', () => {
     expect(DEFAULT_SETTINGS.eqGains).toHaveLength(5);
     expect(DEFAULT_SETTINGS.shortcuts.playPause?.code).toBe('Space');
     expect(DEFAULT_SETTINGS.bilibiliProxy).toBe('');
+    expect(DEFAULT_SETTINGS.backgroundVideo).toBe(false);
+    expect(DEFAULT_SETTINGS.lyricSize).toBe(1.1);
+    expect(DEFAULT_SETTINGS.lyricWeight).toBe(700);
+    expect(DEFAULT_SETTINGS.lyricTranslationSize).toBe(0.7);
+    expect(DEFAULT_SETTINGS.danmakuSize).toBe(25);
   });
 
   it('exports a versioned, method-free document', () => {
