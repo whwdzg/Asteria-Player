@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Playlist, Track } from '../lib/types';
 import { uid } from '../lib/format';
+import { clearMediaCaches } from '../lib/media';
 
 interface LibraryState {
   tracks: Track[];
@@ -14,6 +15,7 @@ interface LibraryState {
   setDemoTracks: (tracks: Track[]) => void;
   addTracks: (tracks: Track[]) => Track[];
   removeTracks: (ids: string[]) => void;
+  updateTrack: (id: string, patch: Partial<Track>) => void;
   updateTrackDuration: (id: string, duration: number) => void;
   setCurrent: (id: string | null) => void;
   setQueue: (ids: string[], sequenceId?: string) => void;
@@ -74,6 +76,13 @@ export const useLibraryStore = create<LibraryState>()(persist((set, get) => ({
       })),
       currentId: state.currentId && idSet.has(state.currentId) ? null : state.currentId,
     }));
+  },
+  /** Patch metadata/artwork/lyrics for one item and invalidate parsed caches. */
+  updateTrack: (id, patch) => {
+    set((state) => ({
+      tracks: state.tracks.map((track) => (track.id === id ? { ...track, ...patch } : track)),
+    }));
+    clearMediaCaches(id);
   },
   updateTrackDuration: (id, duration) => set((state) => ({
     tracks: state.tracks.map((track) => (track.id === id && duration > 0 && Math.abs(track.duration - duration) > 0.5

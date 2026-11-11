@@ -37,7 +37,7 @@ export function TrackIdentity(): React.ReactElement {
       <div className="track-copy">
         <div className="track-title" title={track.title}>{track.title}</div>
         <div className="track-subtitle">
-          <span>{track.artist || t('common.unknownArtist')}</span>
+          <span>{track.subtitle || track.artist || t('common.unknownArtist')}</span>
           {track.album ? <><span className="dot" aria-hidden="true">·</span><span>{track.album}</span></> : null}
         </div>
       </div>

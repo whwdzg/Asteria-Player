@@ -1,3 +1,8 @@
+/**
+ * File importer. Media files are grouped with same-name sidecars; video part
+ * names (P1/P2) inherit the parent folder title and keep the filename as a
+ * subtitle.
+ */
 import type { DanmakuComment, MediaKind, SubtitleSource, Track } from './types';
 import {
   extensionOf,
@@ -85,6 +90,30 @@ interface MediaGroup {
   path: string;
   base: string;
   sidecars: File[];
+}
+
+function parentFolder(path: string): string {
+  const parts = path.split('/').filter(Boolean);
+  return parts.length > 1 ? parts[parts.length - 2] : '';
+}
+
+/** P1, P2, Part 3, 第4P and similar multi-part video names. */
+export function isPartVideoName(stem: string): boolean {
+  return /^p\s*\d+(?:[.\-_\s].*)?$/i.test(stem) || /^part\s*\d+/i.test(stem) || /^第?\d+p$/i.test(stem);
+}
+
+/**
+ * Imports in folders such as `My Show/P1.mp4` should keep the folder as the
+ * title and show the filename as a subtitle instead of treating P1 as a title.
+ */
+export function deriveVideoLabels(fileName: string, path: string): { title?: string; subtitle?: string } {
+  const stem = fileName.slice(0, fileName.lastIndexOf('.'));
+  if (!isPartVideoName(stem)) return {};
+  const folder = parentFolder(path).trim();
+  return {
+    title: folder || undefined,
+    subtitle: stem,
+  };
 }
 
 function filePath(file: File): string {
@@ -216,12 +245,14 @@ export async function importFiles(files: File[], onProgress?: ProgressCallback):
       const coverFile = coverFromSidecars(group.sidecars);
       const cover = coverFile ? URL.createObjectURL(coverFile) : tags.cover;
       const guessed = guessTagsFromFileName(group.media.name);
+      const videoLabels = kind === 'video' ? deriveVideoLabels(group.media.name, group.path) : {};
       const src = URL.createObjectURL(group.media);
       const format = tags.format || extensionOf(group.media.name).toUpperCase();
       const track: Track = {
         id: uid('local'),
         kind,
-        title: tags.title || guessed.title,
+        title: videoLabels.title || tags.title || guessed.title,
+        subtitle: videoLabels.subtitle,
         artist: tags.artist || guessed.artist || '',
         album: tags.album,
         src,

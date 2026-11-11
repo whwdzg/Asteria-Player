@@ -1,3 +1,7 @@
+/**
+ * Application shell: library bootstrapping, ambient background, responsive
+ * layout and global chrome/gesture coordination.
+ */
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { ArrowDownload24Regular, ArrowImport24Regular, FolderOpen24Regular } from '@fluentui/react-icons';
 import './styles/index.css';

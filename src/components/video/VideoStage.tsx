@@ -1,3 +1,7 @@
+/**
+ * Video surface: element mounting, auto-hiding chrome, gestures, danmaku,
+ * subtitles and the video-properties entry point.
+ */
 import {
   Chat24Regular,
   ClosedCaption24Regular,
@@ -156,7 +160,7 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
           <div className="video-identity">
             <span className="video-badge"><span className="live-dot" /> {t('np.video')}</span>
             <h1>{track.title}</h1>
-            <p>{track.artist}{track.album ? ` · ${track.album}` : ''}</p>
+            <p>{track.subtitle || track.artist}{track.album ? ` · ${track.album}` : ''}</p>
           </div>
           <div className="video-quick-tools">
             {track.subtitles?.length ? (
@@ -188,6 +192,15 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
                 <Chat24Regular />
               </IconButton>
             ) : null}
+            {/* Kept beside the subtitle/danmaku controls so it is reachable in fullscreen. */}
+            <IconButton
+              className="video-properties-button"
+              label={t('details.videoTitle')}
+              tooltip={t('details.videoTitle')}
+              onClick={() => setDetailsTrackId(track.id)}
+            >
+              <Info24Regular />
+            </IconButton>
             <IconButton
               label={`${fullscreen ? t('player.exitFullscreen') : t('player.fullscreen')}${fullscreenHint}`}
               tooltip={`${fullscreen ? t('player.exitFullscreen') : t('player.fullscreen')}${fullscreenHint}`}
@@ -246,7 +259,7 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
         <div className="video-meta-heading">
           <span className="video-badge"><span className="live-dot" /> {t('np.video')}</span>
           <h2>{track.title}</h2>
-          <p>{track.artist}{track.album ? ` · ${track.album}` : ''}</p>
+          <p>{track.subtitle || track.artist}{track.album ? ` · ${track.album}` : ''}</p>
         </div>
         <div className="video-meta-chips">
           {track.format ? <span>{track.format}</span> : null}
@@ -255,7 +268,7 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
           {hasDanmaku(track) ? <span>{t('np.danmaku')} · {danmakuEnabled ? t('common.on') : t('common.off')}</span> : null}
         </div>
         <button type="button" className="text-button video-detail-button" onClick={() => setDetailsTrackId(track.id)}>
-          <Info24Regular /> {t('details.title')}
+          <Info24Regular /> {t('details.videoTitle')}
         </button>
       </div>
     </section>

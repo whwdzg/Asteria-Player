@@ -52,7 +52,7 @@ export const QueueItem = memo(function QueueItem({
         <span className="queue-copy">
           <span className="queue-title" title={track.title}>{track.title}</span>
           <span className="queue-artist">
-            {track.artist || t('common.unknownArtist')}
+            {track.subtitle || track.artist || t('common.unknownArtist')}
             {track.album ? <><span className="dot" aria-hidden="true">·</span>{track.album}</> : null}
           </span>
         </span>

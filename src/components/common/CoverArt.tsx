@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { MusicNote224Regular, Video24Regular } from '@fluentui/react-icons';
 import type { Track } from '../../lib/types';
 import { coverFallback } from '../../lib/cover';
@@ -13,6 +13,7 @@ interface CoverArtProps {
 
 export function CoverArt({ track, className = '', alt = '', eager = false, showKind = false }: CoverArtProps): React.ReactElement {
   const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [track.cover]);
   const fallback = coverFallback(track);
   const showImage = track.cover && !failed;
   const initial = Array.from(track.title.trim())[0] ?? 'A';

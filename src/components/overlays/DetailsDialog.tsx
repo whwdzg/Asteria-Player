@@ -1,3 +1,7 @@
+/**
+ * Media/video properties. Audio exposes LDDC-style online matching; video
+ * exposes Bilibili danmaku/subtitle matching.
+ */
 import { Play24Filled, TextBulletListAdd24Regular } from '@fluentui/react-icons';
 import { formatDuration, formatFileSize, formatBitrate, formatSampleRate } from '../../lib/format';
 import { useLibraryStore } from '../../state/library';
@@ -6,6 +10,8 @@ import { player } from '../../player/engine';
 import { useI18n } from '../../i18n/I18nProvider';
 import { CoverArt } from '../common/CoverArt';
 import { Modal } from '../common/Modal';
+import { BilibiliMatchPanel } from './BilibiliMatchPanel';
+import { SongMatchPanel } from './SongMatchPanel';
 
 export function DetailsDialog(): React.ReactElement | null {
   const trackId = useUiStore((state) => state.detailsTrackId);
@@ -36,9 +42,9 @@ export function DetailsDialog(): React.ReactElement | null {
     <Modal
       open
       onClose={() => setTrackId(null)}
-      title={t('details.title')}
+      title={track.kind === 'video' ? t('details.videoTitle') : t('details.title')}
       closeLabel={t('details.close')}
-      size="md"
+      size="lg"
       footer={
         <>
           <button type="button" className="fluent-button" onClick={addToQueue}>
@@ -59,7 +65,7 @@ export function DetailsDialog(): React.ReactElement | null {
         <div className="details-heading">
           <span className="soft-badge">{track.kind === 'video' ? t('np.video') : t('np.eyebrow')}</span>
           <h3>{track.title}</h3>
-          <p>{track.artist || t('common.unknownArtist')}</p>
+          <p>{track.subtitle || track.artist || t('common.unknownArtist')}</p>
           <p className="details-album">{track.album || t('common.unknownAlbum')}</p>
         </div>
       </div>
@@ -71,6 +77,8 @@ export function DetailsDialog(): React.ReactElement | null {
           </div>
         ))}
       </dl>
+      {/* Video properties host Bilibili matching; audio properties host the LDDC-style song matcher. */}
+      {track.kind === 'video' ? <BilibiliMatchPanel key={track.id} track={track} /> : <SongMatchPanel key={track.id} track={track} />}
     </Modal>
   );
 }

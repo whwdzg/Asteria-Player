@@ -1,3 +1,7 @@
+/**
+ * Cached media resolution layer. Lyrics, subtitles and danmaku are parsed once
+ * per track and invalidated when metadata is patched from the details dialog.
+ */
 import type { DanmakuComment, LyricsDocument, SubtitleCue, SubtitleSource, Track } from './types';
 import { mergeTranslation, parseLyrics } from './lyrics';
 import { parseDanmaku } from './danmaku';
