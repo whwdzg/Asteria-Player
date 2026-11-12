@@ -1337,3 +1337,51 @@
     --transport-play: 38px;
   }
 }
+
+/* Phone landscape: keep the header out of the way and give the now-playing
+   content enough vertical room above the compact bottom bar. */
+@media (max-height: 560px) and (orientation: landscape) {
+  .app-header {
+    display: none;
+  }
+
+  .app-main {
+    padding-top: 14px;
+    padding-bottom: calc(var(--bottom-bar-height) + 18px);
+  }
+}
+
+@media (max-height: 560px) and (orientation: landscape) and (max-width: 700px) {
+  :root {
+    --bottom-bar-height: 118px;
+  }
+
+  .bottom-bar {
+    padding: 5px 12px 7px;
+  }
+
+  .bottom-bar-content {
+    gap: 2px;
+  }
+
+  .np-art-column {
+    max-width: 124px;
+  }
+
+  .np-artwork-shell {
+    width: 100px;
+  }
+
+  .np-track-copy {
+    margin-top: 8px;
+  }
+
+  .np-title {
+    font-size: 17px;
+  }
+
+  .lyrics-list {
+    padding-top: 36px;
+    padding-bottom: 36px;
+  }
+}
