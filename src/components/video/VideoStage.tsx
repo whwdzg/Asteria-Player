@@ -53,11 +53,13 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
   const colorVision = useSettingsStore((state) => state.colorVisionAssist);
   const videoFit = useSettingsStore((state) => state.videoFit);
   const setDetailsTrackId = useUiStore((state) => state.setDetailsTrackId);
+  const updateTrack = useLibraryStore((state) => state.updateTrack);
   const { t } = useI18n();
   const hostRef = useRef<HTMLDivElement>(null);
   const [subtitleMenu, setSubtitleMenu] = useState<MenuAnchor | null>(null);
   const isTouch = useTouchDevice();
   const fullscreenHint = useShortcutHint('fullscreen');
+  const thumbnailAttempts = useRef(new Set<string>());
   const [toolsHidden, setToolsHidden] = useState(false);
   const [lockRevealed, setLockRevealed] = useState(false);
   const [tempSpeed, setTempSpeed] = useState(false);
@@ -137,6 +139,100 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
       if (element.parentElement === host) host.removeChild(element);
     };
   }, []);
+
+  // Some local/remote videos have no sidecar artwork. Capture one representative
+  // frame after data arrives so queue covers, ambience and properties use it.
+  useEffect(() => {
+    if (!track || track.kind !== 'video' || track.cover) return;
+    if (thumbnailAttempts.current.has(track.id)) return;
+    const video = player.videoElement;
+    if (!video) return;
+    thumbnailAttempts.current.add(track.id);
+
+    let cancelled = false;
+    let captured = false;
+    let seekTimer = 0;
+    let fallbackTimer = 0;
+
+    const capture = (): void => {
+      if (cancelled || video.readyState < 2 || !video.videoWidth || !video.videoHeight) return;
+      try {
+        const scale = Math.min(1, 640 / video.videoWidth);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(video.videoWidth * scale));
+        canvas.height = Math.max(1, Math.round(video.videoHeight * scale));
+        const context = canvas.getContext('2d');
+        if (!context) return;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const cover = canvas.toDataURL('image/jpeg', 0.72);
+        if (cover.length > 64) {
+          captured = true;
+          updateTrack(track.id, { cover });
+        }
+      } catch {
+        // Cross-origin media can taint the canvas; keep the fallback artwork.
+      }
+    };
+
+    const captureFromPreview = (target: number): void => {
+      if (cancelled || !Number.isFinite(video.duration) || video.duration <= 0) {
+        capture();
+        return;
+      }
+      const previous = video.currentTime;
+      let done = false;
+      const onSeeked = (): void => {
+        if (done) return;
+        done = true;
+        window.clearTimeout(seekTimer);
+        video.removeEventListener('seeked', onSeeked);
+        capture();
+        try { video.currentTime = previous; } catch { /* metadata may still be settling */ }
+      };
+      video.addEventListener('seeked', onSeeked);
+      try {
+        video.currentTime = Math.min(target, Math.max(0, video.duration - 0.05));
+      } catch {
+        video.removeEventListener('seeked', onSeeked);
+        capture();
+        return;
+      }
+      seekTimer = window.setTimeout(() => {
+        if (done) return;
+        done = true;
+        video.removeEventListener('seeked', onSeeked);
+        capture();
+      }, 900);
+    };
+
+    const onLoadedData = (): void => {
+      if (cancelled) return;
+      if (video.currentTime > 0.05) capture();
+      else captureFromPreview(Math.min(1, Math.max(0.1, video.duration * 0.1)));
+    };
+
+    video.addEventListener('loadeddata', onLoadedData);
+    if (video.readyState >= 2) onLoadedData();
+    else {
+      // loadeddata normally fires once metadata/data arrive; seek as a fallback
+      // for servers that only provide a frame after a range request.
+      fallbackTimer = window.setTimeout(() => {
+        if (cancelled) return;
+        if (video.readyState >= 2) capture();
+        else if (video.duration > 0.2) captureFromPreview(Math.min(1, video.duration * 0.1));
+      }, 1600);
+    }
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(seekTimer);
+      window.clearTimeout(fallbackTimer);
+      video.removeEventListener('loadeddata', onLoadedData);
+      // StrictMode mounts effects twice in development; allow the second pass
+      // to capture when the first pass was cancelled before a frame arrived.
+      if (!captured) thumbnailAttempts.current.delete(track.id);
+    };
+  }, [track?.id, track?.cover, track?.kind, updateTrack]);
 
   const subtitleLabel = useMemo(() => {
     if (!track?.subtitles?.length) return t('settings.subtitleOff');
