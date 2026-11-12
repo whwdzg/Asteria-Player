@@ -449,6 +449,19 @@
   to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 
+/* Temporary speed feedback lives in the upper video area so it never covers
+   the picture centre or the play controls. */
+.gesture-hud.is-speed {
+  top: clamp(12px, 10%, 140px);
+  transform: translate(-50%, 0);
+  animation-name: gesture-in-top;
+}
+
+@keyframes gesture-in-top {
+  from { opacity: 0; transform: translate(-50%, -6px) scale(0.96); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
 .is-fullscreen .bottom-bar {
   z-index: 45;
 }

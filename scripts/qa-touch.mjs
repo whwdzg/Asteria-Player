@@ -62,6 +62,11 @@ const at = (x, y) => ({ x, y, id: 1, radiusX: 2, radiusY: 2, force: 1 });
 await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [at(200, 300)] });
 await page.waitForTimeout(700);
 check(await page.locator('.gesture-hud.is-speed').count() === 1, 'long press shows 2x HUD');
+check(await page.evaluate(() => {
+  const hud = document.querySelector('.gesture-hud.is-speed').getBoundingClientRect();
+  const frame = document.querySelector('.video-frame').getBoundingClientRect();
+  return hud.top + hud.height / 2 < frame.top + frame.height / 2;
+}), 'speed HUD sits above the video centre');
 check((await page.locator('.player-video').evaluate((video) => video.playbackRate)) === 2, 'long press applies 2x rate');
 await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
 await page.waitForTimeout(300);
