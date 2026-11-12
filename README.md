@@ -112,6 +112,12 @@ npm run preview
 
 静态站点可直接部署 `dist/`；Vite 使用相对路径 `base: './'`，因此也支持子目录部署。
 
+## 版本
+
+- 当前版本以 `package.json` 的 `version` 为准，关于页会自动显示该版本号。
+- 关于页同时显示构建时 HEAD commit 的提交时间；构建元数据由 `vite.config.ts` 注入。
+- 功能更新提升 minor，修复与小型调整提升 patch。
+
 ## GitHub Pages 部署
 
 仓库已包含 [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)，面向 GitHub Actions + GitHub Pages：

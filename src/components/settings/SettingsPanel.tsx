@@ -8,6 +8,7 @@ import {
   Translate24Regular,
 } from '@fluentui/react-icons';
 import { useI18n } from '../../i18n/I18nProvider';
+import { APP_VERSION, COMMIT_HASH, COMMIT_TIME, formatCommitTime } from '../../lib/buildInfo';
 import { IconButton } from '../common/IconButton';
 import { AppearanceSettings } from './AppearanceSettings';
 import { DataSettings } from './DataSettings';
@@ -46,10 +47,13 @@ export function SettingsPanel({ onClose }: SettingsPanelProps): React.ReactEleme
             <Info24Regular /> {t('settings.about')}
           </h3>
           <div className="about-card">
-            <span className="about-mark" aria-hidden="true">A</span>
+            <span className="about-mark" aria-hidden="true"><img src="icons/icon-192.png" alt="" /></span>
             <div>
               <strong>{t('app.name')}</strong>
-              <p>{t('settings.version')}</p>
+              <p>{t('settings.version', { version: APP_VERSION })}</p>
+              <p title={COMMIT_HASH ? `commit ${COMMIT_HASH}` : undefined}>
+                {t('settings.commitTime', { time: formatCommitTime(COMMIT_TIME) })}
+              </p>
               <p>{t('settings.madeWith')}</p>
             </div>
           </div>

@@ -135,7 +135,7 @@
   "settings.shortcuts": "鍵盤快速鍵",
   "settings.shortcutsHint": "快速鍵可在下方逐項自訂，並會顯示在對應按鈕的懸浮提示中。",
   "settings.about": "關於",
-  "settings.version": "版本 0.1.0",
+  "settings.version": "版本 {version}",
   "settings.madeWith": "Fluent Design 與液態玻璃的結合，為開放網路而作。",
   "menu.importFiles": "選擇檔案",
   "menu.importFolder": "選擇資料夾",
@@ -384,5 +384,6 @@
   "settings.fsClockOpacity": "時間透明度",
   "shortcut.volumeUp": "增大音量",
   "shortcut.volumeDown": "減小音量",
-  "np.music": "音樂"
+  "np.music": "音樂",
+  "settings.commitTime": "提交時間 {time}"
 }

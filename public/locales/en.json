@@ -135,7 +135,7 @@
   "settings.shortcuts": "Keyboard shortcuts",
   "settings.shortcutsHint": "Customize each shortcut below. The active key appears in the matching button tooltip.",
   "settings.about": "About",
-  "settings.version": "Version 0.1.0",
+  "settings.version": "Version {version}",
   "settings.madeWith": "Fluent Design meets liquid glass. Built for the open web.",
   "menu.importFiles": "Choose files",
   "menu.importFolder": "Choose folder",
@@ -384,5 +384,6 @@
   "settings.fsClockOpacity": "Clock opacity",
   "shortcut.volumeUp": "Volume up",
   "shortcut.volumeDown": "Volume down",
-  "np.music": "Music"
+  "np.music": "Music",
+  "settings.commitTime": "Commit time {time}"
 }

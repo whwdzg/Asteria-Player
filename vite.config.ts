@@ -1,8 +1,21 @@
+import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { defineConfig, type Plugin } from 'vitest/config';
 import react from '@vitejs/plugin-react';
+
+function gitValue(args: string): string {
+  try {
+    return execSync(`git ${args}`, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  } catch {
+    return '';
+  }
+}
+
+const packageVersion = (JSON.parse(readFileSync('package.json', 'utf8')) as { version?: string }).version ?? '0.0.0';
+const commitTime = gitValue('show -s --format=%cI HEAD') || new Date().toISOString();
+const commitHash = gitValue('rev-parse --short HEAD');
 
 function walk(directory: string, base = ''): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -44,6 +57,11 @@ function serviceWorkerManifest(): Plugin {
 
 export default defineConfig({
   base: './',
+  define: {
+    __APP_VERSION__: JSON.stringify(packageVersion),
+    __COMMIT_TIME__: JSON.stringify(commitTime),
+    __COMMIT_HASH__: JSON.stringify(commitHash),
+  },
   plugins: [react(), serviceWorkerManifest()],
   server: {
     port: 4173,
