@@ -183,7 +183,9 @@ SPL 语法按 [Salt Player Lyrics 标准](https://moriafly.com/standards/spl.htm
 ### 在线匹配
 
 - 歌曲：打开歌曲属性（媒体信息），缺少封面时自动打开在线匹配；已有封面时点击「在线匹配」。结果来自 iTunes Search 与 LRCLIB，可选择候选并一次性应用封面、歌词和元数据。
-- 视频：打开视频属性，输入标题搜索 B 站；结果可分别匹配弹幕或字幕。B 站 API 通常拒绝跨域请求，属性页提供代理输入框，示例 `https://your-proxy.example/?url={url}`（`{url}` 会替换为编码后的目标地址）。
+- 视频：打开视频属性，输入标题搜索 B 站；结果可分别匹配弹幕或字幕。B 站 API 通常拒绝跨域请求，属性页提供代理输入框，示例 `https://your-proxy.example/?url={url}`（`{url}` 会替换为编码后的目标地址）。搜索接口还需要代理补充 `buvid3` Cookie 和浏览器请求头。
+- B 站视频流优先使用当前的 `x/player/wbi/playurl`，旧接口作为后备；弹幕接口失败时会尝试 `comment.bilibili.com` 备用地址。
+- API 实测记录（视频流、字幕、弹幕、搜索和代理要求）：[docs/bilibili-api.md](docs/bilibili-api.md)。
 - 推荐使用开源自部署弹幕聚合服务 [danmu_api](https://github.com/huangxd-/danmu_api)（AGPL-3.0）：在视频属性填入其根地址（含 token，如 `https://danmu.example/87654321`）后，搜索和弹幕匹配会走该开源服务；B 站字幕仍需直连或 CORS 代理。
 
 ### 快捷键

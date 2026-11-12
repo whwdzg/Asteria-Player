@@ -116,6 +116,9 @@ async function request(url: string, proxy: string, signal?: AbortSignal): Promis
     signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
     headers: { Accept: 'application/json,text/xml,text/plain,*/*' },
   });
+  if (response.status === 412) {
+    throw new Error('Bilibili risk control (412): the proxy must forward a buvid3 cookie and browser-like headers.');
+  }
   if (!response.ok) throw new Error(`Bilibili HTTP ${response.status}`);
   return response;
 }
@@ -202,7 +205,9 @@ export async function fetchBilibiliPages(bvid: string, proxy: string, signal?: A
  * Resolve a progressive MP4/FLV stream for a page. Bilibili returns DASH
  * (separate audio/video) for most modern clients; the html5 platform request
  * asks for a progressive `durl` instead so a single <video> element can play it.
- * The URL must normally travel through the configured CORS/media proxy.
+ * The current wbi endpoint is tried first, with the deprecated endpoint as a
+ * fallback. The URL must normally travel through the configured CORS/media
+ * proxy; the html5 MP4 itself could be played without a Referer in testing.
  */
 export async function fetchBilibiliPlayUrl(bvid: string, cid: number, proxy: string): Promise<string> {
   const params = new URLSearchParams({
@@ -215,12 +220,26 @@ export async function fetchBilibiliPlayUrl(bvid: string, cid: number, proxy: str
     platform: 'html5',
     high_quality: '1',
   });
-  const payload = await json<BilibiliPlayUrlPayload>(
-    `https://api.bilibili.com/x/player/playurl?${params.toString()}`,
-    proxy,
-  );
-  if (payload.code !== 0) {
-    throw new Error(payload.message || `Bilibili playurl returned ${payload.code ?? 'an error'}`);
+  const endpoints = [
+    'https://api.bilibili.com/x/player/wbi/playurl',
+    'https://api.bilibili.com/x/player/playurl',
+  ];
+  let payload: BilibiliPlayUrlPayload | null = null;
+  let lastError: unknown;
+  for (const endpoint of endpoints) {
+    try {
+      const candidate = await json<BilibiliPlayUrlPayload>(`${endpoint}?${params.toString()}`, proxy);
+      if (candidate.code === 0 && candidate.data?.durl?.length) {
+        payload = candidate;
+        break;
+      }
+      lastError = new Error(candidate.message || `Bilibili playurl returned ${candidate.code ?? 'an error'}`);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  if (!payload) {
+    throw lastError instanceof Error ? lastError : new Error('Bilibili did not return a playable stream.');
   }
   const stream = (payload.data?.durl ?? [])
     .map((item) => item.url || item.backup_url?.[0])
@@ -243,11 +262,23 @@ export function pickBilibiliPage(pages: BilibiliPage[], subtitle?: string): Bili
 
 /** Download and parse Bilibili XML danmaku into the app's JSON representation. */
 export async function fetchBilibiliDanmaku(cid: number, proxy: string): Promise<string> {
-  const response = await request(`https://api.bilibili.com/x/v1/dm/list.so?oid=${cid}`, proxy);
-  const xml = await response.text();
-  const comments = parseDanmaku(xml);
-  if (!comments.length) throw new Error('No danmaku found for this page.');
-  return JSON.stringify(comments);
+  const endpoints = [
+    `https://api.bilibili.com/x/v1/dm/list.so?oid=${cid}`,
+    `https://comment.bilibili.com/${cid}.xml`,
+  ];
+  let lastError: unknown;
+  for (const endpoint of endpoints) {
+    try {
+      const response = await request(endpoint, proxy);
+      const xml = await response.text();
+      const comments = parseDanmaku(xml);
+      if (comments.length) return JSON.stringify(comments);
+      lastError = new Error('No danmaku found for this page.');
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error('No danmaku found for this page.');
 }
 
 function vttTimestamp(seconds: number): string {

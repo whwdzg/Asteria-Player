@@ -138,7 +138,7 @@ describe('Bilibili service', () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       const raw = String(input);
       const url = raw.includes('url=') ? decodeURIComponent(raw.slice(raw.indexOf('url=') + 4)) : raw;
-      expect(url).toContain('player/playurl');
+      expect(url).toContain('playurl');
       expect(url).toContain('fnval=0');
       return jsonResponse({
         code: 0,
