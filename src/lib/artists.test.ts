@@ -26,7 +26,12 @@ describe('artist and album grouping', () => {
       'Alice', 'Bob', 'Carol', 'Dave', 'Eve', 'Frank',
     ]);
     expect(parseArtists('Alice; alice ; Bob')).toEqual(['Alice', 'Bob']);
+    expect(parseArtists('Alice / Bob \\ Carol')).toEqual(['Alice', 'Bob', 'Carol']);
+    expect(parseArtists('Alice feat. Bob')).toEqual(['Alice', 'Bob']);
+    expect(parseArtists('Alice FEAT Bob、Carol')).toEqual(['Alice', 'Bob', 'Carol']);
+    expect(parseArtists('Defeat Artist')).toEqual(['Defeat Artist']);
     expect(displayArtists('Alice; Bob、Carol')).toBe('Alice / Bob / Carol');
+    expect(displayArtists('Alice feat. Bob / Carol')).toBe('Alice / Bob / Carol');
     expect(parseArtists('')).toEqual([]);
   });
 

@@ -1,7 +1,11 @@
 import type { Track } from './types';
 
-/** Semicolon, comma and 顿号 all separate co-artists in imported tags. */
-const ARTIST_SEPARATOR = /[;,、；，]/;
+/**
+ * Co-artist separators: semicolon, comma, 顿号, slash/backslash and the
+ * common featured-artist token (`feat`, `feat.`). The feat token must be a
+ * standalone word so names such as "Defeat" are not split.
+ */
+const ARTIST_SEPARATOR = /[;,、；，/\\]|\bfeat\.?(?=\s|$)/i;
 
 export function parseArtists(value: string | undefined): string[] {
   if (!value) return [];

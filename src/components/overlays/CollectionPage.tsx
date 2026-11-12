@@ -4,6 +4,7 @@ import type { Track } from '../../lib/types';
 import {
   albumsFromTracks,
   orderAlbumTracks,
+  parseArtists,
   tracksForAlbum,
   tracksForArtist,
 } from '../../lib/artists';
@@ -83,7 +84,7 @@ export function CollectionPage(): React.ReactElement | null {
       tracks: albumTracks,
       entries: orderAlbumTracks(albumTracks),
       cover: albumTracks.find((track) => track.cover)?.cover,
-      artists: [...new Set(albumTracks.flatMap((track) => track.artist.split(/[;,、；，]/).map((name) => name.trim()).filter(Boolean)))],
+      artists: [...new Set(albumTracks.flatMap((track) => parseArtists(track.artist)))],
     };
   }, [tracks, view]);
 
