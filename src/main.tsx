@@ -22,7 +22,8 @@ createRoot(root).render(
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     const workerUrl = new URL('sw.js', document.baseURI);
-    navigator.serviceWorker.register(workerUrl, { scope: './' })
+    const scope = new URL('./', document.baseURI).href;
+    navigator.serviceWorker.register(workerUrl, { scope })
       .then((registration) => {
         void registration.update();
         document.addEventListener('visibilitychange', () => {

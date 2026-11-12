@@ -108,6 +108,21 @@ npm run preview
 
 静态站点可直接部署 `dist/`；Vite 使用相对路径 `base: './'`，因此也支持子目录部署。
 
+## GitHub Pages 部署
+
+仓库已包含 [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)，面向 GitHub Actions + GitHub Pages：
+
+1. 在仓库 **Settings → Pages → Build and deployment** 中把 Source 设为 **GitHub Actions**。
+2. 推送到 `main`，或在 Actions 页面手动运行 **Deploy to GitHub Pages**。
+3. 工作流会安装依赖、构建、运行测试、上传 `dist/` 并部署。
+
+部署地址通常是 `https://<user>.github.io/<repo>/`。项目使用相对 `base: './'`，已验证在仓库子路径 `/Asteria-Player/` 下资源、manifest、Service Worker scope 与离线缓存均正常；无需修改仓库名或 base。
+
+- Node 版本由 `.nvmrc` 固定为 22，工作流使用 Node 22。
+- `dist/.nojekyll` 由工作流生成，避免 GitHub Pages 的 Jekyll 处理。
+- 自定义域名不影响相对路径与 PWA。
+- 若使用其他静态托管，直接把 `dist/` 上传到站点根目录或子目录即可。
+
 ## 使用说明
 
 ### 导入媒体

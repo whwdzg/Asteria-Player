@@ -1,16 +1,19 @@
 /* Asteria Player service worker: network-first navigation, runtime asset cache. */
 const VERSION = 'asteria-v1';
-const CORE = ['./', './index.html', './manifest.webmanifest'];
+// Resolve every cache URL against the worker location so the same build works
+// at a domain root and under a GitHub Pages project subpath.
+const BASE = new URL('./', self.location.href);
+const CORE = ['', 'index.html', 'manifest.webmanifest'].map((path) => new URL(path, BASE).href);
 
 async function precache() {
   const cache = await caches.open(VERSION);
-  const urls = new Set(CORE.map((url) => new URL(url, self.registration.scope).href));
+  const urls = new Set(CORE);
   try {
-    const response = await fetch(new URL('sw-assets.json', self.registration.scope), { cache: 'no-store' });
+    const response = await fetch(new URL('sw-assets.json', BASE), { cache: 'no-store' });
     if (response.ok) {
       const manifest = await response.json();
       for (const asset of manifest.assets || []) {
-        urls.add(new URL(asset, self.registration.scope).href);
+        urls.add(new URL(asset, BASE).href);
       }
     }
   } catch {
@@ -45,7 +48,7 @@ async function networkFirst(request) {
     if (response && response.ok) cache.put(request, response.clone());
     return response;
   } catch (error) {
-    const cached = await cache.match(request) || await cache.match('./index.html');
+    const cached = await cache.match(request) || await cache.match(new URL('index.html', BASE).href);
     if (cached) return cached;
     throw error;
   }
