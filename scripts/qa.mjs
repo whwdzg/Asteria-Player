@@ -9,6 +9,7 @@ const browser = await chromium.launch({
   args: ['--autoplay-policy=no-user-gesture-required'],
 });
 const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: 'dark', locale: 'zh-CN' });
+await context.addInitScript(() => localStorage.setItem('asteria-demo-preference', 'demo'));
 const page = await context.newPage();
 const errors = [];
 page.on('pageerror', (error) => errors.push(error.message));
@@ -115,7 +116,8 @@ await page.waitForTimeout(2500);
 await page.locator('.queue-button').click();
 await page.waitForTimeout(300);
 const rows = await page.locator('.queue-row').count();
-check(rows >= 5, `local track imported (${rows} queue rows)`);
+check(rows >= 1, `local track imported (${rows} queue rows)`);
+check(await page.locator('.queue-title').filter({ hasText: 'Chromatic Fields' }).count() === 0, 'demo items are removed after real import');
 const localRow = page.locator('.queue-row').filter({ hasText: 'Aurora Drift' }).last();
 await localRow.locator('.queue-row-main').click();
 await page.waitForTimeout(1100);
@@ -151,7 +153,11 @@ check(await page.locator('.details-grid').count() === 1, 'track details dialog o
 await page.getByRole('button', { name: '关闭详细信息' }).click();
 await page.keyboard.press('Escape');
 
-// -------- video + subtitles + danmaku
+// -------- video + subtitles + danmaku (reload the demo library after the import test)
+await page.evaluate(() => localStorage.setItem('asteria-demo-preference', 'demo'));
+await page.reload({ waitUntil: 'networkidle' });
+await page.waitForSelector('.np-title', { timeout: 20000 });
+await page.waitForTimeout(500);
 await page.locator('.queue-button').click();
 await page.waitForTimeout(300);
 await page.locator('.queue-row').filter({ hasText: 'Chromatic Fields' }).first().locator('.queue-row-main').click();

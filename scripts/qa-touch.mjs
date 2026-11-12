@@ -14,6 +14,7 @@ const context = await browser.newContext({
   hasTouch: true,
   isMobile: true,
 });
+await context.addInitScript(() => localStorage.setItem('asteria-demo-preference', 'demo'));
 const page = await context.newPage();
 const check = (condition, message) => {
   if (!condition) throw new Error(`TOUCH CHECK FAILED: ${message}`);

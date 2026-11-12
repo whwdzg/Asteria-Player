@@ -386,5 +386,10 @@
   "shortcut.volumeDown": "減小音量",
   "np.music": "音樂",
   "settings.commitTime": "提交時間 {time}",
-  "settings.subtitleLanguage": "字幕語言"
+  "settings.subtitleLanguage": "字幕語言",
+  "welcome.title": "歡迎使用 Asteria Player",
+  "welcome.heading": "先匯入你自己的音樂與影片",
+  "welcome.hint": "可以匯入檔案、資料夾，或在線直連 / B 站連結。匯入真實內容後，示例媒體會自動從播放清單移除。",
+  "welcome.note": "在你選擇載入示例之前，不會下載任何示例媒體。",
+  "welcome.useDemo": "暫不匯入，載入示例內容"
 }

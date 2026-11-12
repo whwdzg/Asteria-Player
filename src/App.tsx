@@ -2,7 +2,7 @@
  * Application shell: library bootstrapping, ambient background, responsive
  * layout and global chrome/gesture coordination.
  */
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowDownload24Regular, ArrowImport24Regular, FolderOpen24Regular, Link24Regular } from '@fluentui/react-icons';
 import './styles/index.css';
 import type { Track } from './lib/types';
@@ -11,6 +11,7 @@ import { TooltipLayer } from './components/common/TooltipLayer';
 import { NowPlaying } from './components/nowplaying/NowPlaying';
 import { VideoStage } from './components/video/VideoStage';
 import { Toasts } from './components/overlays/Toasts';
+import { WelcomeDialog } from './components/overlays/WelcomeDialog';
 
 import { useAppearance } from './hooks/useTheme';
 import { useFullscreen } from './hooks/useFullscreen';
@@ -20,6 +21,7 @@ import { useTouchDevice } from './hooks/useTouchDevice';
 import { useOrientationFullscreen } from './hooks/useOrientationFullscreen';
 import { useI18n } from './i18n/I18nProvider';
 import { loadDemoLibrary } from './lib/demo';
+import { getDemoPreference, setDemoPreference } from './lib/demoPreference';
 import { coverFallback } from './lib/cover';
 import { clamp } from './lib/format';
 import { collectDroppedFiles } from './lib/importer';
@@ -184,7 +186,7 @@ export default function App(): React.ReactElement {
   const { t } = useI18n();
   const appRef = useRef<HTMLDivElement>(null);
   const { fullscreen, toggleFullscreen, exitFullscreen } = useFullscreen(appRef);
-  const { importFiles } = useImporter();
+  const { importFiles, openFiles, openFolder, openUrl } = useImporter();
   const current = useLibraryStore((state) => state.tracks.find((item) => item.id === state.currentId));
   const tracks = useLibraryStore((state) => state.tracks);
   const loaded = useLibraryStore((state) => state.loaded);
@@ -199,13 +201,16 @@ export default function App(): React.ReactElement {
   const playbackError = usePlaybackStore((state) => state.error);
   const setError = usePlaybackStore((state) => state.setError);
   const [bootError, setBootError] = useState(false);
+  const [welcomeOpen, setWelcomeOpen] = useState(false);
   const dragCounter = useRef(0);
 
-  useEffect(() => {
+  const loadDemoContent = useCallback(() => {
     let cancelled = false;
     loadDemoLibrary()
       .then((demoTracks) => {
-        if (cancelled) return;
+        // If the user starts an import while the demo request is in flight,
+        // keep the real content and never merge demo items back in.
+        if (cancelled || getDemoPreference() !== 'demo') return;
         useLibraryStore.getState().setDemoTracks(demoTracks);
         player.initialize();
         player.ensureCurrent();
@@ -219,6 +224,25 @@ export default function App(): React.ReactElement {
       });
     return () => { cancelled = true; };
   }, []);
+
+  useEffect(() => {
+    const preference = getDemoPreference();
+    if (preference === 'demo') {
+      loadDemoContent();
+      return;
+    }
+    // First launch, or a previous import choice: do not download demo media.
+    // Let the user choose real content first; skipping will load the demo.
+    useLibraryStore.getState().setLoaded(true);
+    player.initialize();
+    setWelcomeOpen(true);
+  }, [loadDemoContent]);
+
+  const useDemoContent = useCallback(() => {
+    setDemoPreference('demo');
+    setWelcomeOpen(false);
+    loadDemoContent();
+  }, [loadDemoContent]);
 
   useEffect(() => {
     if (!bootError) return;
@@ -312,6 +336,14 @@ export default function App(): React.ReactElement {
       </main>
 
       <BottomBar onToggleFullscreen={toggleFullscreen} />
+      {welcomeOpen ? (
+        <WelcomeDialog
+          onOpenFiles={() => { setWelcomeOpen(false); openFiles(); }}
+          onOpenFolder={() => { setWelcomeOpen(false); openFolder(); }}
+          onOpenUrl={() => { setWelcomeOpen(false); openUrl(); }}
+          onUseDemo={useDemoContent}
+        />
+      ) : null}
       {collectionView ? (
         <Suspense fallback={null}>
           <LazyCollectionPage />

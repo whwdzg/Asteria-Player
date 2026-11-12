@@ -386,5 +386,10 @@
   "shortcut.volumeDown": "Volume down",
   "np.music": "Music",
   "settings.commitTime": "Commit time {time}",
-  "settings.subtitleLanguage": "Subtitle language"
+  "settings.subtitleLanguage": "Subtitle language",
+  "welcome.title": "Welcome to Asteria Player",
+  "welcome.heading": "Bring your own music and video",
+  "welcome.hint": "Import files, a folder, or a direct/Bilibili link. Your real content replaces the demo library automatically.",
+  "welcome.note": "No sample media is downloaded until you choose to load it.",
+  "welcome.useDemo": "Not now — load demo content"
 }

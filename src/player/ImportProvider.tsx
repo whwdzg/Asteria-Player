@@ -11,6 +11,7 @@ import {
 import { importFiles as readFiles } from '../lib/importer';
 import type { UrlKind } from '../lib/urlImport';
 import type { Track } from '../lib/types';
+import { setDemoPreference } from '../lib/demoPreference';
 import { useLibraryStore } from '../state/library';
 import { useUiStore } from '../state/ui';
 import { player } from '../player/engine';
@@ -47,6 +48,14 @@ export function ImportProvider({ children }: { children: ReactNode }): ReactNode
   const addImportedTrack = useCallback((track: Track): boolean => {
     const accepted = useLibraryStore.getState().addTracks([track]);
     if (!accepted.length) return false;
+    setDemoPreference('import');
+
+    // Real content replaces the sample library. This runs on the first accepted
+    // import, even if the user had previously chosen to load the demo.
+    const state = useLibraryStore.getState();
+    const demoIds = state.tracks.filter((item) => item.source === 'demo').map((item) => item.id);
+    if (demoIds.length) state.removeTracks(demoIds);
+
     player.ensureCurrent();
     if (!useLibraryStore.getState().currentId) {
       const first = accepted[0];
