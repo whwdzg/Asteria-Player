@@ -1,4 +1,6 @@
 .now-playing {
+  position: relative;
+  isolation: isolate;
   display: grid;
   grid-template-columns: minmax(280px, 0.88fr) minmax(0, 1.12fr);
   align-items: center;
@@ -602,4 +604,36 @@
   font-size: calc(17px * var(--lyric-scale, 1));
   font-weight: var(--lyric-weight, 400);
   line-height: 1.6;
+}
+
+/* Rounded-bar spectrum behind the artwork, lyrics and track actions. */
+.audio-visualizer {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(2px, 0.32vw, 5px);
+  padding: 0 3%;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.audio-visualizer-bar {
+  flex: 1 1 0;
+  min-width: 2px;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--track-accent) 82%, transparent),
+    color-mix(in srgb, var(--accent) 28%, transparent)
+  );
+  box-shadow: 0 0 10px color-mix(in srgb, var(--track-accent) 24%, transparent);
+  transform: scaleY(0.025);
+  transform-origin: bottom;
+  will-change: transform;
 }

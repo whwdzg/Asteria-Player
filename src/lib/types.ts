@@ -153,6 +153,11 @@ export interface Settings {
   dynamicBackground: boolean;
   backgroundBpm: boolean;
   backgroundVideo: boolean;
+  /** Rounded-bar spectrum behind the now-playing controls. */
+  audioVisualizer: boolean;
+  /** Visualizer height as a fraction of the 1/10-screen cap. */
+  audioVisualizerHeight: number;
+  audioVisualizerOpacity: number;
   lyricSize: number;
   lyricWeight: number;
   lyricTranslationSize: number;

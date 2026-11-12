@@ -13,6 +13,7 @@ import { CoverArt } from '../common/CoverArt';
 import { highResolutionCover } from '../../lib/cover';
 import { ArtworkLightbox } from './ArtworkLightbox';
 import { LyricsView } from './LyricsView';
+import { AudioVisualizer } from './AudioVisualizer';
 
 export function ArtworkPanel(): React.ReactElement | null {
   const track = useLibraryStore((state) => state.tracks.find((item) => item.id === state.currentId));
@@ -110,6 +111,7 @@ export function ArtworkPanel(): React.ReactElement | null {
 export function NowPlaying(): React.ReactElement {
   return (
     <section className="now-playing" aria-label="Now playing">
+      <AudioVisualizer />
       <ArtworkPanel />
       <LyricsView />
     </section>

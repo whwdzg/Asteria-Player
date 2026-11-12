@@ -7,6 +7,9 @@
     "dynamicBackground": true,
     "backgroundBpm": true,
     "backgroundVideo": false,
+    "audioVisualizer": false,
+    "audioVisualizerHeight": 0.8,
+    "audioVisualizerOpacity": 0.55,
     "lyricSize": 1.1,
     "lyricWeight": 700,
     "lyricTranslationSize": 0.7,
@@ -32,7 +35,13 @@
     "playMode": "all",
     "playbackRate": 1,
     "eqEnabled": false,
-    "eqGains": [0, 0, 0, 0, 0],
+    "eqGains": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
     "autoPlayNext": true,
     "fullscreenClock": false,
     "fullscreenClockHours": true,
@@ -43,18 +52,90 @@
     "videoFit": "contain",
     "danmuApiBase": "",
     "shortcuts": {
-      "playPause": { "code": "Space", "ctrl": false, "alt": false, "shift": false, "meta": false },
-      "previous": { "code": "ArrowLeft", "ctrl": false, "alt": true, "shift": false, "meta": false },
-      "next": { "code": "ArrowRight", "ctrl": false, "alt": true, "shift": false, "meta": false },
-      "rewind10": { "code": "KeyJ", "ctrl": false, "alt": false, "shift": false, "meta": false },
-      "forward10": { "code": "KeyL", "ctrl": false, "alt": false, "shift": false, "meta": false },
-      "cycleMode": { "code": "KeyR", "ctrl": false, "alt": false, "shift": false, "meta": false },
-      "seekBack5": { "code": "ArrowLeft", "ctrl": false, "alt": false, "shift": false, "meta": false },
-      "seekForward5": { "code": "ArrowRight", "ctrl": false, "alt": false, "shift": false, "meta": false },
-      "fullscreen": { "code": "KeyF", "ctrl": false, "alt": false, "shift": false, "meta": false },
-      "mute": { "code": "KeyM", "ctrl": false, "alt": false, "shift": false, "meta": false },
-      "queue": { "code": "KeyQ", "ctrl": false, "alt": false, "shift": false, "meta": false },
-      "settings": { "code": "KeyS", "ctrl": false, "alt": false, "shift": false, "meta": false }
+      "playPause": {
+        "code": "Space",
+        "ctrl": false,
+        "alt": false,
+        "shift": false,
+        "meta": false
+      },
+      "previous": {
+        "code": "ArrowLeft",
+        "ctrl": false,
+        "alt": true,
+        "shift": false,
+        "meta": false
+      },
+      "next": {
+        "code": "ArrowRight",
+        "ctrl": false,
+        "alt": true,
+        "shift": false,
+        "meta": false
+      },
+      "rewind10": {
+        "code": "KeyJ",
+        "ctrl": false,
+        "alt": false,
+        "shift": false,
+        "meta": false
+      },
+      "forward10": {
+        "code": "KeyL",
+        "ctrl": false,
+        "alt": false,
+        "shift": false,
+        "meta": false
+      },
+      "cycleMode": {
+        "code": "KeyR",
+        "ctrl": false,
+        "alt": false,
+        "shift": false,
+        "meta": false
+      },
+      "seekBack5": {
+        "code": "ArrowLeft",
+        "ctrl": false,
+        "alt": false,
+        "shift": false,
+        "meta": false
+      },
+      "seekForward5": {
+        "code": "ArrowRight",
+        "ctrl": false,
+        "alt": false,
+        "shift": false,
+        "meta": false
+      },
+      "fullscreen": {
+        "code": "KeyF",
+        "ctrl": false,
+        "alt": false,
+        "shift": false,
+        "meta": false
+      },
+      "mute": {
+        "code": "KeyM",
+        "ctrl": false,
+        "alt": false,
+        "shift": false,
+        "meta": false
+      },
+      "queue": {
+        "code": "KeyQ",
+        "ctrl": false,
+        "alt": false,
+        "shift": false,
+        "meta": false
+      },
+      "settings": {
+        "code": "KeyS",
+        "ctrl": false,
+        "alt": false,
+        "shift": false,
+        "meta": false
+      }
     },
     "reduceMotion": false,
     "bilibiliProxy": ""

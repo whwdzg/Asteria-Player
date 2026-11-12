@@ -51,7 +51,7 @@ keeps older and newer files interoperable.
 
 | Group | Keys |
 | --- | --- |
-| Appearance | `theme`, `language`, `liquidGlass`, `dynamicBackground`, `backgroundBpm`, `backgroundVideo`, `reduceMotion` |
+| Appearance | `theme`, `language`, `liquidGlass`, `dynamicBackground`, `backgroundBpm`, `backgroundVideo`, `audioVisualizer`, `audioVisualizerHeight` (0.4–1), `audioVisualizerOpacity` (0.1–1), `reduceMotion` |
 | Lyrics | `lyricSize`, `lyricWeight`, `lyricTranslationSize`, `lyricBlur`, `lyricFont`, `showTranslation` |
 | Video | `subtitleLang`, `subtitleBgOpacity`, `subtitleTextOpacity`, `subtitleFont`, `danmakuEnabled`, `danmakuTop`, `danmakuScroll`, `danmakuWeight`, `danmakuSize` (12–48 px), `danmakuArea`, `danmakuOpacity`, `danmakuSpeed`, `danmakuFont`; `fullscreenClock`, `fullscreenClockHours`, `fullscreenClockSeconds`, `fullscreenClockDate`, `mirrorVideo`, `colorVisionAssist`, `videoFit` |
 | Playback | `volume` (0–1.2), `brightness` (0–1), `muted`, `playMode`, `playbackRate` (0.25–4), `eqEnabled`, `eqGains` (five numbers, −12–12), `autoPlayNext` |

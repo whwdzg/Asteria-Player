@@ -14,6 +14,9 @@ describe('settings JSON', () => {
     expect(DEFAULT_SETTINGS.shortcuts.playPause?.code).toBe('Space');
     expect(DEFAULT_SETTINGS.bilibiliProxy).toBe('');
     expect(DEFAULT_SETTINGS.backgroundVideo).toBe(false);
+    expect(DEFAULT_SETTINGS.audioVisualizer).toBe(false);
+    expect(DEFAULT_SETTINGS.audioVisualizerHeight).toBe(0.8);
+    expect(DEFAULT_SETTINGS.audioVisualizerOpacity).toBe(0.55);
     expect(DEFAULT_SETTINGS.lyricSize).toBe(1.1);
     expect(DEFAULT_SETTINGS.lyricWeight).toBe(700);
     expect(DEFAULT_SETTINGS.lyricTranslationSize).toBe(0.7);
@@ -44,10 +47,13 @@ describe('settings JSON', () => {
     expect(wrapped.settings.lyricSize).toBe(0.7);
     expect(wrapped.settings.shortcuts.playPause?.code).toBe('Space');
 
-    const bare = parseSettingsJson(JSON.stringify({ theme: 'dark', language: 'en', danmakuArea: 'half', videoFit: 'cover', autoPlayNext: false }));
+    const bare = parseSettingsJson(JSON.stringify({ theme: 'dark', language: 'en', danmakuArea: 'half', videoFit: 'cover', autoPlayNext: false, audioVisualizer: true, audioVisualizerHeight: 9, audioVisualizerOpacity: 0 }));
     expect(bare.settings.danmakuArea).toBe('half');
     expect(bare.settings.videoFit).toBe('cover');
     expect(bare.settings.autoPlayNext).toBe(false);
+    expect(bare.settings.audioVisualizer).toBe(true);
+    expect(bare.settings.audioVisualizerHeight).toBe(1);
+    expect(bare.settings.audioVisualizerOpacity).toBe(0.1);
     expect(bare.settings.theme).toBe('dark');
     expect(bare.settings.language).toBe('en');
   });

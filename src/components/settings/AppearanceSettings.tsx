@@ -16,6 +16,8 @@ import { useI18n } from '../../i18n/I18nProvider';
 import { useSettingsStore } from '../../state/settings';
 import { useUiStore } from '../../state/ui';
 import { Dropdown } from '../common/Dropdown';
+import { NumberField } from '../common/NumberField';
+import { RangeSlider } from '../common/RangeSlider';
 import { Segmented } from '../common/Segmented';
 import { Switch } from '../common/Switch';
 
@@ -141,6 +143,65 @@ export function AppearanceSettings(): React.ReactElement {
             label={t('settings.backgroundVideo')}
             disabled={!settings.dynamicBackground}
           />
+        </div>
+      </div>
+
+      <div className="setting-row">
+        <div className="setting-label">
+          <span>{t('settings.audioVisualizer')}</span>
+          <small>{t('settings.audioVisualizerHint')}</small>
+        </div>
+        <Switch
+          checked={settings.audioVisualizer}
+          onChange={(value) => set('audioVisualizer', value)}
+          label={t('settings.audioVisualizer')}
+        />
+      </div>
+
+      <div className={`setting-subgroup ${settings.audioVisualizer ? '' : 'is-disabled'}`.trim()}>
+        <div className="setting-row compact">
+          <div className="setting-label"><span>{t('settings.visualizerHeight')}</span></div>
+          <span className="setting-inline-control">
+            <RangeSlider
+              value={settings.audioVisualizerHeight}
+              min={0.4}
+              max={1}
+              step={0.05}
+              onChange={(value) => set('audioVisualizerHeight', value)}
+              ariaLabel={t('settings.visualizerHeight')}
+              ariaValueText={`${Math.round(settings.audioVisualizerHeight * 100)}%`}
+            />
+            <NumberField
+              value={Math.round(settings.audioVisualizerHeight * 100)}
+              min={40}
+              max={100}
+              suffix="%"
+              ariaLabel={t('settings.visualizerHeight')}
+              onChange={(value) => set('audioVisualizerHeight', value / 100)}
+            />
+          </span>
+        </div>
+        <div className="setting-row compact">
+          <div className="setting-label"><span>{t('settings.visualizerOpacity')}</span></div>
+          <span className="setting-inline-control">
+            <RangeSlider
+              value={settings.audioVisualizerOpacity}
+              min={0.1}
+              max={1}
+              step={0.05}
+              onChange={(value) => set('audioVisualizerOpacity', value)}
+              ariaLabel={t('settings.visualizerOpacity')}
+              ariaValueText={`${Math.round(settings.audioVisualizerOpacity * 100)}%`}
+            />
+            <NumberField
+              value={Math.round(settings.audioVisualizerOpacity * 100)}
+              min={10}
+              max={100}
+              suffix="%"
+              ariaLabel={t('settings.visualizerOpacity')}
+              onChange={(value) => set('audioVisualizerOpacity', value / 100)}
+            />
+          </span>
         </div>
       </div>
     </section>

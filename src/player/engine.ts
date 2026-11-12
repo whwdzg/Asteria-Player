@@ -20,6 +20,7 @@ export class PlayerEngine {
   private context: AudioContext | null = null;
   private gain: GainNode | null = null;
   private compressor: DynamicsCompressorNode | null = null;
+  private analyser: AnalyserNode | null = null;
   private filters: BiquadFilterNode[] = [];
   private sources = new WeakSet<HTMLMediaElement>();
   private initialized = false;
@@ -69,6 +70,11 @@ export class PlayerEngine {
 
   get currentElement(): HTMLMediaElement | null {
     return this.active;
+  }
+
+  /** Frequency data source for the audio visualizer; null until playback starts. */
+  get analyserNode(): AnalyserNode | null {
+    return this.analyser;
   }
 
   private bind(element: HTMLMediaElement): void {
@@ -158,6 +164,9 @@ export class PlayerEngine {
         });
         this.gain = this.context.createGain();
         this.compressor = this.context.createDynamicsCompressor();
+        this.analyser = this.context.createAnalyser();
+        this.analyser.fftSize = 512;
+        this.analyser.smoothingTimeConstant = 0.82;
         this.compressor.threshold.value = -3;
         this.compressor.knee.value = 8;
         this.compressor.ratio.value = 12;
@@ -168,7 +177,8 @@ export class PlayerEngine {
         }
         this.filters[this.filters.length - 1].connect(this.gain);
         this.gain.connect(this.compressor);
-        this.compressor.connect(this.context.destination);
+        this.compressor.connect(this.analyser);
+        this.analyser.connect(this.context.destination);
         this.applyVolume();
         this.applyEq();
       } catch {
