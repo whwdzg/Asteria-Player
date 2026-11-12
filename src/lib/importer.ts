@@ -277,6 +277,8 @@ export async function importFiles(files: File[], onProgress?: ProgressCallback):
         duration: tags.duration ?? 0,
         sampleRate: tags.sampleRate,
         bitDepth: tags.bitDepth,
+        discNumber: tags.discNumber,
+        trackNumber: tags.trackNumber,
         bitrate: tags.bitrate ?? (tags.duration ? Math.round((group.media.size * 8) / tags.duration) : undefined),
         format,
         fileName: group.media.name,

@@ -77,6 +77,8 @@ export interface Track {
   fileSize?: number;
   videoWidth?: number;
   videoHeight?: number;
+  discNumber?: number;
+  trackNumber?: number;
   addedAt?: number;
   /** Local File handle. Never persisted. */
   file?: File;
@@ -137,6 +139,8 @@ export interface MediaTags {
   title?: string;
   artist?: string;
   album?: string;
+  discNumber?: number;
+  trackNumber?: number;
   lyrics?: string;
   cover?: string;
   sampleRate?: number;

@@ -14,6 +14,7 @@ import { highResolutionCover } from '../../lib/cover';
 import { ArtworkLightbox } from './ArtworkLightbox';
 import { LyricsView } from './LyricsView';
 import { AudioVisualizer } from './AudioVisualizer';
+import { AlbumLink, ArtistLinks } from '../common/CollectionLinks';
 
 export function ArtworkPanel(): React.ReactElement | null {
   const track = useLibraryStore((state) => state.tracks.find((item) => item.id === state.currentId));
@@ -58,8 +59,8 @@ export function ArtworkPanel(): React.ReactElement | null {
         </div>
         <h1 className="np-title">{track.title}</h1>
         <p className="np-artist">
-          {track.artist || t('common.unknownArtist')}
-          {track.album ? <><span className="np-dot" aria-hidden="true">·</span>{track.album}</> : null}
+          <ArtistLinks artist={track.artist} />
+          {track.album ? <><span className="np-dot" aria-hidden="true">·</span><AlbumLink album={track.album} /></> : null}
         </p>
       </div>
 

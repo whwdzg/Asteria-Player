@@ -89,6 +89,11 @@ export async function readMediaTags(file: File): Promise<MediaTags> {
 }
 
 /** Minimal Ogg Vorbis/Opus header + Vorbis comment reader. */
+const tagNumber = (value: string): number | undefined => {
+  const parsed = Number.parseInt(value.split('/')[0] ?? '', 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+};
+
 function parseOgg(bytes: Uint8Array): MediaTags {
   const tags: MediaTags = {};
   const text = new TextDecoder('utf-8', { fatal: false }).decode(bytes.subarray(0, Math.min(bytes.length, 512 * 1024)));
@@ -109,6 +114,8 @@ function parseOgg(bytes: Uint8Array): MediaTags {
       if (key === 'TITLE') tags.title = payload;
       if (key === 'ARTIST') tags.artist = payload;
       if (key === 'ALBUM') tags.album = payload;
+      if (key === 'TRACKNUMBER') tags.trackNumber = tagNumber(payload);
+      if (key === 'DISCNUMBER') tags.discNumber = tagNumber(payload);
       if (key === 'LYRICS' || key === 'UNSYNCEDLYRICS') tags.lyrics = payload;
     }
   }

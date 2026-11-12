@@ -7,6 +7,11 @@ interface FlacMetadata {
   length: number;
 }
 
+const tagNumber = (value: string): number | undefined => {
+  const parsed = Number.parseInt(value.split('/')[0] ?? '', 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+};
+
 function parseStreamInfo(bytes: Uint8Array, offset: number): Partial<MediaTags> {
   if (offset + 18 > bytes.length) return {};
   const p = offset;
@@ -45,6 +50,8 @@ function parseVorbisComment(bytes: Uint8Array, offset: number, length: number): 
       case 'TITLE': tags.title = value; break;
       case 'ARTIST': tags.artist = value; break;
       case 'ALBUM': tags.album = value; break;
+      case 'TRACKNUMBER': tags.trackNumber = tagNumber(value); break;
+      case 'DISCNUMBER': tags.discNumber = tagNumber(value); break;
       case 'ALBUMARTIST': if (!tags.artist) tags.artist = value; break;
       case 'LYRICS':
       case 'UNSYNCEDLYRICS':

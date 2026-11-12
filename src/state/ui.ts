@@ -3,6 +3,7 @@ import { uid } from '../lib/format';
 
 export type QueueView = 'closed' | 'sidebar' | 'full';
 export type PopoverId = 'volume' | 'brightness' | 'speed' | null;
+export type CollectionView = { kind: 'artist' | 'album'; name: string } | null;
 
 interface Toast {
   id: string;
@@ -15,6 +16,7 @@ interface UiState {
   settingsOpen: boolean;
   popover: PopoverId;
   detailsTrackId: string | null;
+  collectionView: CollectionView;
   playlistDialogOpen: boolean;
   playlistDialogTrackIds: string[];
   fullscreen: boolean;
@@ -28,6 +30,8 @@ interface UiState {
   setSettingsOpen: (open: boolean) => void;
   setPopover: (popover: PopoverId) => void;
   setDetailsTrackId: (id: string | null) => void;
+  openCollection: (kind: 'artist' | 'album', name: string) => void;
+  closeCollection: () => void;
   openPlaylistDialog: (trackIds?: string[]) => void;
   closePlaylistDialog: () => void;
   setFullscreen: (fullscreen: boolean) => void;
@@ -45,6 +49,7 @@ export const useUiStore = create<UiState>()((set) => ({
   settingsOpen: false,
   popover: null,
   detailsTrackId: null,
+  collectionView: null,
   playlistDialogOpen: false,
   playlistDialogTrackIds: [],
   fullscreen: false,
@@ -58,6 +63,14 @@ export const useUiStore = create<UiState>()((set) => ({
   setSettingsOpen: (settingsOpen) => set({ settingsOpen, popover: null, queueView: 'closed' }),
   setPopover: (popover) => set({ popover, settingsOpen: false, queueView: 'closed' }),
   setDetailsTrackId: (detailsTrackId) => set({ detailsTrackId }),
+  openCollection: (kind, name) => set({
+    collectionView: { kind, name },
+    detailsTrackId: null,
+    settingsOpen: false,
+    queueView: 'closed',
+    popover: null,
+  }),
+  closeCollection: () => set({ collectionView: null }),
   openPlaylistDialog: (playlistDialogTrackIds = []) => set({ playlistDialogOpen: true, playlistDialogTrackIds }),
   closePlaylistDialog: () => set({ playlistDialogOpen: false, playlistDialogTrackIds: [] }),
   setFullscreen: (fullscreen) => set({ fullscreen, chromeVisible: true }),
@@ -73,5 +86,5 @@ export const useUiStore = create<UiState>()((set) => ({
     }, tone === 'error' ? 4800 : 3000);
   },
   dismissToast: (id) => set((state) => ({ toasts: state.toasts.filter((toast) => toast.id !== id) })),
-  closeOverlays: () => set({ settingsOpen: false, queueView: 'closed', popover: null }),
+  closeOverlays: () => set({ settingsOpen: false, queueView: 'closed', popover: null, collectionView: null }),
 }));

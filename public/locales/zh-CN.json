@@ -366,5 +366,17 @@
   "urlImport.bilibiliNote": "暂不支持 B 站列表、空间和短链接；请粘贴单个视频、BV 或 AV 链接。",
   "urlImport.noUrls": "请至少输入一个链接。",
   "urlImport.import": "导入链接",
-  "urlImport.importing": "正在导入…"
+  "urlImport.importing": "正在导入…",
+  "collection.page": "作者与专辑",
+  "collection.artist": "作者",
+  "collection.album": "专辑",
+  "collection.artistHint": "当前媒体库中包含的歌曲与参与专辑。",
+  "collection.albums": "参与专辑",
+  "collection.songs": "全部歌曲",
+  "collection.tracklist": "曲目列表",
+  "collection.disc": "第 {disc} 碟",
+  "collection.empty": "当前媒体库中没有匹配的歌曲。",
+  "collection.playFirst": "播放第一首",
+  "collection.songCount": "{count} 首歌曲",
+  "collection.albumCount": "{count} 张专辑"
 }

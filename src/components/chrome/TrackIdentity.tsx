@@ -5,6 +5,7 @@ import { CoverArt } from '../common/CoverArt';
 import { useI18n } from '../../i18n/I18nProvider';
 import { ArtworkLightbox } from '../nowplaying/ArtworkLightbox';
 import { highResolutionCover } from '../../lib/cover';
+import { AlbumLink, ArtistLinks } from '../common/CollectionLinks';
 
 export function TrackIdentity(): React.ReactElement {
   const track = useLibraryStore((state) => state.tracks.find((item) => item.id === state.currentId));
@@ -46,8 +47,12 @@ export function TrackIdentity(): React.ReactElement {
       <div className="track-copy">
         <div className="track-title" title={track.title}>{track.title}</div>
         <div className="track-subtitle">
-          <span>{track.subtitle || track.artist || t('common.unknownArtist')}</span>
-          {track.album ? <><span className="dot" aria-hidden="true">·</span><span>{track.album}</span></> : null}
+          {track.kind === 'audio'
+            ? <ArtistLinks artist={track.artist} />
+            : <span>{track.subtitle || track.artist || t('common.unknownArtist')}</span>}
+          {track.album
+            ? <><span className="dot" aria-hidden="true">·</span><AlbumLink album={track.album} /></>
+            : null}
         </div>
       </div>
       {lightboxOpen ? (

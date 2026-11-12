@@ -13,6 +13,7 @@ import { VideoStage } from './components/video/VideoStage';
 import { Toasts } from './components/overlays/Toasts';
 import { DetailsDialog } from './components/overlays/DetailsDialog';
 import { PlaylistDialog } from './components/overlays/PlaylistDialog';
+import { CollectionPage } from './components/overlays/CollectionPage';
 import { useAppearance } from './hooks/useTheme';
 import { useFullscreen } from './hooks/useFullscreen';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
@@ -307,6 +308,7 @@ export default function App(): React.ReactElement {
       </main>
 
       <BottomBar onToggleFullscreen={toggleFullscreen} />
+      <CollectionPage />
 
       {queueView !== 'closed' ? (
         <Suspense fallback={null}>

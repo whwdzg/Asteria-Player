@@ -1,5 +1,5 @@
 import type { MediaTags } from '../types';
-import { ascii, dataUrl, u32be, u64be } from './bytes';
+import { ascii, dataUrl, u16be, u32be, u64be } from './bytes';
 
 interface Atom {
   type: string;
@@ -93,6 +93,15 @@ export function parseMp4(bytes: Uint8Array): MediaTags | null {
   const ilst = metaChildren.find((atom) => atom.type === 'ilst');
   if (!ilst) return Object.keys(tags).length ? tags : null;
   for (const item of readAtoms(bytes, ilst.dataStart, ilst.end)) {
+    if (item.type === 'trkn' || item.type === 'disk') {
+      const value = readValue(bytes, item);
+      const number = value ? u16be(value.binary, 2) : 0;
+      if (number > 0) {
+        if (item.type === 'trkn') tags.trackNumber = number;
+        else tags.discNumber = number;
+      }
+      continue;
+    }
     const key = TAG_KEYS[item.type];
     if (!key) continue;
     const value = readValue(bytes, item);

@@ -366,5 +366,17 @@
   "urlImport.bilibiliNote": "暫不支援 B 站清單、空間和短連結；請貼上單一影片、BV 或 AV 連結。",
   "urlImport.noUrls": "請至少輸入一個連結。",
   "urlImport.import": "匯入連結",
-  "urlImport.importing": "正在匯入…"
+  "urlImport.importing": "正在匯入…",
+  "collection.page": "作者與專輯",
+  "collection.artist": "作者",
+  "collection.album": "專輯",
+  "collection.artistHint": "目前媒體庫中包含的歌曲與參與專輯。",
+  "collection.albums": "參與專輯",
+  "collection.songs": "全部歌曲",
+  "collection.tracklist": "曲目列表",
+  "collection.disc": "第 {disc} 碟",
+  "collection.empty": "目前媒體庫中沒有符合的歌曲。",
+  "collection.playFirst": "播放第一首",
+  "collection.songCount": "{count} 首歌曲",
+  "collection.albumCount": "{count} 張專輯"
 }

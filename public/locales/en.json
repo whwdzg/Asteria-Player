@@ -366,5 +366,17 @@
   "urlImport.bilibiliNote": "Bilibili list, space and short links are not supported; paste a single video, BV or AV link.",
   "urlImport.noUrls": "Enter at least one link.",
   "urlImport.import": "Import links",
-  "urlImport.importing": "Importing…"
+  "urlImport.importing": "Importing…",
+  "collection.page": "Artist / album",
+  "collection.artist": "Artist",
+  "collection.album": "Album",
+  "collection.artistHint": "All songs and appearances in this library.",
+  "collection.albums": "Albums",
+  "collection.songs": "All songs",
+  "collection.tracklist": "Track list",
+  "collection.disc": "Disc {disc}",
+  "collection.empty": "No matching songs in this library.",
+  "collection.playFirst": "Play first",
+  "collection.songCount": "{count} songs",
+  "collection.albumCount": "{count} albums"
 }

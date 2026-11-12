@@ -1,6 +1,11 @@
 import type { MediaTags } from '../types';
 import { ascii, dataUrl, decodeText, findTerminator, syncSafe, u32be } from './bytes';
 
+const tagNumber = (value: string): number | undefined => {
+  const parsed = Number.parseInt(value.split('/')[0] ?? '', 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+};
+
 function deUnsynchronize(bytes: Uint8Array): Uint8Array {
   const out = new Uint8Array(bytes.length);
   let write = 0;
@@ -94,6 +99,8 @@ export function parseId3(bytes: Uint8Array): { tags: MediaTags; tagSize: number 
         case 'TPE1': tags.artist = readTextFrame(data); break;
         case 'TPE2': if (!tags.artist) tags.artist = readTextFrame(data); break;
         case 'TALB': tags.album = readTextFrame(data); break;
+        case 'TRCK': tags.trackNumber = tagNumber(readTextFrame(data)); break;
+        case 'TPOS': tags.discNumber = tagNumber(readTextFrame(data)); break;
         case 'TLEN': {
           const ms = Number(readTextFrame(data));
           if (Number.isFinite(ms) && ms > 0) tags.duration = ms / 1000;

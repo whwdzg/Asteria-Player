@@ -95,6 +95,7 @@ export function useKeyboardShortcuts({ toggleFullscreen, exitFullscreen, isVideo
 
       if (event.key === 'Escape') {
         if (ui.detailsTrackId || ui.playlistDialogOpen) return;
+        if (ui.collectionView) { ui.closeCollection(); return; }
         if (ui.settingsOpen) { ui.setSettingsOpen(false); return; }
         if (ui.popover) { ui.setPopover(null); return; }
         if (ui.queueView !== 'closed') { ui.setQueueView('closed'); return; }

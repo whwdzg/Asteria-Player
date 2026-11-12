@@ -15,6 +15,7 @@ import { BilibiliMatchPanel } from './BilibiliMatchPanel';
 import { SongMatchPanel } from './SongMatchPanel';
 import { ArtworkLightbox } from '../nowplaying/ArtworkLightbox';
 import { highResolutionCover } from '../../lib/cover';
+import { AlbumLink, ArtistLinks } from '../common/CollectionLinks';
 
 export function DetailsDialog(): React.ReactElement | null {
   const trackId = useUiStore((state) => state.detailsTrackId);
@@ -108,8 +109,10 @@ export function DetailsDialog(): React.ReactElement | null {
         <div className="details-heading">
           <span className="soft-badge">{track.kind === 'video' ? t('np.video') : t('np.eyebrow')}</span>
           <h3>{track.title}</h3>
-          <p>{track.subtitle || track.artist || t('common.unknownArtist')}</p>
-          <p className="details-album">{track.album || t('common.unknownAlbum')}</p>
+          <p>{track.kind === 'audio'
+            ? <ArtistLinks artist={track.artist} />
+            : (track.subtitle || track.artist || t('common.unknownArtist'))}</p>
+          <p className="details-album"><AlbumLink album={track.album} /></p>
         </div>
       </div>
       <dl className="details-grid">
