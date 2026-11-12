@@ -383,5 +383,6 @@
   "settings.settingsJsonSyntaxError": "Syntax error (line {line}, column {column})",
   "settings.fsClockOpacity": "Clock opacity",
   "shortcut.volumeUp": "Volume up",
-  "shortcut.volumeDown": "Volume down"
+  "shortcut.volumeDown": "Volume down",
+  "np.music": "Music"
 }

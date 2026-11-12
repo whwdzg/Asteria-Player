@@ -107,7 +107,7 @@ export function DetailsDialog(): React.ReactElement | null {
           <CoverArt track={track} className="details-cover" alt={t('a11y.cover', { title: track.title })} eager showKind />
         </button>
         <div className="details-heading">
-          <span className="soft-badge">{track.kind === 'video' ? t('np.video') : t('np.eyebrow')}</span>
+          <span className="soft-badge">{track.kind === 'video' ? t('np.video') : t('np.music')}</span>
           <h3>{track.title}</h3>
           <p>{track.kind === 'audio'
             ? <ArtistLinks artist={track.artist} />
