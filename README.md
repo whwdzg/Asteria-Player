@@ -304,7 +304,7 @@ python scripts/generate-demo.py
 ## 验证
 
 ```bash
-npm test        # 46 个解析器 / 设置 / 在线匹配 / B 站单元测试
+npm test        # 48 个解析器 / 设置 / 在线匹配 / B 站单元测试
 npm run qa       # 桌面端到端交互检查（需要本机 Edge 与运行中的 dev server）
 npm run qa:touch # 手机触摸手势、横竖屏与视频自动隐藏检查
 npm run shots    # 输出桌面 / 平板 / 手机 / 视频 / 全屏截图

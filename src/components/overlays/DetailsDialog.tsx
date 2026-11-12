@@ -3,6 +3,7 @@
  * exposes Bilibili danmaku/subtitle matching.
  */
 import { Play24Filled, TextBulletListAdd24Regular } from '@fluentui/react-icons';
+import { useState } from 'react';
 import { formatDuration, formatFileSize, formatBitrate, formatSampleRate } from '../../lib/format';
 import { useLibraryStore } from '../../state/library';
 import { useUiStore } from '../../state/ui';
@@ -12,12 +13,15 @@ import { CoverArt } from '../common/CoverArt';
 import { Modal } from '../common/Modal';
 import { BilibiliMatchPanel } from './BilibiliMatchPanel';
 import { SongMatchPanel } from './SongMatchPanel';
+import { ArtworkLightbox } from '../nowplaying/ArtworkLightbox';
+import { highResolutionCover } from '../../lib/cover';
 
 export function DetailsDialog(): React.ReactElement | null {
   const trackId = useUiStore((state) => state.detailsTrackId);
   const setTrackId = useUiStore((state) => state.setDetailsTrackId);
   const track = useLibraryStore((state) => state.tracks.find((item) => item.id === trackId));
   const { t } = useI18n();
+  const [artworkOpen, setArtworkOpen] = useState(false);
 
   if (!trackId || !track) return null;
 
@@ -87,7 +91,14 @@ export function DetailsDialog(): React.ReactElement | null {
       }
     >
       <div className="details-hero">
-        <CoverArt track={track} className="details-cover" alt={t('a11y.cover', { title: track.title })} eager showKind />
+        <button
+          type="button"
+          className="details-cover-button"
+          aria-label={t('np.viewArtwork')}
+          onClick={() => setArtworkOpen(true)}
+        >
+          <CoverArt track={track} className="details-cover" alt={t('a11y.cover', { title: track.title })} eager showKind />
+        </button>
         <div className="details-heading">
           <span className="soft-badge">{track.kind === 'video' ? t('np.video') : t('np.eyebrow')}</span>
           <h3>{track.title}</h3>
@@ -105,6 +116,13 @@ export function DetailsDialog(): React.ReactElement | null {
       </dl>
       {/* Video properties host Bilibili matching; audio properties host the LDDC-style song matcher. */}
       {track.kind === 'video' ? <BilibiliMatchPanel key={track.id} track={track} /> : <SongMatchPanel key={track.id} track={track} />}
+      {artworkOpen ? (
+        <ArtworkLightbox
+          track={track}
+          source={highResolutionCover(track.cover)}
+          onClose={() => setArtworkOpen(false)}
+        />
+      ) : null}
     </Modal>
   );
 }

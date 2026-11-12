@@ -35,10 +35,11 @@ export function ArtworkLightbox({ track, source, onClose }: ArtworkLightboxProps
         onClose();
       }
     };
-    window.addEventListener('keydown', onKey);
+    // Capture so Escape closes only the lightbox, not a surrounding details modal.
+    window.addEventListener('keydown', onKey, true);
     return () => {
       document.body.style.overflow = previous;
-      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('keydown', onKey, true);
     };
   }, [onClose]);
 
