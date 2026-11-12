@@ -164,11 +164,11 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
         const context = canvas.getContext('2d');
         if (!context) return;
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const cover = canvas.toDataURL('image/jpeg', 0.72);
-        if (cover.length > 64) {
+        canvas.toBlob((blob) => {
+          if (!blob || cancelled) return;
           captured = true;
-          updateTrack(track.id, { cover });
-        }
+          updateTrack(track.id, { cover: URL.createObjectURL(blob) });
+        }, 'image/jpeg', 0.72);
       } catch {
         // Cross-origin media can taint the canvas; keep the fallback artwork.
       }

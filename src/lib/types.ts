@@ -82,8 +82,6 @@ export interface Track {
   discNumber?: number;
   trackNumber?: number;
   addedAt?: number;
-  /** Local File handle. Never persisted. */
-  file?: File;
 }
 
 export interface Playlist {

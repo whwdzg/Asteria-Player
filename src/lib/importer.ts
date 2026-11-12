@@ -12,6 +12,7 @@ import {
 import { languageLabel, subtitleFormatFromName, subtitleLanguageFromName } from './subtitles';
 import { parseDanmaku } from './danmaku';
 import { baseName, uid } from './format';
+import { compactImageDataUrl } from './images';
 
 const AUDIO_EXTENSIONS = new Set(['mp3', 'flac', 'wav', 'm4a', 'aac', 'ogg', 'oga', 'opus', 'weba', 'webm', 'aiff', 'aif', 'wma']);
 const VIDEO_EXTENSIONS = new Set(['mp4', 'm4v', 'webm', 'mkv', 'mov', 'avi', 'ogv']);
@@ -264,7 +265,9 @@ export async function importFiles(
         }
       }
       const coverFile = coverFromSidecars(group.sidecars);
-      const cover = coverFile ? URL.createObjectURL(coverFile) : tags.cover;
+      const cover = coverFile
+        ? URL.createObjectURL(coverFile)
+        : await compactImageDataUrl(tags.cover);
       const guessed = guessTagsFromFileName(group.media.name);
       const videoLabels = kind === 'video' ? deriveVideoLabels(group.media.name, group.path) : {};
       const src = URL.createObjectURL(group.media);
@@ -287,7 +290,6 @@ export async function importFiles(
         format,
         fileName: group.media.name,
         fileSize: group.media.size,
-        file: group.media,
         source: 'local',
         lyrics,
         lyricsEncoding: lyrics ? 'UTF-8' : undefined,
@@ -298,8 +300,8 @@ export async function importFiles(
         danmakuText,
         addedAt: Date.now(),
       };
-      tracks.push(track);
-      onTrack?.(track);
+      if (onTrack) onTrack(track);
+      else tracks.push(track);
     } catch (error) {
       warnings.push(`${group.media.name}: ${error instanceof Error ? error.message : String(error)}`);
     }
