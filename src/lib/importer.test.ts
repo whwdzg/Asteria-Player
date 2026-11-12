@@ -8,6 +8,8 @@ describe('video part naming', () => {
     expect(isPartVideoName('P1 opening')).toBe(true);
     expect(isPartVideoName('Part 3')).toBe(true);
     expect(isPartVideoName('第4P')).toBe(true);
+    expect(isPartVideoName('01 开场')).toBe(true);
+    expect(isPartVideoName('12')).toBe(true);
     expect(isPartVideoName('Episode 1')).toBe(false);
   });
 
@@ -23,6 +25,10 @@ describe('video part naming', () => {
   });
 
   it('leaves ordinary video names alone', () => {
+    expect(deriveVideoLabels('01 开场.mp4', 'My Show/01 开场.mp4')).toEqual({
+      title: 'My Show',
+      subtitle: '01 开场',
+    });
     expect(deriveVideoLabels('concert.mp4', 'My Show/concert.mp4')).toEqual({});
   });
 });

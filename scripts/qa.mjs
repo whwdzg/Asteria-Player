@@ -180,7 +180,9 @@ await page.waitForTimeout(300);
 // -------- mobile layout
 await page.setViewportSize({ width: 390, height: 844 });
 await page.waitForTimeout(500);
-check(await page.locator('.bottom-bar').boundingBox().then((box) => box.height) <= 145, 'mobile bottom bar keeps a compact height');
+check(await page.locator('.bottom-bar').boundingBox().then((box) => box.height) <= 160, 'mobile bottom bar keeps a compact height');
+check(!(await page.locator('.bottom-left').isVisible()), 'mobile bottom bar hides title and identity');
+check(await page.locator('.bottom-right').boundingBox().then((box) => box.height) > 0, 'mobile utilities render in their own row');
 await page.screenshot({ path: 'screenshots/qa-mobile.png' });
 
 check(errors.length === 0, `no runtime errors (${errors.length})`);

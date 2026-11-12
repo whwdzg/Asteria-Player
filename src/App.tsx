@@ -184,6 +184,7 @@ export default function App(): React.ReactElement {
   const loaded = useLibraryStore((state) => state.loaded);
   const queueView = useUiStore((state) => state.queueView);
   const chromeVisible = useUiStore((state) => state.chromeVisible);
+  const videoLocked = useUiStore((state) => state.videoLocked);
   const brightness = useSettingsStore((state) => state.brightness);
   const dynamicBackground = useSettingsStore((state) => state.dynamicBackground);
   const playbackError = usePlaybackStore((state) => state.error);
@@ -231,7 +232,7 @@ export default function App(): React.ReactElement {
   const isTouch = useTouchDevice();
   useAutoHideChrome(fullscreen, Boolean(isVideo), isTouch);
   useOrientationFullscreen(Boolean(isVideo), exitFullscreen);
-  useKeyboardShortcuts({ toggleFullscreen, exitFullscreen });
+  useKeyboardShortcuts({ toggleFullscreen, exitFullscreen, isVideo: Boolean(isVideo) });
 
   useEffect(() => {
     const hasFiles = (event: DragEvent): boolean => Array.from(event.dataTransfer?.types ?? []).includes('Files');
@@ -286,6 +287,7 @@ export default function App(): React.ReactElement {
     queueView !== 'closed' ? 'queue-is-open' : '',
     dynamicBackground ? 'has-dynamic-bg' : 'is-static-bg',
     isTouch ? 'is-touch' : 'is-desktop',
+    videoLocked && isVideo ? 'is-video-locked' : '',
   ].filter(Boolean).join(' ');
 
   return (

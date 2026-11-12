@@ -14,6 +14,8 @@ import {
   fetchBilibiliDanmaku,
   fetchBilibiliPages,
   fetchBilibiliSubtitles,
+  fetchDanmuApiDanmaku,
+  searchDanmuApiEpisodes,
   mergeSubtitles,
   pickBilibiliPage,
   searchBilibiliVideos,
@@ -37,6 +39,7 @@ export function BilibiliMatchPanel({ track }: BilibiliMatchPanelProps): React.Re
   const { t } = useI18n();
   const updateTrack = useLibraryStore((state) => state.updateTrack);
   const proxy = useSettingsStore((state) => state.bilibiliProxy);
+  const danmuApiBase = useSettingsStore((state) => state.danmuApiBase);
   const patch = useSettingsStore((state) => state.patch);
   const pushToast = useUiStore((state) => state.pushToast);
   const [query, setQuery] = useState(track.title);
@@ -53,7 +56,9 @@ export function BilibiliMatchPanel({ track }: BilibiliMatchPanelProps): React.Re
     setSearching(true);
     setError('');
     try {
-      setResults(await searchBilibiliVideos(query, proxy, controller.signal));
+      setResults(danmuApiBase.trim()
+        ? await searchDanmuApiEpisodes(query, danmuApiBase, controller.signal)
+        : await searchBilibiliVideos(query, proxy, controller.signal));
     } catch (reason) {
       if (controller.signal.aborted) return;
       setError(reason instanceof Error ? reason.message : String(reason));
@@ -67,6 +72,16 @@ export function BilibiliMatchPanel({ track }: BilibiliMatchPanelProps): React.Re
     setBusy(key);
     setError('');
     try {
+      if (target === 'subtitle' && !video.bvid) {
+        throw new Error(t('match.subtitleNeedsBilibili'));
+      }
+      if (target === 'danmaku' && video.episodeId) {
+        const danmakuText = await fetchDanmuApiDanmaku(video.episodeId, danmuApiBase);
+        updateTrack(track.id, { danmakuText });
+        patch({ danmakuEnabled: true });
+        pushToast(t('match.danmakuApplied'));
+        return;
+      }
       const { pages } = await fetchBilibiliPages(video.bvid, proxy);
       const page = pickBilibiliPage(pages, track.subtitle);
       if (!page) throw new Error('No playable page found.');
@@ -101,6 +116,16 @@ export function BilibiliMatchPanel({ track }: BilibiliMatchPanelProps): React.Re
       </div>
 
       <label className="bilibili-proxy">
+        <span>{t('match.danmuApiBase')}</span>
+        <input
+          value={danmuApiBase}
+          onChange={(event) => patch({ danmuApiBase: event.target.value })}
+          placeholder="https://danmu-api.example.com/87654321"
+        />
+        <small>{t('match.danmuApiHint')}</small>
+      </label>
+
+      <label className="bilibili-proxy">
         <span>{t('match.bilibiliProxy')}</span>
         <input
           value={proxy}
@@ -128,7 +153,7 @@ export function BilibiliMatchPanel({ track }: BilibiliMatchPanelProps): React.Re
       <div className="online-match-results">
         {results.map((video) => (
           <article className="online-match-card bilibili-card" key={video.bvid}>
-            <a className="bilibili-cover" href={bilibiliVideoUrl(video.bvid)} target="_blank" rel="noreferrer" aria-label={video.title}>
+            <a className="bilibili-cover" href={video.bvid ? bilibiliVideoUrl(video.bvid) : undefined} target={video.bvid ? '_blank' : undefined} rel="noreferrer" aria-label={video.title}>
               {video.cover ? <img src={video.cover} alt="" loading="lazy" referrerPolicy="no-referrer" /> : <span>B</span>}
             </a>
             <div className="online-match-copy">
@@ -137,6 +162,7 @@ export function BilibiliMatchPanel({ track }: BilibiliMatchPanelProps): React.Re
               <small>
                 {video.duration ? formatDuration(video.duration) : '—'}
                 {typeof video.play === 'number' ? ` · ${t('match.views', { count: video.play })}` : ''}
+                {video.source === 'danmu_api' ? ` · ${t('match.sourceDanmuApi')}` : ''}
               </small>
             </div>
             <div className="bilibili-actions">
@@ -152,7 +178,8 @@ export function BilibiliMatchPanel({ track }: BilibiliMatchPanelProps): React.Re
               <button
                 type="button"
                 className="fluent-button"
-                disabled={Boolean(busy)}
+                disabled={Boolean(busy) || !video.bvid}
+                title={!video.bvid ? t('match.subtitleNeedsBilibili') : undefined}
                 onClick={() => void match(video, 'subtitle')}
               >
                 {busy === `${video.bvid}:subtitle` ? <ArrowSync24Regular className="spin-slow" /> : <ClosedCaption24Regular />}

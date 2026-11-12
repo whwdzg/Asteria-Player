@@ -362,18 +362,11 @@
 .lyrics-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 16px;
   flex: none;
   padding: 0 10px 8px;
   border-bottom: 0;
-}
-
-.lyrics-heading {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
 }
 
 .lyrics-translate-toggle {

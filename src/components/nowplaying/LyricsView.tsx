@@ -198,9 +198,6 @@ export function LyricsView(): React.ReactElement {
       } as React.CSSProperties}
     >
       <header className="lyrics-header">
-        <div className="lyrics-heading">
-          <span className="section-eyebrow">{t('np.lyrics')}</span>
-        </div>
         <button
           type="button"
           className={`lyrics-translate-toggle ${settings.showTranslation ? 'is-on' : ''}`.trim()}

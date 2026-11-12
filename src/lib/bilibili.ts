@@ -18,6 +18,9 @@ import { uid } from './format';
  */
 export interface BilibiliVideo {
   bvid: string;
+  /** danmu_api episode id when the open-source provider is used. */
+  episodeId?: number;
+  source?: 'bilibili' | 'danmu_api';
   title: string;
   author: string;
   cover?: string;
@@ -271,6 +274,86 @@ export function mergeSubtitles(existing: SubtitleSource[] | undefined, incoming:
   const byLang = new Map((existing ?? []).map((subtitle) => [subtitle.lang, subtitle]));
   for (const subtitle of incoming) byLang.set(subtitle.lang, subtitle);
   return [...byLang.values()];
+}
+
+/**
+ * Open-source danmu_api adapter (AGPL project by huangxd-):
+ * https://github.com/huangxd-/danmu_api
+ * It aggregates Bilibili and other sources behind a Dandanplay-compatible API
+ * and avoids direct Bilibili CORS/risk-control issues when self-hosted.
+ */
+function danmuApiEndpoint(base: string, path: string): string {
+  const root = base.trim().replace(/\/+$/, '');
+  return `${/\/api\/v2$/.test(root) ? root : `${root}/api/v2`}${path}`;
+}
+
+interface DanmuApiEpisode {
+  episodeId?: number;
+  id?: number;
+  episodeTitle?: string;
+  title?: string;
+  episodeNumber?: number;
+}
+
+interface DanmuApiAnime {
+  animeId?: number;
+  animeTitle?: string;
+  typeDescription?: string;
+  imageUrl?: string;
+  episodes?: DanmuApiEpisode[];
+}
+
+async function fetchDanmuApiJson<T>(url: string, signal?: AbortSignal): Promise<T> {
+  const timeout = AbortSignal.timeout(15_000);
+  const response = await fetch(url, {
+    signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
+    headers: { Accept: 'application/json' },
+  });
+  if (!response.ok) throw new Error(`danmu_api HTTP ${response.status}`);
+  return (await response.json()) as T;
+}
+
+/** Search the open-source danmu_api server and flatten its episode results. */
+export async function searchDanmuApiEpisodes(
+  query: string,
+  base: string,
+  signal?: AbortSignal,
+): Promise<BilibiliVideo[]> {
+  const payload = await fetchDanmuApiJson<{ animes?: DanmuApiAnime[]; episodes?: DanmuApiEpisode[] }>(
+    danmuApiEndpoint(base, `/search/episodes?anime=${encodeURIComponent(query.trim())}`),
+    signal,
+  );
+  const results: BilibiliVideo[] = [];
+  const groups: DanmuApiAnime[] = payload.animes ?? (
+    payload.episodes ? [{ animeTitle: 'danmu_api', episodes: payload.episodes }] : []
+  );
+  for (const anime of groups) {
+    for (const episode of anime.episodes ?? []) {
+      const episodeId = episode.episodeId ?? episode.id;
+      if (!episodeId) continue;
+      const episodeTitle = episode.episodeTitle ?? episode.title ?? (episode.episodeNumber ? `EP${episode.episodeNumber}` : '');
+      results.push({
+        bvid: '',
+        episodeId,
+        source: 'danmu_api',
+        title: [anime.animeTitle, episodeTitle].filter(Boolean).join(' · '),
+        author: anime.typeDescription ?? 'danmu_api',
+        cover: anime.imageUrl,
+      });
+    }
+  }
+  return results;
+}
+
+/** Fetch Bilibili XML via the open-source danmu_api comment endpoint. */
+export async function fetchDanmuApiDanmaku(episodeId: number, base: string): Promise<string> {
+  const timeout = AbortSignal.timeout(15_000);
+  const response = await fetch(danmuApiEndpoint(base, `/comment/${episodeId}?format=xml`), { signal: timeout });
+  if (!response.ok) throw new Error(`danmu_api HTTP ${response.status}`);
+  const xml = await response.text();
+  const comments = parseDanmaku(xml);
+  if (!comments.length) throw new Error('No danmaku found for this episode.');
+  return JSON.stringify(comments);
 }
 
 export function bilibiliSearchUrl(title: string): string {

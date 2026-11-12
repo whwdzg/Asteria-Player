@@ -11,6 +11,7 @@ export type GestureHud =
   | { kind: 'volume'; value: number }
   | { kind: 'brightness'; value: number }
   | { kind: 'speed'; value: number }
+  | { kind: 'danmaku'; enabled: boolean }
   | { kind: 'play' | 'pause' }
   | null;
 
@@ -52,11 +53,16 @@ export function useVideoGestures({ track, isTouch }: GestureOptions): {
   const hudTimer = useRef(0);
   const lastSeek = useRef(0);
   const pointerId = useRef<number | null>(null);
+  const activePointers = useRef(new Map<number, { startX: number; startY: number }>());
+  const multiTap = useRef<{ start: number; moved: boolean } | null>(null);
+  const lastMultiTap = useRef(0);
 
   useEffect(() => () => {
     window.clearTimeout(longPressTimer.current);
     window.clearTimeout(singleTapTimer.current);
     window.clearTimeout(hudTimer.current);
+    activePointers.current.clear();
+    multiTap.current = null;
     const video = player.videoElement;
     if (video) video.playbackRate = useSettingsStore.getState().playbackRate;
   }, []);
@@ -82,6 +88,15 @@ export function useVideoGestures({ track, isTouch }: GestureOptions): {
     if (!isTouch || (event.pointerType !== 'touch' && event.pointerType !== 'pen')) return;
     const target = event.target as HTMLElement;
     if (target.closest('button, a, .video-top-tools, .video-meta-card')) return;
+    activePointers.current.set(event.pointerId, { startX: event.clientX, startY: event.clientY });
+    if (activePointers.current.size === 2) {
+      window.clearTimeout(longPressTimer.current);
+      state.current = null;
+      pointerId.current = null;
+      multiTap.current = { start: performance.now(), moved: false };
+      return;
+    }
+    if (activePointers.current.size > 2) return;
     if (pointerId.current !== null) return;
     pointerId.current = event.pointerId;
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -109,6 +124,13 @@ export function useVideoGestures({ track, isTouch }: GestureOptions): {
   };
 
   const onPointerMove = (event: PointerEvent<HTMLDivElement>): void => {
+    const pointer = activePointers.current.get(event.pointerId);
+    if (pointer && activePointers.current.size >= 2) {
+      if (Math.hypot(event.clientX - pointer.startX, event.clientY - pointer.startY) > 10 && multiTap.current) {
+        multiTap.current.moved = true;
+      }
+      return;
+    }
     const current = state.current;
     if (!current || pointerId.current !== event.pointerId) return;
     const dx = event.clientX - current.startX;
@@ -158,6 +180,24 @@ export function useVideoGestures({ track, isTouch }: GestureOptions): {
   };
 
   const finish = (event: PointerEvent<HTMLDivElement>): void => {
+    activePointers.current.delete(event.pointerId);
+    if (multiTap.current) {
+      if (activePointers.current.size === 0) {
+        const multi = multiTap.current;
+        if (!multi.moved && performance.now() - multi.start < 360) {
+          if (lastMultiTap.current && performance.now() - lastMultiTap.current < 480) {
+            const enabled = !useSettingsStore.getState().danmakuEnabled;
+            useSettingsStore.getState().patch({ danmakuEnabled: enabled });
+            flashHud({ kind: 'danmaku', enabled }, 900);
+            lastMultiTap.current = 0;
+          } else {
+            lastMultiTap.current = performance.now();
+          }
+        }
+        multiTap.current = null;
+      }
+      return;
+    }
     const current = state.current;
     if (!current || pointerId.current !== event.pointerId) return;
     window.clearTimeout(longPressTimer.current);
@@ -194,8 +234,10 @@ export function useVideoGestures({ track, isTouch }: GestureOptions): {
       onPointerCancel: (event) => {
         window.clearTimeout(longPressTimer.current);
         restoreRate();
+        activePointers.current.delete(event.pointerId);
         pointerId.current = null;
         state.current = null;
+        multiTap.current = null;
         setHud(null);
         void event;
       },

@@ -451,3 +451,92 @@
 .is-fullscreen .bottom-bar {
   z-index: 45;
 }
+
+/* ------------------------------------------------------------ lock + clock + video transforms */
+.is-video-locked .bottom-bar,
+.is-video-locked .video-center-control,
+.is-video-locked .video-meta-card {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(18px);
+}
+
+.is-video-locked .video-top-tools {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: none !important;
+}
+
+.is-video-locked .video-identity,
+.is-video-locked .video-quick-tools .icon-button:not(.video-lock-button) {
+  display: none !important;
+}
+
+.is-video-locked .video-quick-tools {
+  margin-left: auto;
+}
+
+.video-lock-button {
+  opacity: 0.55;
+}
+
+.video-lock-button:hover,
+.video-lock-button.is-revealed,
+.is-video-locked .video-lock-button.is-revealed {
+  opacity: 1;
+}
+
+.is-video-locked .video-lock-button {
+  opacity: 0.35;
+}
+
+.is-video-locked .video-lock-button:hover {
+  opacity: 1;
+}
+
+.video-frame[data-mirror="true"] .player-video {
+  transform: scaleX(-1);
+}
+
+.video-frame.has-color-vision .player-video {
+  filter: brightness(var(--media-brightness)) saturate(1.35) contrast(1.08);
+}
+
+.is-video-fullscreen .video-frame[data-fit="cover"] .player-video {
+  object-fit: cover;
+}
+
+.is-video-fullscreen .video-frame[data-fit="fill"] .player-video {
+  object-fit: fill;
+}
+
+.fullscreen-clock {
+  position: absolute;
+  z-index: 6;
+  top: 74px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9px;
+  background: rgba(6, 10, 16, 0.32);
+  color: rgba(255, 255, 255, 0.72);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+}
+
+.fullscreen-clock-time {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.fullscreen-clock-date {
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 9px;
+}

@@ -126,7 +126,7 @@ export function ProgressBar(): React.ReactElement {
         {hoverTime !== null && !disabled ? (
           <div
             className={`progress-tooltip ${dragging ? 'is-dragging' : ''} ${isVideo ? 'has-preview' : ''}`.trim()}
-            style={{ left: `${displayRatio * 100}%` }}
+            style={{ left: `clamp(87px, ${displayRatio * 100}%, calc(100% - 87px))` }}
             aria-hidden="true"
           >
             {isVideo && track ? (

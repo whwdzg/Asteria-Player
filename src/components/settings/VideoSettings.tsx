@@ -188,6 +188,21 @@ export function VideoSettings(): React.ReactElement {
           </span>
         </div>
         <div className="setting-row compact">
+          <div className="setting-label"><span>{t('settings.danmakuArea')}</span></div>
+          <Dropdown
+            value={settings.danmakuArea}
+            onChange={(value) => set('danmakuArea', value as Settings['danmakuArea'])}
+            options={[
+              { value: 'quarter', label: t('settings.areaQuarter') },
+              { value: 'half', label: t('settings.areaHalf') },
+              { value: 'threeQuarter', label: t('settings.areaThreeQuarter') },
+              { value: 'full', label: t('settings.areaFull') },
+            ]}
+            ariaLabel={t('settings.danmakuArea')}
+            menuLabel={t('settings.danmakuArea')}
+          />
+        </div>
+        <div className="setting-row compact">
           <div className="setting-label"><span>{t('settings.danmakuOpacity')}</span></div>
           <span className="setting-inline-control">
             <RangeSlider
@@ -243,6 +258,47 @@ export function VideoSettings(): React.ReactElement {
             options={fontOptions(t)}
             ariaLabel={t('settings.danmakuFont')}
             menuLabel={t('settings.danmakuFont')}
+          />
+        </div>
+      </div>
+
+      <div className="setting-row">
+        <div className="setting-label">
+          <span>{t('settings.fullscreenClock')}</span>
+          <small>{t('settings.fullscreenClockHint')}</small>
+        </div>
+        <Switch
+          checked={settings.fullscreenClock}
+          onChange={(value) => set('fullscreenClock', value)}
+          label={t('settings.fullscreenClock')}
+        />
+      </div>
+      <div className={`setting-subgroup ${settings.fullscreenClock ? '' : 'is-disabled'}`.trim()}>
+        <div className="setting-row compact">
+          <div className="setting-label"><span>{t('settings.fsClockHours')}</span></div>
+          <Switch
+            checked={settings.fullscreenClockHours}
+            onChange={(value) => set('fullscreenClockHours', value)}
+            label={t('settings.fsClockHours')}
+            disabled={!settings.fullscreenClock}
+          />
+        </div>
+        <div className="setting-row compact">
+          <div className="setting-label"><span>{t('settings.fsClockSeconds')}</span></div>
+          <Switch
+            checked={settings.fullscreenClockSeconds}
+            onChange={(value) => set('fullscreenClockSeconds', value)}
+            label={t('settings.fsClockSeconds')}
+            disabled={!settings.fullscreenClock}
+          />
+        </div>
+        <div className="setting-row compact">
+          <div className="setting-label"><span>{t('settings.fsClockDate')}</span></div>
+          <Switch
+            checked={settings.fullscreenClockDate}
+            onChange={(value) => set('fullscreenClockDate', value)}
+            label={t('settings.fsClockDate')}
+            disabled={!settings.fullscreenClock}
           />
         </div>
       </div>

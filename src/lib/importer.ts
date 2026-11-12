@@ -111,7 +111,10 @@ function parentFolder(path: string): string {
 
 /** P1, P2, Part 3, 第4P and similar multi-part video names. */
 export function isPartVideoName(stem: string): boolean {
-  return /^p\s*\d+(?:[.\-_\s].*)?$/i.test(stem) || /^part\s*\d+/i.test(stem) || /^第?\d+p$/i.test(stem);
+  return /^p\s*\d+(?:[.\-_\s].*)?$/i.test(stem)
+    || /^part\s*\d+/i.test(stem)
+    || /^第?\d+p$/i.test(stem)
+    || /^\d+/.test(stem);
 }
 
 /**
@@ -281,6 +284,7 @@ export async function importFiles(files: File[], onProgress?: ProgressCallback):
         file: group.media,
         source: 'local',
         lyrics,
+        lyricsEncoding: lyrics ? 'UTF-8' : undefined,
         lyricsFormat: mainLyricFile ? (extensionOf(mainLyricFile.name) === 'spl' ? 'spl' : 'lrc') : undefined,
         embeddedLyrics: tags.lyrics,
         translation,

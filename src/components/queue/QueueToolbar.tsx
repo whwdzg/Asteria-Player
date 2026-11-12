@@ -18,6 +18,8 @@ import { useI18n } from '../../i18n/I18nProvider';
 import { useImporter } from '../../player/ImportProvider';
 import { IconButton } from '../common/IconButton';
 import { Menu, type MenuAnchor } from '../common/Menu';
+import { Switch } from '../common/Switch';
+import { useSettingsStore } from '../../state/settings';
 
 interface QueueToolbarProps {
   variant: 'sidebar' | 'full';
@@ -68,6 +70,8 @@ export function QueueToolbar({
 }: QueueToolbarProps): React.ReactElement {
   const { t } = useI18n();
   const { openFiles, openFolder } = useImporter();
+  const autoPlayNext = useSettingsStore((state) => state.autoPlayNext);
+  const patchSettings = useSettingsStore((state) => state.patch);
   const searchRef = useRef<HTMLInputElement>(null);
   const [sequenceAnchor, setSequenceAnchor] = useState<MenuAnchor | null>(null);
   const [importAnchor, setImportAnchor] = useState<MenuAnchor | null>(null);
@@ -161,6 +165,14 @@ export function QueueToolbar({
             <span className="queue-eyebrow">{t('queue.title')}</span>
             <div className="queue-heading-row">
               <span className="queue-count">{t('queue.count', { count })}</span>
+              <label className="queue-autoplay" title={t('queue.autoplayHint')}>
+                <Switch
+                  checked={autoPlayNext}
+                  onChange={(value) => patchSettings({ autoPlayNext: value })}
+                  label={t('queue.autoplay')}
+                />
+                <span>{t('queue.autoplay')}</span>
+              </label>
               <button
                 type="button"
                 className="sequence-button"

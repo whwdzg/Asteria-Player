@@ -8,6 +8,8 @@ import {
   FullScreenMaximize24Regular,
   FullScreenMinimize24Regular,
   Info24Regular,
+  LockClosed24Regular,
+  LockOpen24Regular,
   Pause24Filled,
   Play24Filled,
   Speaker224Regular,
@@ -30,6 +32,7 @@ import { useVideoGestures } from '../../hooks/useVideoGestures';
 import { IconButton } from '../common/IconButton';
 import { Menu, type MenuAnchor } from '../common/Menu';
 import { DanmakuLayer } from './DanmakuLayer';
+import { FullscreenClock } from './FullscreenClock';
 import { SubtitleOverlay } from './SubtitleOverlay';
 
 function hasDanmaku(track: Track): boolean {
@@ -44,6 +47,11 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
   const patch = useSettingsStore((state) => state.patch);
   const danmakuEnabled = useSettingsStore((state) => state.danmakuEnabled);
   const fullscreen = useUiStore((state) => state.fullscreen);
+  const locked = useUiStore((state) => state.videoLocked);
+  const setVideoLocked = useUiStore((state) => state.setVideoLocked);
+  const mirror = useSettingsStore((state) => state.mirrorVideo);
+  const colorVision = useSettingsStore((state) => state.colorVisionAssist);
+  const videoFit = useSettingsStore((state) => state.videoFit);
   const setDetailsTrackId = useUiStore((state) => state.setDetailsTrackId);
   const { t } = useI18n();
   const hostRef = useRef<HTMLDivElement>(null);
@@ -51,7 +59,11 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
   const isTouch = useTouchDevice();
   const fullscreenHint = useShortcutHint('fullscreen');
   const [toolsHidden, setToolsHidden] = useState(false);
+  const [lockRevealed, setLockRevealed] = useState(false);
+  const [tempSpeed, setTempSpeed] = useState(false);
   const toolsTimer = useRef(0);
+  const clickTimer = useRef(0);
+  const lockTimer = useRef(0);
 
   const showTools = useCallback((): void => {
     window.clearTimeout(toolsTimer.current);
@@ -64,6 +76,39 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
   const holdTools = useCallback((): void => {
     window.clearTimeout(toolsTimer.current);
     setToolsHidden(false);
+  }, []);
+
+  const revealLock = useCallback((): void => {
+    setLockRevealed(true);
+    window.clearTimeout(lockTimer.current);
+    lockTimer.current = window.setTimeout(() => setLockRevealed(false), 3000);
+  }, []);
+
+  useEffect(() => {
+    const onReveal = (): void => revealLock();
+    window.addEventListener('asteria:lock-reveal', onReveal);
+    return () => window.removeEventListener('asteria:lock-reveal', onReveal);
+  }, [revealLock]);
+
+  useEffect(() => {
+    if (locked) revealLock();
+    else setLockRevealed(false);
+    return () => window.clearTimeout(lockTimer.current);
+  }, [locked, revealLock]);
+
+  useEffect(() => {
+    setVideoLocked(false);
+    return () => setVideoLocked(false);
+  }, [setVideoLocked, track?.id]);
+
+  useEffect(() => () => window.clearTimeout(clickTimer.current), []);
+
+  useEffect(() => {
+    const onTempSpeed = (event: Event): void => {
+      setTempSpeed(Boolean((event as CustomEvent<{ active?: boolean }>).detail?.active));
+    };
+    window.addEventListener('asteria:temp-speed', onTempSpeed);
+    return () => window.removeEventListener('asteria:temp-speed', onTempSpeed);
   }, []);
 
   useEffect(() => {
@@ -126,21 +171,35 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
   return (
     <section className="video-view" aria-label={track.title}>
       <div
-        className={`video-frame ${toolsHidden && !fullscreen && !isTouch ? 'tools-hidden' : ''}`.trim()}
+        className={`video-frame ${toolsHidden && !fullscreen && !isTouch ? 'tools-hidden' : ''} ${colorVision ? 'has-color-vision' : ''}`.trim()}
+        data-fit={videoFit}
+        data-mirror={mirror ? 'true' : 'false'}
         style={{ '--video-cover': track.cover ? `url("${track.cover}")` : 'none' } as React.CSSProperties}
         onClick={(event) => {
+          if (locked) { revealLock(); return; }
           if (isTouch) return;
           if ((event.target as HTMLElement).closest('button, .video-top-tools')) return;
-          player.toggle();
+          window.clearTimeout(clickTimer.current);
+          clickTimer.current = window.setTimeout(() => player.toggle(), 250);
         }}
-        onContextMenu={(event) => { if (isTouch) event.preventDefault(); }}
-        {...gestures.handlers}
+        onDoubleClick={(event) => {
+          if (locked) { revealLock(); return; }
+          if (isTouch) return;
+          if ((event.target as HTMLElement).closest('button, .video-top-tools')) return;
+          window.clearTimeout(clickTimer.current);
+          onToggleFullscreen();
+        }}
+        onContextMenu={(event) => { if (isTouch || locked) event.preventDefault(); }}
+        onPointerDown={locked ? () => revealLock() : gestures.handlers.onPointerDown}
         onPointerMove={(event) => {
+          if (locked) { revealLock(); return; }
           gestures.handlers.onPointerMove(event);
           showTools();
         }}
+        onPointerUp={locked ? () => revealLock() : gestures.handlers.onPointerUp}
+        onPointerCancel={locked ? () => revealLock() : gestures.handlers.onPointerCancel}
         onPointerLeave={() => {
-          if (!fullscreen && !isTouch && isPlaying && !subtitleMenu) setToolsHidden(true);
+          if (!locked && !fullscreen && !isTouch && isPlaying && !subtitleMenu) setToolsHidden(true);
         }}
       >
         <div className="video-media" ref={hostRef} />
@@ -194,6 +253,21 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
             ) : null}
             {/* Kept beside the subtitle/danmaku controls so it is reachable in fullscreen. */}
             <IconButton
+              className={`video-lock-button ${lockRevealed ? 'is-revealed' : ''}`.trim()}
+              label={locked ? t('video.unlock') : t('video.lock')}
+              tooltip={locked ? t('video.unlock') : t('video.lock')}
+              active={locked}
+              onClick={(event) => {
+                event.stopPropagation();
+                const next = !locked;
+                setVideoLocked(next);
+                setLockRevealed(true);
+                if (!next) setToolsHidden(false);
+              }}
+            >
+              {locked ? <LockOpen24Regular /> : <LockClosed24Regular />}
+            </IconButton>
+            <IconButton
               className="video-properties-button"
               label={t('details.videoTitle')}
               tooltip={t('details.videoTitle')}
@@ -228,6 +302,7 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
 
         <DanmakuLayer track={track} />
         <SubtitleOverlay track={track} />
+        {fullscreen ? <FullscreenClock /> : null}
 
         {hud ? (
           <div className={`gesture-hud is-${hud.kind}`} aria-live="polite">
@@ -244,6 +319,8 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
                   <i style={{ width: `${Math.min(100, (hud.value / (hud.kind === 'volume' ? 1.2 : 1)) * 100)}%` }} />
                 </span>
               </>
+            ) : hud.kind === 'danmaku' ? (
+              <><Chat24Regular /><strong>{t('np.danmaku')}</strong><span>{hud.enabled ? t('common.on') : t('common.off')}</span></>
             ) : hud.kind === 'speed' ? (
               <><strong>{hud.value}×</strong><span>{t('player.playbackRate')}</span></>
             ) : hud.kind === 'play' ? (
@@ -251,6 +328,10 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
             ) : (
               <><Pause24Filled /><span>{t('player.pause')}</span></>
             )}
+          </div>
+        ) : tempSpeed ? (
+          <div className="gesture-hud is-speed" aria-live="polite">
+            <strong>2×</strong><span>{t('player.tempSpeed')}</span>
           </div>
         ) : null}
       </div>

@@ -13,6 +13,8 @@ export const SETTINGS_JSON_VERSION = 1;
 const THEMES = new Set<Settings['theme']>(['dark', 'light', 'system']);
 const PLAY_MODES = new Set<PlayMode>(['one', 'all', 'none', 'shuffle']);
 const FONTS = new Set<FontChoice>(['display', 'sans', 'serif', 'rounded', 'mono']);
+const DANMAKU_AREAS = new Set<Settings['danmakuArea']>(['quarter', 'half', 'threeQuarter', 'full']);
+const VIDEO_FITS = new Set<Settings['videoFit']>(['contain', 'cover', 'fill']);
 
 type RawSettings = Record<string, unknown>;
 
@@ -51,6 +53,7 @@ const FALLBACK_SETTINGS: Settings = {
   danmakuScroll: true,
   danmakuWeight: 600,
   danmakuSize: 25,
+  danmakuArea: 'full',
   danmakuOpacity: 1,
   danmakuSpeed: 1,
   danmakuFont: 'sans',
@@ -61,6 +64,15 @@ const FALLBACK_SETTINGS: Settings = {
   playbackRate: 1,
   eqEnabled: false,
   eqGains: [0, 0, 0, 0, 0],
+  autoPlayNext: true,
+  fullscreenClock: false,
+  fullscreenClockHours: true,
+  fullscreenClockSeconds: false,
+  fullscreenClockDate: false,
+  mirrorVideo: false,
+  colorVisionAssist: false,
+  videoFit: 'contain',
+  danmuApiBase: '',
   shortcuts: normalizeShortcuts(undefined),
   lastPosition: 0,
   reduceMotion: false,
@@ -103,6 +115,12 @@ export function normalizeSettings(input: unknown, base: Settings = DEFAULT_SETTI
   const font = (value: unknown, fallback: FontChoice): FontChoice => (
     typeof value === 'string' && FONTS.has(value as FontChoice) ? value as FontChoice : fallback
   );
+  const danmakuArea = typeof raw.danmakuArea === 'string' && DANMAKU_AREAS.has(raw.danmakuArea as Settings['danmakuArea'])
+    ? raw.danmakuArea as Settings['danmakuArea']
+    : base.danmakuArea;
+  const videoFit = typeof raw.videoFit === 'string' && VIDEO_FITS.has(raw.videoFit as Settings['videoFit'])
+    ? raw.videoFit as Settings['videoFit']
+    : base.videoFit;
   const gains = Array.isArray(raw.eqGains) && raw.eqGains.length === 5
     ? raw.eqGains.map((gain) => clamp(Number(gain) || 0, -12, 12))
     : [...base.eqGains];
@@ -129,6 +147,7 @@ export function normalizeSettings(input: unknown, base: Settings = DEFAULT_SETTI
     danmakuScroll: booleanValue(raw.danmakuScroll, base.danmakuScroll),
     danmakuWeight: numberValue(raw.danmakuWeight, base.danmakuWeight, 300, 800),
     danmakuSize: numberValue(raw.danmakuSize, base.danmakuSize, 12, 48),
+    danmakuArea,
     danmakuOpacity: numberValue(raw.danmakuOpacity, base.danmakuOpacity, 0.2, 1),
     danmakuSpeed: numberValue(raw.danmakuSpeed, base.danmakuSpeed, 0.5, 2.5),
     danmakuFont: font(raw.danmakuFont, base.danmakuFont),
@@ -139,6 +158,15 @@ export function normalizeSettings(input: unknown, base: Settings = DEFAULT_SETTI
     playbackRate: numberValue(raw.playbackRate, base.playbackRate, 0.25, 4),
     eqEnabled: booleanValue(raw.eqEnabled, base.eqEnabled),
     eqGains: gains,
+    autoPlayNext: booleanValue(raw.autoPlayNext, base.autoPlayNext),
+    fullscreenClock: booleanValue(raw.fullscreenClock, base.fullscreenClock),
+    fullscreenClockHours: booleanValue(raw.fullscreenClockHours, base.fullscreenClockHours),
+    fullscreenClockSeconds: booleanValue(raw.fullscreenClockSeconds, base.fullscreenClockSeconds),
+    fullscreenClockDate: booleanValue(raw.fullscreenClockDate, base.fullscreenClockDate),
+    mirrorVideo: booleanValue(raw.mirrorVideo, base.mirrorVideo),
+    colorVisionAssist: booleanValue(raw.colorVisionAssist, base.colorVisionAssist),
+    videoFit,
+    danmuApiBase: stringValue(raw.danmuApiBase, base.danmuApiBase),
     shortcuts: raw.shortcuts === undefined ? { ...base.shortcuts } : normalizeShortcuts(raw.shortcuts),
     lastTrackId: typeof raw.lastTrackId === 'string' ? raw.lastTrackId : base.lastTrackId,
     lastPosition: numberValue(raw.lastPosition, base.lastPosition ?? 0, 0, Number.MAX_SAFE_INTEGER),
@@ -180,6 +208,7 @@ export function settingsDocument(settings: Settings): SettingsJsonDocument {
       danmakuScroll: settings.danmakuScroll,
       danmakuWeight: settings.danmakuWeight,
       danmakuSize: settings.danmakuSize,
+      danmakuArea: settings.danmakuArea,
       danmakuOpacity: settings.danmakuOpacity,
       danmakuSpeed: settings.danmakuSpeed,
       danmakuFont: settings.danmakuFont,
@@ -190,6 +219,15 @@ export function settingsDocument(settings: Settings): SettingsJsonDocument {
       playbackRate: settings.playbackRate,
       eqEnabled: settings.eqEnabled,
       eqGains: [...settings.eqGains],
+      autoPlayNext: settings.autoPlayNext,
+      fullscreenClock: settings.fullscreenClock,
+      fullscreenClockHours: settings.fullscreenClockHours,
+      fullscreenClockSeconds: settings.fullscreenClockSeconds,
+      fullscreenClockDate: settings.fullscreenClockDate,
+      mirrorVideo: settings.mirrorVideo,
+      colorVisionAssist: settings.colorVisionAssist,
+      videoFit: settings.videoFit,
+      danmuApiBase: settings.danmuApiBase,
       shortcuts: settings.shortcuts,
       reduceMotion: settings.reduceMotion ?? false,
       bilibiliProxy: settings.bilibiliProxy,

@@ -112,7 +112,15 @@ export function SongMatchPanel({ track }: SongMatchPanelProps): React.ReactEleme
             <Dismiss24Regular />
           </IconButton>
         ) : (
-          <button type="button" className="fluent-button" onClick={() => setOpen(true)}>
+          <button
+            type="button"
+            className="fluent-button"
+            onClick={() => {
+              setOpen(true);
+              autoSearched.current = true;
+              void runSearch();
+            }}
+          >
             <CloudArrowDown24Regular /> {t('match.open')}
           </button>
         )}

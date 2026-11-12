@@ -497,3 +497,18 @@
 .queue-panel.is-full .queue-empty {
   padding-bottom: 80px;
 }
+
+.queue-autoplay {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  color: var(--text-3);
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.queue-autoplay span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

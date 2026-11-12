@@ -21,7 +21,33 @@ export function DetailsDialog(): React.ReactElement | null {
 
   if (!trackId || !track) return null;
 
+  const hasLyrics = Boolean(track.lyrics || track.embeddedLyrics || track.lyricsUrl);
+  const lyricText = track.lyrics ?? track.embeddedLyrics ?? '';
+  const wordSync = Boolean(/<\d|\[[0-9]+:[0-9]+[^\]]*\]\s*[^\n]+<[^>]+>/.test(lyricText)) || track.lyricsFormat === 'spl';
+  const lyricFormat = track.lyrics
+    ? (track.lyricsFormat === 'spl' ? 'SPL' : 'LRC')
+    : track.embeddedLyrics
+      ? t('details.embedded')
+      : track.lyricsUrl
+        ? (track.lyricsFormat === 'spl' ? 'SPL' : 'LRC')
+        : t('details.none');
+  const lyricEncoding = hasLyrics ? (track.lyricsEncoding ?? 'UTF-8') : '—';
+  const subtitleCount = track.subtitles?.length ?? 0;
+  const hasDanmaku = Boolean(track.danmakuText || track.danmakuUrl);
+
   const rows: Array<{ label: string; value: string }> = [
+    ...(track.kind === 'audio'
+      ? [
+          { label: t('details.hasLyrics'), value: hasLyrics ? t('details.yes') : t('details.no') },
+          { label: t('details.lyricSync'), value: wordSync ? t('details.yes') : t('details.no') },
+          { label: t('details.lyricFormat'), value: lyricFormat },
+          { label: t('details.lyricEncoding'), value: lyricEncoding },
+        ]
+      : [
+          { label: t('details.hasSubtitles'), value: subtitleCount ? t('details.yes') : t('details.no') },
+          { label: t('details.subtitleCount'), value: String(subtitleCount) },
+          { label: t('details.hasDanmaku'), value: hasDanmaku ? t('details.yes') : t('details.no') },
+        ]),
     { label: t('details.file'), value: track.fileName ?? track.title },
     { label: t('details.source'), value: track.source === 'demo' ? t('details.demo') : t('details.local') },
     { label: t('np.format'), value: track.format ?? '—' },

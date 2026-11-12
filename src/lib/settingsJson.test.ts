@@ -18,6 +18,11 @@ describe('settings JSON', () => {
     expect(DEFAULT_SETTINGS.lyricWeight).toBe(700);
     expect(DEFAULT_SETTINGS.lyricTranslationSize).toBe(0.7);
     expect(DEFAULT_SETTINGS.danmakuSize).toBe(25);
+    expect(DEFAULT_SETTINGS.danmakuArea).toBe('full');
+    expect(DEFAULT_SETTINGS.autoPlayNext).toBe(true);
+    expect(DEFAULT_SETTINGS.fullscreenClock).toBe(false);
+    expect(DEFAULT_SETTINGS.videoFit).toBe('contain');
+    expect(DEFAULT_SETTINGS.danmuApiBase).toBe('');
   });
 
   it('exports a versioned, method-free document', () => {
@@ -39,7 +44,10 @@ describe('settings JSON', () => {
     expect(wrapped.settings.lyricSize).toBe(0.7);
     expect(wrapped.settings.shortcuts.playPause?.code).toBe('Space');
 
-    const bare = parseSettingsJson(JSON.stringify({ theme: 'dark', language: 'en' }));
+    const bare = parseSettingsJson(JSON.stringify({ theme: 'dark', language: 'en', danmakuArea: 'half', videoFit: 'cover', autoPlayNext: false }));
+    expect(bare.settings.danmakuArea).toBe('half');
+    expect(bare.settings.videoFit).toBe('cover');
+    expect(bare.settings.autoPlayNext).toBe(false);
     expect(bare.settings.theme).toBe('dark');
     expect(bare.settings.language).toBe('en');
   });

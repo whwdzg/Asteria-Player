@@ -10,6 +10,7 @@ import { useClockStore } from '../../state/clock';
 import { useUiStore } from '../../state/ui';
 import { formatTime } from '../../lib/format';
 import { CoverArt } from '../common/CoverArt';
+import { highResolutionCover } from '../../lib/cover';
 import { ArtworkLightbox } from './ArtworkLightbox';
 import { LyricsView } from './LyricsView';
 
@@ -101,7 +102,7 @@ export function ArtworkPanel(): React.ReactElement | null {
         <span>{track.fileName ?? track.format ?? t('np.video')}</span>
       </div>
 
-      {lightboxOpen ? <ArtworkLightbox track={track} onClose={() => setLightboxOpen(false)} /> : null}
+      {lightboxOpen ? <ArtworkLightbox track={track} source={highResolutionCover(track.cover)} onClose={() => setLightboxOpen(false)} /> : null}
     </div>
   );
 }

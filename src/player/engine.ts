@@ -452,7 +452,13 @@ export class PlayerEngine {
   }
 
   private handleEnded(): void {
-    const { playMode } = useSettingsStore.getState();
+    const { autoPlayNext, playMode } = useSettingsStore.getState();
+    if (!autoPlayNext) {
+      usePlaybackStore.getState().setPlaying(false);
+      this.stopClock();
+      this.syncClock(true);
+      return;
+    }
     if (playMode === 'one') {
       this.seek(0);
       this.play();

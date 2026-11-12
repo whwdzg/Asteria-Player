@@ -16,6 +16,7 @@ interface ActiveComment extends DanmakuComment {
 const SCROLL_LANES = 7;
 const TOP_LANES = 3;
 const MAX_ACTIVE = 50;
+const AREA_FRACTION = { quarter: 0.25, half: 0.5, threeQuarter: 0.75, full: 1 } as const;
 
 export function useDanmaku(track: Track | undefined): {
   comments: DanmakuComment[];
@@ -26,6 +27,11 @@ export function useDanmaku(track: Track | undefined): {
   const showTop = useSettingsStore((state) => state.danmakuTop);
   const showScroll = useSettingsStore((state) => state.danmakuScroll);
   const speed = useSettingsStore((state) => state.danmakuSpeed);
+  const area = useSettingsStore((state) => state.danmakuArea);
+  const laneCounts = {
+    scroll: Math.max(2, Math.round(SCROLL_LANES * AREA_FRACTION[area])),
+    top: Math.max(1, Math.round(TOP_LANES * AREA_FRACTION[area])),
+  };
   const [comments, setComments] = useState<DanmakuComment[]>([]);
   const [active, setActive] = useState<ActiveComment[]>([]);
   const commentsRef = useRef<DanmakuComment[]>([]);
@@ -67,7 +73,7 @@ export function useDanmaku(track: Track | undefined): {
     setActive([]);
     spawned.current.clear();
     lastTime.current = useClockStore.getState().time;
-  }, [track?.id, enabled, showTop, showScroll, speed]);
+  }, [track?.id, enabled, showTop, showScroll, speed, area]);
 
   useEffect(() => {
     if (!enabled || !showScroll && !showTop) {
@@ -99,8 +105,8 @@ export function useDanmaku(track: Track | undefined): {
         spawned.current.add(key);
         if (comment.mode === 'bottom') continue;
         const lane = comment.mode === 'top'
-          ? laneCursor.current.top++ % TOP_LANES
-          : laneCursor.current.scroll++ % SCROLL_LANES;
+          ? laneCursor.current.top++ % laneCounts.top
+          : laneCursor.current.scroll++ % laneCounts.scroll;
         sequence.current += 1;
         const baseDuration = comment.mode === 'top' ? 4.4 : Math.min(14, Math.max(8, 8 + comment.text.length * 0.12));
         additions.push({
@@ -112,7 +118,12 @@ export function useDanmaku(track: Track | undefined): {
       }
       lastTime.current = time;
       if (additions.length) {
-        setActive((current) => [...current, ...additions].slice(-MAX_ACTIVE));
+        setActive((current) => {
+          // Never drop comments that are still crossing the video; simply wait
+          // for room instead of slicing the animation queue.
+          const room = Math.max(0, MAX_ACTIVE - current.length);
+          return room > 0 ? [...current, ...additions.slice(0, room)] : current;
+        });
       }
     };
 
@@ -122,7 +133,7 @@ export function useDanmaku(track: Track | undefined): {
       unsubscribe();
       setActive([]);
     };
-  }, [enabled, showTop, showScroll, speed, track?.id, comments]);
+  }, [enabled, showTop, showScroll, speed, area, laneCounts.scroll, laneCounts.top, track?.id, comments]);
 
   return {
     comments,
@@ -139,6 +150,10 @@ export function DanmakuLayer({ track }: { track: Track }): React.ReactElement {
   const opacity = useSettingsStore((state) => state.danmakuOpacity);
   const font = useSettingsStore((state) => state.danmakuFont);
   const isPlaying = usePlaybackStore((state) => state.isPlaying);
+  const area = useSettingsStore((state) => state.danmakuArea);
+  const areaFraction = AREA_FRACTION[area];
+  const scrollLanes = Math.max(2, Math.round(SCROLL_LANES * areaFraction));
+  const topLanes = Math.max(1, Math.round(TOP_LANES * areaFraction));
   if (!enabled) return <div className="danmaku-layer" aria-hidden="true" />;
   return (
     <div className={`danmaku-layer ${isPlaying ? '' : 'is-paused'}`.trim()} aria-hidden="true">
@@ -149,6 +164,9 @@ export function DanmakuLayer({ track }: { track: Track }): React.ReactElement {
           style={{
             '--lane': comment.lane,
             '--danmaku-duration': `${comment.duration}s`,
+            top: `${comment.mode === 'top'
+              ? 7 + (comment.lane / Math.max(1, topLanes - 1)) * (areaFraction * 78)
+              : 9 + (comment.lane / Math.max(1, scrollLanes - 1)) * (areaFraction * 80)}%`,
             '--danmaku-weight': weight,
             '--danmaku-opacity': opacity,
             color: comment.color,

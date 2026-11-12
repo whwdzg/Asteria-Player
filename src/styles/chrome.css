@@ -250,6 +250,24 @@
 .track-cover-wrap {
   position: relative;
   flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  cursor: pointer;
+}
+
+.track-cover-wrap:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.track-cover-wrap:hover .track-cover {
+  transform: scale(1.04);
+}
+
+.track-cover {
+  transition: transform 180ms var(--ease-fluent);
 }
 
 .track-cover {
@@ -834,4 +852,50 @@
   color: var(--text-4);
   font-size: 9px;
   font-variant-numeric: tabular-nums;
+}
+
+/* Video options live inside the brightness/video popover. */
+.video-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 13px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.video-option-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.video-option-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.video-option-row strong {
+  color: var(--text-1);
+  font-size: 10.5px;
+  font-weight: 500;
+}
+
+.video-option-row small {
+  color: var(--text-4);
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.video-option-row.is-select {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.video-option-row.is-select .fluent-select {
+  width: 100%;
 }

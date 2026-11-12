@@ -2,6 +2,8 @@ export type MediaKind = 'audio' | 'video';
 export type PlayMode = 'one' | 'all' | 'none' | 'shuffle';
 
 export type FontChoice = 'display' | 'sans' | 'serif' | 'rounded' | 'mono';
+export type DanmakuArea = 'quarter' | 'half' | 'threeQuarter' | 'full';
+export type VideoFit = 'contain' | 'cover' | 'fill';
 
 export type ShortcutAction =
   | 'playPause'
@@ -58,6 +60,7 @@ export interface Track {
   /** Remote lyrics URL for the demo library. */
   lyricsUrl?: string;
   lyricsFormat?: 'lrc' | 'spl';
+  lyricsEncoding?: string;
   /** Lyrics read from audio tags during import. */
   embeddedLyrics?: string;
   /** Translation read from a separate sidecar file. */
@@ -164,6 +167,8 @@ export interface Settings {
   danmakuTop: boolean;
   danmakuScroll: boolean;
   danmakuWeight: number;
+  /** Vertical range of the danmaku field. */
+  danmakuArea: DanmakuArea;
   /** Base danmaku font size in pixels at the authored 25px reference. */
   danmakuSize: number;
   danmakuOpacity: number;
@@ -176,6 +181,15 @@ export interface Settings {
   playbackRate: number;
   eqEnabled: boolean;
   eqGains: number[];
+  autoPlayNext: boolean;
+  fullscreenClock: boolean;
+  fullscreenClockHours: boolean;
+  fullscreenClockSeconds: boolean;
+  fullscreenClockDate: boolean;
+  mirrorVideo: boolean;
+  colorVisionAssist: boolean;
+  videoFit: VideoFit;
+  danmuApiBase: string;
   shortcuts: ShortcutMap;
   lastTrackId?: string;
   lastPosition?: number;

@@ -4,7 +4,7 @@ import {
   Settings24Regular,
   Speaker224Regular,
   TextBulletListLtr24Regular,
-  WeatherSunny24Regular,
+  Video24Regular,
 } from '@fluentui/react-icons';
 import { lazy, Suspense, useRef, type ReactNode } from 'react';
 import { formatRate } from '../../lib/format';
@@ -118,10 +118,10 @@ export function UtilityBar({ onToggleFullscreen }: UtilityBarProps): React.React
         open={popover === 'brightness'}
         onClose={() => setPopover(null)}
         onClick={() => togglePopover('brightness')}
-        label={t('player.brightness')}
-        trigger={<WeatherSunny24Regular />}
+        label={t('player.videoOptions')}
+        trigger={<Video24Regular />}
         className="brightness-slot"
-        panel={<PopoverCard label={t('brightness.title')}><BrightnessPanel /></PopoverCard>}
+        panel={<PopoverCard label={t('video.options')}><BrightnessPanel /></PopoverCard>}
       />
       <IconButton
         label={fullscreenLabel}

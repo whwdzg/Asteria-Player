@@ -53,9 +53,9 @@ keeps older and newer files interoperable.
 | --- | --- |
 | Appearance | `theme`, `language`, `liquidGlass`, `dynamicBackground`, `backgroundBpm`, `backgroundVideo`, `reduceMotion` |
 | Lyrics | `lyricSize`, `lyricWeight`, `lyricTranslationSize`, `lyricBlur`, `lyricFont`, `showTranslation` |
-| Video | `subtitleLang`, `subtitleBgOpacity`, `subtitleTextOpacity`, `subtitleFont`, `danmakuEnabled`, `danmakuTop`, `danmakuScroll`, `danmakuWeight`, `danmakuSize` (12–48 px), `danmakuOpacity`, `danmakuSpeed`, `danmakuFont` |
-| Playback | `volume` (0–1.2), `brightness` (0–1), `muted`, `playMode`, `playbackRate` (0.25–4), `eqEnabled`, `eqGains` (five numbers, −12–12) |
-| Online | `bilibiliProxy` — optional CORS proxy prefix or `{url}` template |
+| Video | `subtitleLang`, `subtitleBgOpacity`, `subtitleTextOpacity`, `subtitleFont`, `danmakuEnabled`, `danmakuTop`, `danmakuScroll`, `danmakuWeight`, `danmakuSize` (12–48 px), `danmakuArea`, `danmakuOpacity`, `danmakuSpeed`, `danmakuFont`; `fullscreenClock`, `fullscreenClockHours`, `fullscreenClockSeconds`, `fullscreenClockDate`, `mirrorVideo`, `colorVisionAssist`, `videoFit` |
+| Playback | `volume` (0–1.2), `brightness` (0–1), `muted`, `playMode`, `playbackRate` (0.25–4), `eqEnabled`, `eqGains` (five numbers, −12–12), `autoPlayNext` |
+| Online | `bilibiliProxy` — optional Bilibili CORS proxy prefix or `{url}` template; `danmuApiBase` — optional self-hosted open-source danmu_api root URL |
 | Shortcuts | `shortcuts` — one entry per action, or `null` to disable |
 
 ### Enumerations
@@ -63,6 +63,8 @@ keeps older and newer files interoperable.
 - `theme`: `dark`, `light`, `system`
 - `language`: `system`, a language-pack code such as `zh-CN`, or an imported code
 - `playMode`: `one`, `all`, `none`, `shuffle`
+- `danmakuArea`: `quarter`, `half`, `threeQuarter`, `full`
+- `videoFit`: `contain`, `cover`, `fill`
 - `lyricFont` / `subtitleFont` / `danmakuFont`: `display`, `sans`, `serif`,
   `rounded`, `mono`
 

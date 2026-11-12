@@ -1226,3 +1226,52 @@
     font-size: calc(clamp(19px, 4.8vw, 23px) * var(--lyric-scale, 1));
   }
 }
+
+/* Narrow/mobile: progress, transport, utilities — no identity block. */
+@media (max-width: 700px) {
+  :root {
+    --bottom-bar-height: 154px;
+  }
+
+  .bottom-bar {
+    padding: 7px 12px 9px;
+  }
+
+  .bottom-bar-content {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "transport"
+      "utilities";
+    grid-template-rows: auto auto;
+    gap: 3px;
+  }
+
+  .bottom-left {
+    display: none;
+  }
+
+  .bottom-center {
+    grid-area: transport;
+    justify-self: stretch;
+  }
+
+  .bottom-right {
+    grid-area: utilities;
+    justify-self: stretch;
+  }
+
+  .transport-controls {
+    margin: 0 auto;
+  }
+
+  .utility-bar {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 380px) {
+  :root {
+    --bottom-bar-height: 148px;
+  }
+}

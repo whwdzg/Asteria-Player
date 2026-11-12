@@ -7,6 +7,8 @@ import { CoverArt } from '../common/CoverArt';
 
 interface ArtworkLightboxProps {
   track: Track;
+  /** Optional larger rendition; falls back to track.cover. */
+  source?: string;
   onClose: () => void;
 }
 
@@ -14,7 +16,7 @@ const MIN_SCALE = 1;
 const MAX_SCALE = 4;
 const CLOSE_DRAG = 120;
 
-export function ArtworkLightbox({ track, onClose }: ArtworkLightboxProps): React.ReactElement {
+export function ArtworkLightbox({ track, source, onClose }: ArtworkLightboxProps): React.ReactElement {
   const { t } = useI18n();
   const [scale, setScale] = useState(1);
   const [offsetY, setOffsetY] = useState(0);
@@ -120,7 +122,7 @@ export function ArtworkLightbox({ track, onClose }: ArtworkLightboxProps): React
         style={{ '--lightbox-scale': scale, '--lightbox-y': `${offsetY}px` } as React.CSSProperties}
       >
         <div className="lightbox-image" onClick={(event) => event.stopPropagation()}>
-          <CoverArt track={track} className="lightbox-cover" alt={t('a11y.cover', { title: track.title })} eager showKind />
+          <CoverArt track={{ ...track, cover: source ?? track.cover }} className="lightbox-cover" alt={t('a11y.cover', { title: track.title })} eager showKind />
         </div>
       </div>
     </div>,

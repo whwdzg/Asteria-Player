@@ -9,9 +9,12 @@ import { useUiStore } from '../state/ui';
 interface ShortcutOptions {
   toggleFullscreen: () => void;
   exitFullscreen: () => void;
+  isVideo: boolean;
 }
 
-export function useKeyboardShortcuts({ toggleFullscreen, exitFullscreen }: ShortcutOptions): void {
+const TEMP_SPEED_DELAY = 450;
+
+export function useKeyboardShortcuts({ toggleFullscreen, exitFullscreen, isVideo }: ShortcutOptions): void {
   const shortcuts = useSettingsStore((state) => state.shortcuts);
 
   useEffect(() => {
@@ -43,9 +46,52 @@ export function useKeyboardShortcuts({ toggleFullscreen, exitFullscreen }: Short
       }
     };
 
+    let holdTimer = 0;
+    let holdingSpeed = false;
+    const restoreSpeed = (): void => {
+      if (!holdingSpeed) return;
+      holdingSpeed = false;
+      const video = player.videoElement;
+      if (video) video.playbackRate = useSettingsStore.getState().playbackRate;
+      window.dispatchEvent(new CustomEvent('asteria:temp-speed', { detail: { active: false } }));
+    };
+    const startHold = (event: KeyboardEvent): void => {
+      const ui = useUiStore.getState();
+      if (ui.videoLocked) {
+        window.dispatchEvent(new Event('asteria:lock-reveal'));
+        return;
+      }
+      if (!isVideo || isEditableTarget(event.target)) return;
+      if (event.code !== 'ArrowRight' || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      if (event.repeat) return;
+      window.clearTimeout(holdTimer);
+      holdTimer = window.setTimeout(() => {
+        const video = player.videoElement;
+        if (!video) return;
+        holdingSpeed = true;
+        video.playbackRate = 2;
+        window.dispatchEvent(new CustomEvent('asteria:temp-speed', { detail: { active: true } }));
+      }, TEMP_SPEED_DELAY);
+    };
+    const onKeyUp = (event: KeyboardEvent): void => {
+      if (event.code === 'ArrowRight') {
+        window.clearTimeout(holdTimer);
+        restoreSpeed();
+      }
+    };
+    const onBlur = (): void => {
+      window.clearTimeout(holdTimer);
+      restoreSpeed();
+    };
+
     const onKeyDown = (event: KeyboardEvent): void => {
       if (isEditableTarget(event.target) || event.repeat) return;
       const ui = useUiStore.getState();
+      if (ui.videoLocked) {
+        event.preventDefault();
+        window.dispatchEvent(new Event('asteria:lock-reveal'));
+        return;
+      }
 
       if (event.key === 'Escape') {
         if (ui.detailsTrackId || ui.playlistDialogOpen) return;
@@ -61,12 +107,22 @@ export function useKeyboardShortcuts({ toggleFullscreen, exitFullscreen }: Short
       if (!action) return;
       const interactive = event.target instanceof HTMLElement
         && event.target.closest('button, a, [role="button"], [role="slider"], [role="menuitem"], [role="option"]');
-      if (interactive && (event.code === 'Space' || event.code === 'Enter' || event.code === 'NumpadEnter')) return;
+      if (interactive && action !== 'playPause' && (event.code === 'Space' || event.code === 'Enter' || event.code === 'NumpadEnter')) return;
       event.preventDefault();
       run(action);
     };
 
+    window.addEventListener('keydown', startHold);
     window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [exitFullscreen, shortcuts, toggleFullscreen]);
+    window.addEventListener('keyup', onKeyUp);
+    window.addEventListener('blur', onBlur);
+    return () => {
+      window.clearTimeout(holdTimer);
+      restoreSpeed();
+      window.removeEventListener('keydown', startHold);
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+      window.removeEventListener('blur', onBlur);
+    };
+  }, [exitFullscreen, isVideo, shortcuts, toggleFullscreen]);
 }

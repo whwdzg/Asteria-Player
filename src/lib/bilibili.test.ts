@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   fetchBilibiliDanmaku,
+  fetchDanmuApiDanmaku,
+  searchDanmuApiEpisodes,
   fetchBilibiliPages,
   fetchBilibiliSubtitles,
   searchBilibiliVideos,
@@ -97,6 +99,38 @@ describe('Bilibili service', () => {
     expect(subtitles[0]).toMatchObject({ lang: 'zh-CN', format: 'vtt' });
     expect(subtitles[0].text).toContain('WEBVTT');
     expect(subtitles[0].text).toContain('00:00:01.200 --> 00:00:03.400');
+  });
+
+  it('searches the open-source danmu_api server and parses its XML comments', async () => {
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('/search/episodes')) {
+        return jsonResponse({
+          animes: [{
+            animeTitle: 'Test Show',
+            typeDescription: 'TV series',
+            imageUrl: 'https://img.example/poster.jpg',
+            episodes: [{ episodeId: 77, episodeTitle: 'Episode 1' }],
+          }],
+        });
+      }
+      if (url.includes('/comment/77')) {
+        return new Response('<i><d p="1.0,1,25,16777215,0,0,0,0">Hello</d></i>', { status: 200 });
+      }
+      throw new Error(`Unexpected URL: ${url}`);
+    }));
+
+    const results = await searchDanmuApiEpisodes('Test Show', 'https://danmu.example/87654321/');
+    expect(results[0]).toMatchObject({
+      bvid: '',
+      episodeId: 77,
+      source: 'danmu_api',
+      title: 'Test Show · Episode 1',
+      author: 'TV series',
+      cover: 'https://img.example/poster.jpg',
+    });
+    const danmaku = JSON.parse(await fetchDanmuApiDanmaku(77, 'https://danmu.example/87654321'));
+    expect(danmaku[0]).toMatchObject({ time: 1, text: 'Hello' });
   });
 
   it('reports API and empty-result errors', async () => {
