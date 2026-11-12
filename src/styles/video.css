@@ -62,7 +62,8 @@
 }
 
 .player-video {
-  position: relative;
+  position: absolute;
+  inset: 0;
   z-index: 1;
   width: 100%;
   height: 100%;
@@ -500,6 +501,12 @@
 
 .video-frame.has-color-vision .player-video {
   filter: brightness(var(--media-brightness)) saturate(1.35) contrast(1.08);
+}
+
+/* Windowed playback always preserves the complete frame; letterboxing is
+   preferable to cropping a non-16:9 source. */
+.app:not(.is-video-fullscreen) .video-frame .player-video {
+  object-fit: contain !important;
 }
 
 .is-video-fullscreen .video-frame[data-fit="cover"] .player-video {

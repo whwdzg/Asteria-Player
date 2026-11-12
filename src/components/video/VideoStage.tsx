@@ -172,7 +172,7 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
     <section className="video-view" aria-label={track.title}>
       <div
         className={`video-frame ${toolsHidden && !fullscreen && !isTouch ? 'tools-hidden' : ''} ${colorVision ? 'has-color-vision' : ''}`.trim()}
-        data-fit={videoFit}
+        data-fit={fullscreen ? videoFit : 'contain'}
         data-mirror={mirror ? 'true' : 'false'}
         style={{ '--video-cover': track.cover ? `url("${track.cover}")` : 'none' } as React.CSSProperties}
         onClick={(event) => {
