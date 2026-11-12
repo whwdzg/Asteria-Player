@@ -522,6 +522,7 @@
   z-index: 6;
   top: 74px;
   right: 20px;
+  transition: top 220ms var(--ease-fluent), right 220ms var(--ease-fluent), opacity 160ms linear;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -546,4 +547,12 @@
 .fullscreen-clock-date {
   color: rgba(255, 255, 255, 0.48);
   font-size: 9px;
+}
+
+/* When the rest of the fullscreen chrome is gone, the clock takes the
+   free top-right corner instead of staying below the empty toolbar space. */
+.is-video-fullscreen.chrome-hidden .fullscreen-clock,
+.is-fullscreen.chrome-hidden .fullscreen-clock {
+  top: 18px;
+  right: 22px;
 }

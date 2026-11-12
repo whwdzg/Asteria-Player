@@ -380,5 +380,6 @@
   "collection.songCount": "{count} 首歌曲",
   "collection.albumCount": "{count} 張專輯",
   "settings.settingsJsonValid": "JSON 語法有效",
-  "settings.settingsJsonSyntaxError": "語法錯誤（第 {line} 行，第 {column} 列）"
+  "settings.settingsJsonSyntaxError": "語法錯誤（第 {line} 行，第 {column} 列）",
+  "settings.fsClockOpacity": "時間透明度"
 }

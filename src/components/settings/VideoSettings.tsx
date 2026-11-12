@@ -301,6 +301,28 @@ export function VideoSettings(): React.ReactElement {
             disabled={!settings.fullscreenClock}
           />
         </div>
+        <div className="setting-row compact">
+          <div className="setting-label"><span>{t('settings.fsClockOpacity')}</span></div>
+          <span className="setting-inline-control">
+            <RangeSlider
+              value={settings.fullscreenClockOpacity}
+              min={0.1}
+              max={1}
+              step={0.05}
+              onChange={(value) => set('fullscreenClockOpacity', value)}
+              ariaLabel={t('settings.fsClockOpacity')}
+              ariaValueText={`${Math.round(settings.fullscreenClockOpacity * 100)}%`}
+            />
+            <NumberField
+              value={Math.round(settings.fullscreenClockOpacity * 100)}
+              min={10}
+              max={100}
+              suffix="%"
+              ariaLabel={t('settings.fsClockOpacity')}
+              onChange={(value) => set('fullscreenClockOpacity', value / 100)}
+            />
+          </span>
+        </div>
       </div>
     </section>
   );

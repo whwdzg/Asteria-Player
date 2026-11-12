@@ -14,6 +14,7 @@ export function FullscreenClock(): React.ReactElement | null {
   const showHours = useSettingsStore((state) => state.fullscreenClockHours);
   const showSeconds = useSettingsStore((state) => state.fullscreenClockSeconds);
   const showDate = useSettingsStore((state) => state.fullscreenClockDate);
+  const opacity = useSettingsStore((state) => state.fullscreenClockOpacity);
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
@@ -33,7 +34,7 @@ export function FullscreenClock(): React.ReactElement | null {
     : '';
 
   return (
-    <div className="fullscreen-clock" aria-hidden="true">
+    <div className="fullscreen-clock" aria-hidden="true" style={{ opacity }}>
       {date ? <span className="fullscreen-clock-date">{date}</span> : null}
       <span className="fullscreen-clock-time">{withSeconds}</span>
     </div>

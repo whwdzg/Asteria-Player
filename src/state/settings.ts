@@ -104,6 +104,7 @@ export const useSettingsStore = create<SettingsState>()(
         fullscreenClockHours: state.fullscreenClockHours,
         fullscreenClockSeconds: state.fullscreenClockSeconds,
         fullscreenClockDate: state.fullscreenClockDate,
+        fullscreenClockOpacity: state.fullscreenClockOpacity,
         mirrorVideo: state.mirrorVideo,
         colorVisionAssist: state.colorVisionAssist,
         videoFit: state.videoFit,

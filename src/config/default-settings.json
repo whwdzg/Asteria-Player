@@ -47,6 +47,7 @@
     "fullscreenClockHours": true,
     "fullscreenClockSeconds": false,
     "fullscreenClockDate": false,
+    "fullscreenClockOpacity": 0.72,
     "mirrorVideo": false,
     "colorVisionAssist": false,
     "videoFit": "contain",

@@ -24,6 +24,7 @@ describe('settings JSON', () => {
     expect(DEFAULT_SETTINGS.danmakuArea).toBe('full');
     expect(DEFAULT_SETTINGS.autoPlayNext).toBe(true);
     expect(DEFAULT_SETTINGS.fullscreenClock).toBe(false);
+    expect(DEFAULT_SETTINGS.fullscreenClockOpacity).toBe(0.72);
     expect(DEFAULT_SETTINGS.videoFit).toBe('contain');
     expect(DEFAULT_SETTINGS.danmuApiBase).toBe('');
   });
@@ -47,13 +48,14 @@ describe('settings JSON', () => {
     expect(wrapped.settings.lyricSize).toBe(0.7);
     expect(wrapped.settings.shortcuts.playPause?.code).toBe('Space');
 
-    const bare = parseSettingsJson(JSON.stringify({ theme: 'dark', language: 'en', danmakuArea: 'half', videoFit: 'cover', autoPlayNext: false, audioVisualizer: true, audioVisualizerHeight: 9, audioVisualizerOpacity: 0 }));
+    const bare = parseSettingsJson(JSON.stringify({ theme: 'dark', language: 'en', danmakuArea: 'half', videoFit: 'cover', autoPlayNext: false, audioVisualizer: true, audioVisualizerHeight: 9, audioVisualizerOpacity: 0, fullscreenClockOpacity: 0 }));
     expect(bare.settings.danmakuArea).toBe('half');
     expect(bare.settings.videoFit).toBe('cover');
     expect(bare.settings.autoPlayNext).toBe(false);
     expect(bare.settings.audioVisualizer).toBe(true);
     expect(bare.settings.audioVisualizerHeight).toBe(1);
     expect(bare.settings.audioVisualizerOpacity).toBe(0.1);
+    expect(bare.settings.fullscreenClockOpacity).toBe(0.1);
     expect(bare.settings.theme).toBe('dark');
     expect(bare.settings.language).toBe('en');
   });

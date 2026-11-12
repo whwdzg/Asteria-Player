@@ -195,6 +195,7 @@ export interface Settings {
   fullscreenClockHours: boolean;
   fullscreenClockSeconds: boolean;
   fullscreenClockDate: boolean;
+  fullscreenClockOpacity: number;
   mirrorVideo: boolean;
   colorVisionAssist: boolean;
   videoFit: VideoFit;

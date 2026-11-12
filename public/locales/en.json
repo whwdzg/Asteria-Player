@@ -380,5 +380,6 @@
   "collection.songCount": "{count} songs",
   "collection.albumCount": "{count} albums",
   "settings.settingsJsonValid": "JSON syntax is valid",
-  "settings.settingsJsonSyntaxError": "Syntax error (line {line}, column {column})"
+  "settings.settingsJsonSyntaxError": "Syntax error (line {line}, column {column})",
+  "settings.fsClockOpacity": "Clock opacity"
 }
