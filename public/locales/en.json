@@ -248,7 +248,7 @@
   "settings.editJson": "Edit settings JSON",
   "settings.dataOpen": "Open JSON editor",
   "settings.settingsJson": "Settings JSON",
-  "settings.settingsJsonHint": "Edit the JSON below; applying it writes the settings immediately.",
+  "settings.settingsJsonHint": "Edit the versioned settings JSON. Syntax is checked live and highlighted; Apply still validates the settings schema.",
   "settings.settingsJsonApply": "Apply JSON",
   "settings.settingsJsonDownload": "Download file",
   "settings.settingsJsonImport": "Import file",
@@ -378,5 +378,7 @@
   "collection.empty": "No matching songs in this library.",
   "collection.playFirst": "Play first",
   "collection.songCount": "{count} songs",
-  "collection.albumCount": "{count} albums"
+  "collection.albumCount": "{count} albums",
+  "settings.settingsJsonValid": "JSON syntax is valid",
+  "settings.settingsJsonSyntaxError": "Syntax error (line {line}, column {column})"
 }

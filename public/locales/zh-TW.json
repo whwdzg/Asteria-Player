@@ -248,7 +248,7 @@
   "settings.editJson": "編輯設定 JSON",
   "settings.dataOpen": "開啟 JSON 編輯器",
   "settings.settingsJson": "設定 JSON",
-  "settings.settingsJsonHint": "可直接編輯下方 JSON；套用後會立即寫入本機設定。",
+  "settings.settingsJsonHint": "編輯帶版本號的設定 JSON。輸入時會即時檢查語法並著色；套用時仍會驗證設定欄位。",
   "settings.settingsJsonApply": "套用 JSON",
   "settings.settingsJsonDownload": "下載檔案",
   "settings.settingsJsonImport": "匯入檔案",
@@ -378,5 +378,7 @@
   "collection.empty": "目前媒體庫中沒有符合的歌曲。",
   "collection.playFirst": "播放第一首",
   "collection.songCount": "{count} 首歌曲",
-  "collection.albumCount": "{count} 張專輯"
+  "collection.albumCount": "{count} 張專輯",
+  "settings.settingsJsonValid": "JSON 語法有效",
+  "settings.settingsJsonSyntaxError": "語法錯誤（第 {line} 行，第 {column} 列）"
 }

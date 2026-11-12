@@ -13,6 +13,7 @@ import {
   settingsDocument,
 } from '../../lib/settingsJson';
 import { useSettingsStore } from '../../state/settings';
+import { checkJsonSyntax, tokenizeJson } from '../../lib/jsonEditor';
 import { useUiStore } from '../../state/ui';
 import { Modal } from '../common/Modal';
 
@@ -34,6 +35,10 @@ export function SettingsJsonDialog({ onClose }: SettingsJsonDialogProps): React.
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
+  const highlightRef = useRef<HTMLPreElement>(null);
+  const editorRef = useRef<HTMLTextAreaElement>(null);
+  const syntax = useMemo(() => checkJsonSyntax(draft), [draft]);
+  const tokens = useMemo(() => tokenizeJson(draft), [draft]);
   const currentDocument = useMemo(() => settingsDocument(settings), [settings]);
   const version = currentDocument.version;
 
@@ -103,7 +108,7 @@ export function SettingsJsonDialog({ onClose }: SettingsJsonDialogProps): React.
       footer={
         <>
           <button type="button" className="fluent-button" onClick={onClose}>{t('common.cancel')}</button>
-          <button type="button" className="fluent-button primary" onClick={apply}>
+          <button type="button" className="fluent-button primary" onClick={apply} disabled={Boolean(syntax)}>
             {t('settings.settingsJsonApply')}
           </button>
         </>
@@ -115,17 +120,38 @@ export function SettingsJsonDialog({ onClose }: SettingsJsonDialogProps): React.
           <span className="settings-json-version">{t('settings.settingsJsonVersion', { version })}</span>
         </div>
 
-        <textarea
-          className="settings-json-editor"
-          value={draft}
-          onChange={(event) => {
-            setDraft(event.target.value);
-            setError('');
-            setStatus('');
-          }}
-          aria-label={t('settings.settingsJson')}
-          spellCheck={false}
-        />
+        <div className={`settings-json-shell ${syntax ? 'is-invalid' : ''}`.trim()}>
+          <pre ref={highlightRef} className="settings-json-highlight" aria-hidden="true">
+            {tokens.map((token, index) => (
+              <span key={index} className={`json-token json-token-${token.type}`}>{token.text}</span>
+            ))}
+          </pre>
+          <textarea
+            ref={editorRef}
+            className="settings-json-editor"
+            value={draft}
+            wrap="off"
+            onChange={(event) => {
+              setDraft(event.target.value);
+              setError('');
+              setStatus('');
+            }}
+            onScroll={() => {
+              if (!highlightRef.current || !editorRef.current) return;
+              highlightRef.current.scrollTop = editorRef.current.scrollTop;
+              highlightRef.current.scrollLeft = editorRef.current.scrollLeft;
+            }}
+            aria-label={t('settings.settingsJson')}
+            aria-invalid={Boolean(syntax)}
+            spellCheck={false}
+          />
+        </div>
+        <p className={`settings-json-check ${syntax ? 'is-invalid' : 'is-valid'}`.trim()} role="status" aria-live="polite">
+          <span className="settings-json-check-dot" aria-hidden="true" />
+          {syntax
+            ? `${t('settings.settingsJsonSyntaxError', { line: syntax.line, column: syntax.column })}: ${syntax.message}`
+            : t('settings.settingsJsonValid')}
+        </p>
 
         <div className="settings-json-actions">
           <button type="button" className="fluent-button" onClick={() => fileRef.current?.click()}>
