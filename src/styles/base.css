@@ -501,36 +501,6 @@ svg {
   opacity: 0.32;
 }
 
-.icon-button[data-tooltip]::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  z-index: 80;
-  bottom: calc(100% + 10px);
-  left: 50%;
-  max-width: 260px;
-  padding: 6px 9px;
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  background: var(--panel);
-  box-shadow: var(--shadow-soft);
-  color: var(--text);
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1.25;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transform: translate(-50%, 4px);
-  transition: opacity 140ms var(--ease-fluent) 260ms, transform 140ms var(--ease-fluent) 260ms;
-  backdrop-filter: blur(20px);
-}
-
-.icon-button[data-tooltip]:hover::after,
-.icon-button[data-tooltip]:focus-visible::after {
-  opacity: 1;
-  transform: translate(-50%, 0);
-}
-
 .fluent-button {
   display: inline-flex;
   align-items: center;
@@ -1559,4 +1529,37 @@ svg {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* Fixed portal tooltip: escapes every overflow/scroll container. */
+.app-tooltip {
+  position: fixed;
+  z-index: 300;
+  width: max-content;
+  max-width: min(340px, calc(100vw - 16px));
+  padding: 6px 9px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--panel);
+  box-shadow: var(--shadow-soft);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+  backdrop-filter: blur(20px);
+  animation: tooltip-in 120ms var(--ease-fluent);
+}
+
+@keyframes tooltip-in {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (hover: none) {
+  /* Touch devices have no hover; keep focus from leaving a sticky tooltip. */
+  .app-tooltip { display: none; }
 }

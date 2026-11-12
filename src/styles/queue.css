@@ -176,12 +176,6 @@
   height: 17px;
 }
 
-/* Keep toolbar tooltips readable even when the panel touches the viewport top. */
-.queue-toolbar-actions .icon-button[data-tooltip]::after {
-  top: calc(100% + 8px);
-  bottom: auto;
-}
-
 .queue-search-row {
   display: flex;
   align-items: center;

@@ -7,6 +7,7 @@ import { ArrowDownload24Regular, ArrowImport24Regular, FolderOpen24Regular } fro
 import './styles/index.css';
 import type { Track } from './lib/types';
 import { BottomBar } from './components/chrome/BottomBar';
+import { TooltipLayer } from './components/common/TooltipLayer';
 import { NowPlaying } from './components/nowplaying/NowPlaying';
 import { VideoStage } from './components/video/VideoStage';
 import { Toasts } from './components/overlays/Toasts';
@@ -316,6 +317,7 @@ export default function App(): React.ReactElement {
         <PlaylistDialog />
       </Suspense>
       <DropOverlay />
+      <TooltipLayer />
     </div>
   );
 }
