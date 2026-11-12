@@ -203,7 +203,11 @@ async function readText(file: File): Promise<string> {
   return file.text();
 }
 
-export async function importFiles(files: File[], onProgress?: ProgressCallback): Promise<ImportResult> {
+export async function importFiles(
+  files: File[],
+  onProgress?: ProgressCallback,
+  onTrack?: (track: Track) => void,
+): Promise<ImportResult> {
   const unique = Array.from(new Map(files.map((file) => [`${filePath(file)}:${file.size}:${file.lastModified}`, file])).values());
   const { groups, orphans } = groupFiles(unique);
   const tracks: Track[] = [];
@@ -295,6 +299,7 @@ export async function importFiles(files: File[], onProgress?: ProgressCallback):
         addedAt: Date.now(),
       };
       tracks.push(track);
+      onTrack?.(track);
     } catch (error) {
       warnings.push(`${group.media.name}: ${error instanceof Error ? error.message : String(error)}`);
     }

@@ -7,10 +7,12 @@ describe('online URL import', () => {
     expect(kindFromUrl('https://cdn.example/movie/trailer.mp4')).toBe('video');
     expect(kindFromUrl('https://cdn.example/download?id=42', 'video')).toBe('video');
 
+    const seen: string[] = [];
     const result = await importRemoteUrls([
       'https://cdn.example/album/My%20Song.mp3',
       'https://cdn.example/movie/trailer.mp4',
-    ]);
+    ], { onTrack: (track) => seen.push(track.title) });
+    expect(seen).toEqual(['My Song', 'trailer']);
     expect(result.warnings).toEqual([]);
     expect(result.tracks).toHaveLength(2);
     expect(result.tracks[0]).toMatchObject({

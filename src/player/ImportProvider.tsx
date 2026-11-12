@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { importFiles as readFiles } from '../lib/importer';
 import type { UrlKind } from '../lib/urlImport';
+import type { Track } from '../lib/types';
 import { useLibraryStore } from '../state/library';
 import { useUiStore } from '../state/ui';
 import { player } from '../player/engine';
@@ -43,37 +44,36 @@ export function ImportProvider({ children }: { children: ReactNode }): ReactNode
   const [busy, setBusy] = useState(false);
   const [urlOpen, setUrlOpen] = useState(false);
 
-  const commitTracks = useCallback((incoming: Awaited<ReturnType<typeof readFiles>>, showSkipped = true) => {
-    if (!incoming.tracks.length) {
-      useUiStore.getState().pushToast(t('toast.importEmpty'), 'error');
-      return false;
-    }
-    const accepted = useLibraryStore.getState().addTracks(incoming.tracks);
-    if (!accepted.length) {
-      useUiStore.getState().pushToast(t('toast.importEmpty'), 'error');
-      return false;
-    }
-    useUiStore.getState().pushToast(t('toast.imported', { count: accepted.length }));
-    if (showSkipped && incoming.warnings.length) {
-      useUiStore.getState().pushToast(t('toast.importSkipped', { count: incoming.warnings.length }));
-    }
+  const addImportedTrack = useCallback((track: Track): boolean => {
+    const accepted = useLibraryStore.getState().addTracks([track]);
+    if (!accepted.length) return false;
     player.ensureCurrent();
     if (!useLibraryStore.getState().currentId) {
       const first = accepted[0];
       if (first) player.load(first, { autoplay: false });
     }
     return true;
-  }, [t]);
+  }, []);
 
   const importFiles = useCallback(async (files: File[]) => {
     if (!files.length || busy) return;
     setBusy(true);
     useUiStore.getState().setImporting({ done: 0, total: files.length });
     try {
+      let imported = 0;
       const result = await readFiles(files, (done, total) => {
         useUiStore.getState().setImporting({ done, total });
+      }, (track) => {
+        if (addImportedTrack(track)) imported += 1;
       });
-      commitTracks(result);
+      if (!imported) {
+        useUiStore.getState().pushToast(result.warnings[0] ?? t('toast.importEmpty'), 'error');
+      } else {
+        useUiStore.getState().pushToast(t('toast.imported', { count: imported }));
+        if (result.warnings.length) {
+          useUiStore.getState().pushToast(t('toast.importSkipped', { count: result.warnings.length }));
+        }
+      }
     } catch (error) {
       console.error(error);
       useUiStore.getState().pushToast(t('toast.error'), 'error');
@@ -81,7 +81,7 @@ export function ImportProvider({ children }: { children: ReactNode }): ReactNode
       setBusy(false);
       useUiStore.getState().setImporting(null);
     }
-  }, [busy, commitTracks, t]);
+  }, [addImportedTrack, busy, t]);
 
   const importUrls = useCallback(async (urls: string[], kind: UrlKind): Promise<boolean> => {
     if (!urls.length || busy) return false;
@@ -89,26 +89,30 @@ export function ImportProvider({ children }: { children: ReactNode }): ReactNode
     useUiStore.getState().setImporting({ done: 0, total: urls.length });
     try {
       const { importRemoteUrls } = await import('../lib/urlImport');
+      let imported = 0;
       const result = await importRemoteUrls(urls, {
         kind,
         proxy: useSettingsStore.getState().bilibiliProxy,
         onProgress: (done, total) => {
           useUiStore.getState().setImporting({ done, total });
         },
+        onTrack: (track) => {
+          if (addImportedTrack(track)) imported += 1;
+        },
       });
-      if (!result.tracks.length) {
+      if (!imported) {
         useUiStore.getState().pushToast(result.warnings[0] ?? t('toast.importEmpty'), 'error');
         return false;
       }
-      const committed = commitTracks(result, false);
-      if (committed && result.tracks.some((track) => track.source === 'bilibili')) {
+      useUiStore.getState().pushToast(t('toast.imported', { count: imported }));
+      if (result.tracks.some((track) => track.source === 'bilibili')) {
         const settings = useSettingsStore.getState();
         const patch: Partial<typeof settings> = {};
         if (result.tracks.some((track) => track.danmakuText) && !settings.danmakuEnabled) patch.danmakuEnabled = true;
         if (result.tracks.some((track) => track.subtitles?.length) && settings.subtitleLang === 'off') patch.subtitleLang = 'auto';
         if (Object.keys(patch).length) useSettingsStore.getState().patch(patch);
       }
-      return committed;
+      return true;
     } catch (error) {
       console.error(error);
       useUiStore.getState().pushToast(error instanceof Error ? error.message : t('toast.error'), 'error');
@@ -117,7 +121,7 @@ export function ImportProvider({ children }: { children: ReactNode }): ReactNode
       setBusy(false);
       useUiStore.getState().setImporting(null);
     }
-  }, [busy, commitTracks, t]);
+  }, [addImportedTrack, busy, t]);
 
   const handleInput = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const files = Array.from(event.currentTarget.files ?? []);

@@ -20,6 +20,8 @@ export interface UrlImportOptions {
   proxy?: string;
   signal?: AbortSignal;
   onProgress?: (done: number, total: number, input: string) => void;
+  /** Called as soon as one input has been resolved, before the next input. */
+  onTrack?: (track: Track) => void;
 }
 
 export interface UrlImportResult {
@@ -168,9 +170,12 @@ export async function importRemoteUrls(
       if (isBilibiliUrl(input)) {
         const result = await bilibiliTrack(input, proxy);
         tracks.push(result.track);
+        options.onTrack?.(result.track);
         warnings.push(...result.warnings);
       } else {
-        tracks.push(directTrack(input, options.kind ?? 'auto'));
+        const track = directTrack(input, options.kind ?? 'auto');
+        tracks.push(track);
+        options.onTrack?.(track);
       }
     } catch (error) {
       warnings.push(`${input}: ${error instanceof Error ? error.message : String(error)}`);
