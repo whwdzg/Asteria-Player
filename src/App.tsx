@@ -109,7 +109,7 @@ function AppHeader(): React.ReactElement {
   return (
     <header className="app-header">
       <div className="brand">
-        <span className="brand-mark" aria-hidden="true"><span>A</span></span>
+        <span className="brand-mark" aria-hidden="true"><img src="icons/icon-192.png" alt="" /></span>
         <div className="brand-copy">
           <span className="brand-name">{t('app.name')}</span>
           <span className="brand-tagline">{t('app.tagline')}</span>
@@ -141,7 +141,7 @@ function EmptyStage(): React.ReactElement {
     <section className="empty-stage">
       <div className="empty-orb" aria-hidden="true">
         <span className="empty-orbit" />
-        <span className="empty-mark">A</span>
+        <img className="empty-mark" src="icons/icon-192.png" alt="" aria-hidden="true" />
       </div>
       <h1>{t('empty.title')}</h1>
       <p>{t('empty.hint')}</p>
