@@ -22,6 +22,7 @@ import { useOrientationFullscreen } from './hooks/useOrientationFullscreen';
 import { useI18n } from './i18n/I18nProvider';
 import { loadDemoLibrary } from './lib/demo';
 import { getDemoPreference, setDemoPreference } from './lib/demoPreference';
+import { isPwaStandalone, restorePwaLibrary, startPwaLibraryPersistence } from './lib/pwaLibrary';
 import { coverFallback } from './lib/cover';
 import { clamp } from './lib/format';
 import { collectDroppedFiles } from './lib/importer';
@@ -202,6 +203,8 @@ export default function App(): React.ReactElement {
   const setError = usePlaybackStore((state) => state.setError);
   const [bootError, setBootError] = useState(false);
   const [welcomeOpen, setWelcomeOpen] = useState(false);
+  const [bootReady, setBootReady] = useState(false);
+  const bootStarted = useRef(false);
   const dragCounter = useRef(0);
 
   const loadDemoContent = useCallback(() => {
@@ -226,17 +229,64 @@ export default function App(): React.ReactElement {
   }, []);
 
   useEffect(() => {
-    const preference = getDemoPreference();
-    if (preference === 'demo') {
-      loadDemoContent();
-      return;
-    }
-    // First launch, or a previous import choice: do not download demo media.
-    // Let the user choose real content first; skipping will load the demo.
-    useLibraryStore.getState().setLoaded(true);
-    player.initialize();
-    setWelcomeOpen(true);
+    if (bootStarted.current) return;
+    bootStarted.current = true;
+
+    const boot = async (): Promise<void> => {
+      // Installed PWA sessions restore the real playlist before any onboarding.
+      if (isPwaStandalone()) {
+        const restored = await restorePwaLibrary();
+        if (restored?.tracks.length) {
+          const library = useLibraryStore.getState();
+          library.setDemoTracks(restored.tracks);
+          const known = new Set(restored.tracks.map((track) => track.id));
+          if (restored.session) {
+            const queue = restored.session.queue.filter((id) => known.has(id));
+            if (queue.length) library.setQueue(queue, restored.session.sequenceId);
+            const current = restored.session.currentId && known.has(restored.session.currentId)
+              ? restored.session.currentId
+              : null;
+            library.setCurrent(current);
+          }
+          player.initialize();
+          const state = useLibraryStore.getState();
+          const current = state.tracks.find((track) => track.id === state.currentId);
+          if (current) {
+            player.load(current, {
+              autoplay: false,
+              position: current.id === useSettingsStore.getState().lastTrackId
+                ? useSettingsStore.getState().lastPosition
+                : 0,
+            });
+          } else {
+            player.ensureCurrent();
+          }
+          setBootReady(true);
+          return;
+        }
+      }
+
+      const preference = getDemoPreference();
+      if (preference === 'demo') {
+        loadDemoContent();
+        setBootReady(true);
+        return;
+      }
+      // First launch, or a previous import choice: do not download demo media.
+      // Let the user choose real content first; skipping will load the demo.
+      useLibraryStore.getState().setLoaded(true);
+      player.initialize();
+      setWelcomeOpen(true);
+      setBootReady(true);
+    };
+
+    void boot();
   }, [loadDemoContent]);
+
+  useEffect(() => {
+    if (!bootReady) return;
+    return startPwaLibraryPersistence();
+  }, [bootReady]);
 
   const useDemoContent = useCallback(() => {
     setDemoPreference('demo');

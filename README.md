@@ -250,6 +250,9 @@ SPL 语法按 [Salt Player Lyrics 标准](https://moriafly.com/standards/spl.htm
 
 ## PWA 与缓存
 
+- 以 installed PWA / standalone 模式运行时，真实导入的播放列表、当前项目和队列会保存在 IndexedDB，刷新或重新打开后继续；本地文件以 Blob 形式保存，封面和容器内联数据一并恢复。
+- 普通浏览器标签页不写入 PWA 媒体库，仍保持当前会话导入、刷新后重新导入的行为。
+
 - `public/manifest.webmanifest` 提供安装信息、主题色与 192 / 512 图标。
 - 生产构建会生成 `sw-assets.json` 预缓存清单，并把资源哈希写入 `sw.js` 的缓存版本；新部署会安装新 Service Worker 并清理旧缓存。
 - 导航请求采用 **network-first**：每次访问都会尝试获取最新页面，失败时回退到本地缓存。
