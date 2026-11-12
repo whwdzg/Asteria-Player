@@ -195,6 +195,9 @@ function finalize(
       id: index,
       start: line.start,
       end,
+      // parseBody always supplies a single fallback word for plain LRC; only
+      // finite per-word ends prove that the source actually had word timings.
+      wordTimed: line.words.some((word) => Number.isFinite(word.end)),
       text: line.text,
       translation: line.translation,
       words,

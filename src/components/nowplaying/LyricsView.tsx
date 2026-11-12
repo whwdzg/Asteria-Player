@@ -38,7 +38,7 @@ const LyricLineItem = memo(function LyricLineItem({
   onClick,
   setRef,
 }: LyricLineProps): React.ReactElement {
-  const words = active ? getWordProgress(line, time) : null;
+  const words = active && line.wordTimed ? getWordProgress(line, time) : null;
   const blur = blurEnabled && !active ? Math.min(2.8, Math.max(0, distance - 1) * 0.55) : 0;
   const opacity = active || (next && distance === 0)
     ? 1

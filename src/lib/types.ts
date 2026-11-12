@@ -101,6 +101,8 @@ export interface LyricWord {
 
 export interface LyricLine {
   id: number;
+  /** True only when the source supplied per-word timestamps. */
+  wordTimed: boolean;
   start: number;
   end: number;
   text: string;

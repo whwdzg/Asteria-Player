@@ -12,13 +12,14 @@ describe('parseLyrics', () => {
     expect(doc.synced).toBe(true);
     expect(doc.lines).toHaveLength(2);
     expect(doc.lines[0]).toMatchObject({ start: 1, end: 3.5, text: 'Hello', translation: '你好' });
-    expect(doc.lines[1]).toMatchObject({ start: 3.5, end: 8, text: 'World', translation: '世界' });
+    expect(doc.lines[1]).toMatchObject({ start: 3.5, end: 8, text: 'World', translation: '世界', wordTimed: false });
     expect(doc.meta.ti).toBe('Test');
   });
 
   it('parses SPL word timings and explicit line ends', () => {
     const doc = parseLyrics('[00:10.00]Hello <00:11.00>world[00:12.50]\n[00:13.00]Next', { duration: 20 });
     const line = doc.lines[0];
+    expect(line.wordTimed).toBe(true);
     expect(line.words.map((word) => word.text)).toEqual(['Hello ', 'world']);
     expect(line.words[0].start).toBeCloseTo(10);
     expect(line.words[0].end).toBeCloseTo(11);
