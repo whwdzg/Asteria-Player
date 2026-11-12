@@ -385,5 +385,6 @@
   "shortcut.volumeUp": "Volume up",
   "shortcut.volumeDown": "Volume down",
   "np.music": "Music",
-  "settings.commitTime": "Commit time {time}"
+  "settings.commitTime": "Commit time {time}",
+  "settings.subtitleLanguage": "Subtitle language"
 }

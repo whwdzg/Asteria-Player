@@ -385,5 +385,6 @@
   "shortcut.volumeUp": "增大音量",
   "shortcut.volumeDown": "減小音量",
   "np.music": "音樂",
-  "settings.commitTime": "提交時間 {time}"
+  "settings.commitTime": "提交時間 {time}",
+  "settings.subtitleLanguage": "字幕語言"
 }

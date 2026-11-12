@@ -41,72 +41,73 @@ export function VideoSettings(): React.ReactElement {
         <SlideText24Regular /> {t('settings.video')}
       </h3>
 
-      <div className="setting-row">
-        <div className="setting-label"><span>{t('settings.subtitle')}</span></div>
-        <Dropdown
-          value={settings.subtitleLang}
-          onChange={(value) => set('subtitleLang', value)}
-          options={subtitleOptions}
-          ariaLabel={t('settings.subtitle')}
-          menuLabel={t('settings.subtitle')}
-        />
-      </div>
-
       <div className="setting-row is-stacked">
-        <div className="setting-label"><span className="setting-subhead">{t('settings.subtitleStyle')}</span></div>
-        <div className="setting-row compact">
-          <div className="setting-label"><span>{t('settings.subtitleBg')}</span></div>
-          <span className="setting-inline-control">
-            <RangeSlider
-              value={settings.subtitleBgOpacity}
-              min={0}
-              max={1}
-              step={0.01}
-              onChange={(value) => set('subtitleBgOpacity', value)}
-              ariaLabel={t('settings.subtitleBg')}
-              ariaValueText={`${Math.round(settings.subtitleBgOpacity * 100)}%`}
+        <div className="setting-label"><span className="setting-subhead">{t('settings.subtitle')}</span></div>
+        <div className="setting-subgroup">
+          <div className="setting-row compact">
+            <div className="setting-label"><span>{t('settings.subtitleLanguage')}</span></div>
+            <Dropdown
+              value={settings.subtitleLang}
+              onChange={(value) => set('subtitleLang', value)}
+              options={subtitleOptions}
+              ariaLabel={t('settings.subtitleLanguage')}
+              menuLabel={t('settings.subtitleLanguage')}
             />
-            <NumberField
-              value={Math.round(settings.subtitleBgOpacity * 100)}
-              min={0}
-              max={100}
-              suffix="%"
-              ariaLabel={t('settings.subtitleBg')}
-              onChange={(value) => set('subtitleBgOpacity', value / 100)}
+          </div>
+          <div className="setting-row compact">
+            <div className="setting-label"><span>{t('settings.subtitleBg')}</span></div>
+            <span className="setting-inline-control">
+              <RangeSlider
+                value={settings.subtitleBgOpacity}
+                min={0}
+                max={1}
+                step={0.01}
+                onChange={(value) => set('subtitleBgOpacity', value)}
+                ariaLabel={t('settings.subtitleBg')}
+                ariaValueText={`${Math.round(settings.subtitleBgOpacity * 100)}%`}
+              />
+              <NumberField
+                value={Math.round(settings.subtitleBgOpacity * 100)}
+                min={0}
+                max={100}
+                suffix="%"
+                ariaLabel={t('settings.subtitleBg')}
+                onChange={(value) => set('subtitleBgOpacity', value / 100)}
+              />
+            </span>
+          </div>
+          <div className="setting-row compact">
+            <div className="setting-label"><span>{t('settings.subtitleOpacity')}</span></div>
+            <span className="setting-inline-control">
+              <RangeSlider
+                value={settings.subtitleTextOpacity}
+                min={0.2}
+                max={1}
+                step={0.01}
+                onChange={(value) => set('subtitleTextOpacity', value)}
+                ariaLabel={t('settings.subtitleOpacity')}
+                ariaValueText={`${Math.round(settings.subtitleTextOpacity * 100)}%`}
+              />
+              <NumberField
+                value={Math.round(settings.subtitleTextOpacity * 100)}
+                min={20}
+                max={100}
+                suffix="%"
+                ariaLabel={t('settings.subtitleOpacity')}
+                onChange={(value) => set('subtitleTextOpacity', value / 100)}
+              />
+            </span>
+          </div>
+          <div className="setting-row compact">
+            <div className="setting-label"><span>{t('settings.subtitleFont')}</span></div>
+            <Dropdown
+              value={settings.subtitleFont}
+              onChange={(value) => set('subtitleFont', value as Settings['subtitleFont'])}
+              options={fontOptions(t)}
+              ariaLabel={t('settings.subtitleFont')}
+              menuLabel={t('settings.subtitleFont')}
             />
-          </span>
-        </div>
-        <div className="setting-row compact">
-          <div className="setting-label"><span>{t('settings.subtitleOpacity')}</span></div>
-          <span className="setting-inline-control">
-            <RangeSlider
-              value={settings.subtitleTextOpacity}
-              min={0.2}
-              max={1}
-              step={0.01}
-              onChange={(value) => set('subtitleTextOpacity', value)}
-              ariaLabel={t('settings.subtitleOpacity')}
-              ariaValueText={`${Math.round(settings.subtitleTextOpacity * 100)}%`}
-            />
-            <NumberField
-              value={Math.round(settings.subtitleTextOpacity * 100)}
-              min={20}
-              max={100}
-              suffix="%"
-              ariaLabel={t('settings.subtitleOpacity')}
-              onChange={(value) => set('subtitleTextOpacity', value / 100)}
-            />
-          </span>
-        </div>
-        <div className="setting-row compact">
-          <div className="setting-label"><span>{t('settings.subtitleFont')}</span></div>
-          <Dropdown
-            value={settings.subtitleFont}
-            onChange={(value) => set('subtitleFont', value as Settings['subtitleFont'])}
-            options={fontOptions(t)}
-            ariaLabel={t('settings.subtitleFont')}
-            menuLabel={t('settings.subtitleFont')}
-          />
+          </div>
         </div>
       </div>
 
