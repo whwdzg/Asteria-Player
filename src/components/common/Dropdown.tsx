@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { useOverlayRoot } from '../../hooks/useOverlayRoot';
 
 export interface DropdownOption {
   value: string;
@@ -35,6 +36,7 @@ export function Dropdown({
   menuLabel,
 }: DropdownProps): React.ReactElement {
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const root = useOverlayRoot();
   const panelRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
@@ -153,7 +155,7 @@ export function Dropdown({
             </button>
           ))}
         </div>,
-        document.body,
+        root,
       ) : null}
     </>
   );

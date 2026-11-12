@@ -2,6 +2,7 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { Dismiss24Regular } from '@fluentui/react-icons';
 import { IconButton } from './IconButton';
+import { useOverlayRoot } from '../../hooks/useOverlayRoot';
 
 interface ModalProps {
   open: boolean;
@@ -15,6 +16,7 @@ interface ModalProps {
 
 export function Modal({ open, onClose, title, children, footer, size = 'md', closeLabel }: ModalProps): React.ReactElement | null {
   const panelRef = useRef<HTMLDivElement>(null);
+  const root = useOverlayRoot();
 
   useEffect(() => {
     if (!open) return;
@@ -73,6 +75,6 @@ export function Modal({ open, onClose, title, children, footer, size = 'md', clo
         {footer ? <footer className="modal-footer">{footer}</footer> : null}
       </div>
     </div>,
-    document.body,
+    root,
   );
 }

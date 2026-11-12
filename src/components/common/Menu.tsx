@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { Checkmark24Regular, ChevronLeft24Regular, ChevronRight24Regular } from '@fluentui/react-icons';
+import { useOverlayRoot } from '../../hooks/useOverlayRoot';
 
 export interface MenuAnchor {
   rect: DOMRect;
@@ -33,6 +34,7 @@ const MENU_MARGIN = 8;
 
 export function Menu({ open, anchor, items, onClose, label, width = 232 }: MenuProps): React.ReactElement | null {
   const panelRef = useRef<HTMLDivElement>(null);
+  const root = useOverlayRoot();
   const [stack, setStack] = useState<Array<{ label: string; items: MenuItemDef[] }>>([]);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const activeItems = stack.length ? stack[stack.length - 1].items : items;
@@ -152,6 +154,6 @@ export function Menu({ open, anchor, items, onClose, label, width = 232 }: MenuP
         );
       })}
     </div>,
-    document.body,
+    root,
   );
 }

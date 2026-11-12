@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useOverlayRoot } from '../../hooks/useOverlayRoot';
 
 interface TooltipState {
   text: string;
@@ -15,6 +16,7 @@ interface TooltipState {
  * its original bounds without changing each component.
  */
 export function TooltipLayer(): React.ReactElement | null {
+  const root = useOverlayRoot();
   const [tip, setTip] = useState<TooltipState | null>(null);
   const [position, setPosition] = useState({ top: -1000, left: -1000 });
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -115,6 +117,6 @@ export function TooltipLayer(): React.ReactElement | null {
     >
       {tip.text}
     </div>,
-    document.body,
+    root,
   );
 }

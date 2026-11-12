@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import type { Track } from '../../lib/types';
 import { useI18n } from '../../i18n/I18nProvider';
 import { CoverArt } from '../common/CoverArt';
+import { useOverlayRoot } from '../../hooks/useOverlayRoot';
 
 interface ArtworkLightboxProps {
   track: Track;
@@ -18,6 +19,7 @@ const CLOSE_DRAG = 120;
 
 export function ArtworkLightbox({ track, source, onClose }: ArtworkLightboxProps): React.ReactElement {
   const { t } = useI18n();
+  const root = useOverlayRoot();
   const [scale, setScale] = useState(1);
   const [offsetY, setOffsetY] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -127,6 +129,6 @@ export function ArtworkLightbox({ track, source, onClose }: ArtworkLightboxProps
         </div>
       </div>
     </div>,
-    document.body,
+    root,
   );
 }
