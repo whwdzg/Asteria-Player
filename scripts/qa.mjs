@@ -67,6 +67,18 @@ await page.keyboard.press('Escape');
 await page.locator('.queue-button').click();
 await page.waitForSelector('.queue-panel');
 check(await page.locator('.queue-panel.is-sidebar').count() === 1, 'queue opens as sidebar');
+await page.waitForTimeout(400);
+const queueOverflow = await page.evaluate(() => {
+  const panel = document.querySelector('.queue-panel');
+  const scroll = document.querySelector('.queue-scroll');
+  return {
+    right: panel.getBoundingClientRect().right,
+    viewport: window.innerWidth,
+    scrollWidth: scroll.scrollWidth,
+    clientWidth: scroll.clientWidth,
+  };
+});
+check(queueOverflow.right <= queueOverflow.viewport && queueOverflow.scrollWidth <= queueOverflow.clientWidth, 'queue has no horizontal overflow');
 await page.getByRole('button', { name: '展开' }).click();
 check(await page.locator('.queue-panel.is-full').count() === 1, 'queue expands to a full page');
 await page.getByRole('button', { name: '搜索' }).click();
