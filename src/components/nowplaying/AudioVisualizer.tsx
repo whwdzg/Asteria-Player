@@ -25,8 +25,14 @@ export function AudioVisualizer(): React.ReactElement | null {
     const waveform = new Uint8Array(512);
     const levels = new Float32Array(BAR_COUNT);
     let frame = 0;
+    let lastPaint = 0;
 
-    const tick = (): void => {
+    const tick = (timestamp: number): void => {
+      if (timestamp - lastPaint < 32) {
+        frame = window.requestAnimationFrame(tick);
+        return;
+      }
+      lastPaint = timestamp;
       const analyser = player.analyserNode;
       if (analyser) {
         analyser.getByteFrequencyData(data);
@@ -67,7 +73,7 @@ export function AudioVisualizer(): React.ReactElement | null {
       if (active || moving) frame = window.requestAnimationFrame(tick);
     };
 
-    tick();
+    frame = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(frame);
   }, [enabled, playing]);
 

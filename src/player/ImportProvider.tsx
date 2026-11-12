@@ -1,5 +1,7 @@
 import {
   createContext,
+  lazy,
+  Suspense,
   useCallback,
   useContext,
   useRef,
@@ -7,13 +9,13 @@ import {
   type ReactNode,
 } from 'react';
 import { importFiles as readFiles } from '../lib/importer';
-import { importRemoteUrls, type UrlKind } from '../lib/urlImport';
+import type { UrlKind } from '../lib/urlImport';
 import { useLibraryStore } from '../state/library';
 import { useUiStore } from '../state/ui';
 import { player } from '../player/engine';
 import { useI18n } from '../i18n/I18nProvider';
 import { useSettingsStore } from '../state/settings';
-import { UrlImportDialog } from '../components/overlays/UrlImportDialog';
+const UrlImportDialog = lazy(() => import('../components/overlays/UrlImportDialog').then((module) => ({ default: module.UrlImportDialog })));
 
 interface ImportContextValue {
   openFiles: () => void;
@@ -86,6 +88,7 @@ export function ImportProvider({ children }: { children: ReactNode }): ReactNode
     setBusy(true);
     useUiStore.getState().setImporting({ done: 0, total: urls.length });
     try {
+      const { importRemoteUrls } = await import('../lib/urlImport');
       const result = await importRemoteUrls(urls, {
         kind,
         proxy: useSettingsStore.getState().bilibiliProxy,
@@ -144,12 +147,16 @@ export function ImportProvider({ children }: { children: ReactNode }): ReactNode
         onChange={handleInput}
         aria-hidden="true"
       />
-      <UrlImportDialog
-        open={urlOpen}
-        busy={busy}
-        onClose={() => setUrlOpen(false)}
-        onImport={importUrls}
-      />
+      {urlOpen ? (
+        <Suspense fallback={null}>
+          <UrlImportDialog
+            open
+            busy={busy}
+            onClose={() => setUrlOpen(false)}
+            onImport={importUrls}
+          />
+        </Suspense>
+      ) : null}
       <input
         ref={folderInput}
         type="file"

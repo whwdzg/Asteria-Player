@@ -48,7 +48,10 @@ async function networkFirst(request) {
     if (response && response.ok) cache.put(request, response.clone());
     return response;
   } catch (error) {
-    const cached = await cache.match(request) || await cache.match(new URL('index.html', BASE).href);
+    // ignoreVary: static hosts can add Vary headers (for example Vary: Origin)
+    // that make a cached module miss even though the URL is identical.
+    const cached = await cache.match(request, { ignoreVary: true })
+      || await cache.match(new URL('index.html', BASE).href, { ignoreVary: true });
     if (cached) return cached;
     throw error;
   }
@@ -56,7 +59,7 @@ async function networkFirst(request) {
 
 async function staleWhileRevalidate(request) {
   const cache = await caches.open(VERSION);
-  const cached = await cache.match(request);
+  const cached = await cache.match(request, { ignoreVary: true });
   const update = fetch(request)
     .then((response) => {
       if (response && response.ok) cache.put(request, response.clone());

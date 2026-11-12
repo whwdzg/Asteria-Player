@@ -11,9 +11,7 @@ import { TooltipLayer } from './components/common/TooltipLayer';
 import { NowPlaying } from './components/nowplaying/NowPlaying';
 import { VideoStage } from './components/video/VideoStage';
 import { Toasts } from './components/overlays/Toasts';
-import { DetailsDialog } from './components/overlays/DetailsDialog';
-import { PlaylistDialog } from './components/overlays/PlaylistDialog';
-import { CollectionPage } from './components/overlays/CollectionPage';
+
 import { useAppearance } from './hooks/useTheme';
 import { useFullscreen } from './hooks/useFullscreen';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
@@ -33,6 +31,9 @@ import { useSettingsStore } from './state/settings';
 import { useUiStore } from './state/ui';
 
 const LazyQueuePanel = lazy(() => import('./components/queue/QueuePanel').then((module) => ({ default: module.QueuePanel })));
+const LazyDetailsDialog = lazy(() => import('./components/overlays/DetailsDialog').then((module) => ({ default: module.DetailsDialog })));
+const LazyPlaylistDialog = lazy(() => import('./components/overlays/PlaylistDialog').then((module) => ({ default: module.PlaylistDialog })));
+const LazyCollectionPage = lazy(() => import('./components/overlays/CollectionPage').then((module) => ({ default: module.CollectionPage })));
 
 function AmbientBackdrop({ track, accent }: { track?: Track; accent: string }): React.ReactElement {
   const dynamic = useSettingsStore((state) => state.dynamicBackground);
@@ -188,6 +189,9 @@ export default function App(): React.ReactElement {
   const tracks = useLibraryStore((state) => state.tracks);
   const loaded = useLibraryStore((state) => state.loaded);
   const queueView = useUiStore((state) => state.queueView);
+  const detailsTrackId = useUiStore((state) => state.detailsTrackId);
+  const playlistDialogOpen = useUiStore((state) => state.playlistDialogOpen);
+  const collectionView = useUiStore((state) => state.collectionView);
   const chromeVisible = useUiStore((state) => state.chromeVisible);
   const videoLocked = useUiStore((state) => state.videoLocked);
   const brightness = useSettingsStore((state) => state.brightness);
@@ -308,7 +312,11 @@ export default function App(): React.ReactElement {
       </main>
 
       <BottomBar onToggleFullscreen={toggleFullscreen} />
-      <CollectionPage />
+      {collectionView ? (
+        <Suspense fallback={null}>
+          <LazyCollectionPage />
+        </Suspense>
+      ) : null}
 
       {queueView !== 'closed' ? (
         <Suspense fallback={null}>
@@ -317,10 +325,16 @@ export default function App(): React.ReactElement {
       ) : null}
 
       <Toasts />
-      <Suspense fallback={null}>
-        <DetailsDialog />
-        <PlaylistDialog />
-      </Suspense>
+      {detailsTrackId ? (
+        <Suspense fallback={null}>
+          <LazyDetailsDialog />
+        </Suspense>
+      ) : null}
+      {playlistDialogOpen ? (
+        <Suspense fallback={null}>
+          <LazyPlaylistDialog />
+        </Suspense>
+      ) : null}
       <DropOverlay />
       <TooltipLayer />
     </div>

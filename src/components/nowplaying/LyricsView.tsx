@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { MusicNote224Regular, Translate24Regular } from '@fluentui/react-icons';
 import type { LyricLine, LyricsDocument } from '../../lib/types';
 import { findActiveLineIndex, getWordProgress } from '../../lib/lyrics';
@@ -6,6 +6,7 @@ import { resolveLyrics } from '../../lib/media';
 import { useClockStore } from '../../state/clock';
 import { useLibraryStore } from '../../state/library';
 import { useSettingsStore } from '../../state/settings';
+import { useShallow } from 'zustand/react/shallow';
 import { player } from '../../player/engine';
 import { useI18n } from '../../i18n/I18nProvider';
 import { fontStack } from '../../lib/fonts';
@@ -79,10 +80,23 @@ const LyricLineItem = memo(function LyricLineItem({
   );
 });
 
+/** Only the current line subscribes to the 20 Hz clock for word progress. */
+function ActiveLyricLine(props: Omit<LyricLineProps, 'time'>): React.ReactElement {
+  const time = useClockStore((state) => state.time);
+  return <LyricLineItem {...props} time={time} />;
+}
+
 export function LyricsView(): React.ReactElement {
   const track = useLibraryStore((state) => state.tracks.find((item) => item.id === state.currentId));
-  const settings = useSettingsStore();
-  const time = useClockStore((state) => state.time);
+  const settings = useSettingsStore(useShallow((state) => ({
+    lyricFont: state.lyricFont,
+    showTranslation: state.showTranslation,
+    lyricSize: state.lyricSize,
+    lyricWeight: state.lyricWeight,
+    lyricTranslationSize: state.lyricTranslationSize,
+    lyricBlur: state.lyricBlur,
+  })));
+  const patch = useSettingsStore((state) => state.patch);
   const { t } = useI18n();
   const [document, setDocument] = useState<LyricsDocument | null>(null);
   const [loading, setLoading] = useState(true);
@@ -120,10 +134,10 @@ export function LyricsView(): React.ReactElement {
     if (viewport) viewport.scrollTop = 0;
   }, [track?.id]);
 
-  const activeIndex = useMemo(() => {
+  const activeIndex = useClockStore((state) => {
     if (!document?.synced) return -1;
-    return findActiveLineIndex(document.lines, time);
-  }, [document, time]);
+    return findActiveLineIndex(document.lines, state.time);
+  });
 
   const scrollToActive = useCallback((behavior: ScrollBehavior = 'smooth') => {
     const viewport = viewportRef.current;
@@ -204,7 +218,7 @@ export function LyricsView(): React.ReactElement {
           aria-pressed={settings.showTranslation}
           aria-label={t('settings.showTranslation')}
           data-tooltip={t('settings.showTranslation')}
-          onClick={() => settings.patch({ showTranslation: !settings.showTranslation })}
+          onClick={() => patch({ showTranslation: !settings.showTranslation })}
         >
           <Translate24Regular />
         </button>
@@ -239,22 +253,24 @@ export function LyricsView(): React.ReactElement {
             onTouchMove={beginManualScroll}
           >
             <div className="lyrics-list">
-              {document.lines.map((line, index) => (
-                <LyricLineItem
-                  key={line.id}
-                  line={line}
-                  index={index}
-                  active={index === activeIndex}
-                  past={index < activeIndex}
-                  next={index === activeIndex + 1}
-                  distance={Math.abs(index - Math.max(0, activeIndex))}
-                  blurEnabled={settings.lyricBlur}
-                  time={index === activeIndex ? time : 0}
-                  showTranslation={settings.showTranslation}
-                  onClick={seekToLine}
-                  setRef={setLineRef}
-                />
-              ))}
+              {document.lines.map((line, index) => {
+                const active = index === activeIndex;
+                const common = {
+                  line,
+                  index,
+                  active,
+                  past: index < activeIndex,
+                  next: index === activeIndex + 1,
+                  distance: Math.abs(index - Math.max(0, activeIndex)),
+                  blurEnabled: settings.lyricBlur,
+                  showTranslation: settings.showTranslation,
+                  onClick: seekToLine,
+                  setRef: setLineRef,
+                };
+                return active
+                  ? <ActiveLyricLine key={line.id} {...common} />
+                  : <LyricLineItem key={line.id} {...common} time={0} />;
+              })}
             </div>
           </div>
         )}

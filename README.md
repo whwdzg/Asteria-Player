@@ -227,6 +227,13 @@ SPL 语法按 [Salt Player Lyrics 标准](https://moriafly.com/standards/spl.htm
 
 也可以在 **设置 → 外观 → 导入语言包** 中直接导入上述格式的 JSON；导入包保存在 `localStorage`，无需重新构建。未翻译的键会回退到英文。完整格式见 [docs/language-pack-json.md](docs/language-pack-json.md)。
 
+## 性能
+
+- 详情/作者/专辑/播放列表/设置等非首屏界面按需懒加载，减少首屏 JavaScript 体积。
+- 歌词列表只让当前行订阅高频时钟，非当前行由 memo 保持稳定。
+- 音频可视化限制为约 30fps，并在暂停后停止动画；队列行回调保持稳定以减少虚拟列表重渲染。
+- 播放列表使用虚拟滚动，视频弹幕和封面按需渲染。
+
 ## PWA 与缓存
 
 - `public/manifest.webmanifest` 提供安装信息、主题色与 192 / 512 图标。

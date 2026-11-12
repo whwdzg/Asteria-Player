@@ -7,7 +7,7 @@ import {
   MusicNote224Regular,
   TextBulletListAdd24Regular,
 } from '@fluentui/react-icons';
-import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
 import type { Track } from '../../lib/types';
 import { ALL_SEQUENCE, useLibraryStore } from '../../state/library';
 import { usePlaybackStore } from '../../state/playback';
@@ -77,14 +77,25 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
   const expand = (): void => setQueueView('full');
   const collapse = (): void => setQueueView('sidebar');
 
-  const toggleSelect = (id: string): void => {
+  const toggleSelect = useCallback((id: string): void => {
     setSelected((current) => {
       const next = new Set(current);
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
     });
-  };
+  }, []);
+
+  const playTrack = useCallback((track: Track): void => {
+    player.playTrack(track.id);
+  }, []);
+
+  const openItemMenu = useCallback((track: Track, element: HTMLElement): void => {
+    setItemMenu({
+      anchor: { rect: element.getBoundingClientRect(), element },
+      track,
+    });
+  }, []);
 
   const selectAll = (): void => {
     setSelected((current) => {
@@ -233,12 +244,9 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
           playing={isPlaying}
           batch={batch}
           selected={selected}
-          onPlay={(track) => player.playTrack(track.id)}
+          onPlay={playTrack}
           onToggleSelect={toggleSelect}
-          onMenu={(track, element) => setItemMenu({
-            anchor: { rect: element.getBoundingClientRect(), element },
-            track,
-          })}
+          onMenu={openItemMenu}
           empty={emptyState}
         />
       </aside>
