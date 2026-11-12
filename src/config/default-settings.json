@@ -123,6 +123,20 @@
         "shift": false,
         "meta": false
       },
+      "volumeUp": {
+        "code": "ArrowUp",
+        "ctrl": false,
+        "alt": false,
+        "shift": false,
+        "meta": false
+      },
+      "volumeDown": {
+        "code": "ArrowDown",
+        "ctrl": false,
+        "alt": false,
+        "shift": false,
+        "meta": false
+      },
       "queue": {
         "code": "KeyQ",
         "ctrl": false,

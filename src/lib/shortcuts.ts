@@ -11,6 +11,8 @@ export const SHORTCUT_ACTIONS: ShortcutAction[] = [
   'seekForward5',
   'fullscreen',
   'mute',
+  'volumeUp',
+  'volumeDown',
   'queue',
   'settings',
 ];
@@ -39,6 +41,8 @@ export const DEFAULT_SHORTCUTS: ShortcutMap = {
   seekForward5: spec('ArrowRight'),
   fullscreen: spec('KeyF'),
   mute: spec('KeyM'),
+  volumeUp: spec('ArrowUp'),
+  volumeDown: spec('ArrowDown'),
   queue: spec('KeyQ'),
   settings: spec('KeyS'),
 };

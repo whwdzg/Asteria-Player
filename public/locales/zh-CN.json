@@ -381,5 +381,7 @@
   "collection.albumCount": "{count} 张专辑",
   "settings.settingsJsonValid": "JSON 语法有效",
   "settings.settingsJsonSyntaxError": "语法错误（第 {line} 行，第 {column} 列）",
-  "settings.fsClockOpacity": "时间透明度"
+  "settings.fsClockOpacity": "时间透明度",
+  "shortcut.volumeUp": "增大音量",
+  "shortcut.volumeDown": "减小音量"
 }

@@ -381,5 +381,7 @@
   "collection.albumCount": "{count} albums",
   "settings.settingsJsonValid": "JSON syntax is valid",
   "settings.settingsJsonSyntaxError": "Syntax error (line {line}, column {column})",
-  "settings.fsClockOpacity": "Clock opacity"
+  "settings.fsClockOpacity": "Clock opacity",
+  "shortcut.volumeUp": "Volume up",
+  "shortcut.volumeDown": "Volume down"
 }

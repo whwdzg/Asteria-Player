@@ -16,6 +16,8 @@ export type ShortcutAction =
   | 'seekForward5'
   | 'fullscreen'
   | 'mute'
+  | 'volumeUp'
+  | 'volumeDown'
   | 'queue'
   | 'settings';
 

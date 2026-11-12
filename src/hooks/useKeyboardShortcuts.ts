@@ -37,6 +37,8 @@ export function useKeyboardShortcuts({ toggleFullscreen, exitFullscreen, isVideo
         case 'seekForward5': player.seekBy(5); break;
         case 'fullscreen': toggleFullscreen(); break;
         case 'mute': settings.toggleMute(); break;
+        case 'volumeUp': settings.setVolume(settings.volume + 0.05); break;
+        case 'volumeDown': settings.setVolume(settings.volume - 0.05); break;
         case 'queue':
           if (ui.queueView === 'closed') ui.openQueue('sidebar');
           else ui.setQueueView('closed');
