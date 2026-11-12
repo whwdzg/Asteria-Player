@@ -1271,3 +1271,69 @@
     --bottom-bar-height: 148px;
   }
 }
+
+/* Narrow bottom bar: distribute the six transport controls across the row
+   instead of leaving fixed-size buttons clustered in the centre. The leading
+   spacer mirrors the mode button, so the play/pause control remains exactly
+   centred. */
+@media (max-width: 700px) {
+  .transport-controls {
+    --transport-btn: clamp(34px, 9.4vw, 44px);
+    --transport-play: clamp(40px, 11vw, 50px);
+    display: flex;
+    width: min(100%, 440px);
+    margin: 0 auto;
+    padding: 0;
+    gap: 4px;
+  }
+
+  .transport-controls::before {
+    content: "";
+    display: block;
+    flex: 0 0 var(--transport-btn);
+  }
+
+  .transport-main {
+    display: grid;
+    flex: 1;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0;
+  }
+
+  .transport-controls .icon-button {
+    justify-self: center;
+    width: var(--transport-btn);
+    height: var(--transport-btn);
+  }
+
+  .transport-controls .icon-button > svg {
+    width: clamp(17px, 4.4vw, 20px);
+    height: clamp(17px, 4.4vw, 20px);
+  }
+
+  .transport-controls .transport-mode {
+    width: var(--transport-btn);
+    height: var(--transport-btn);
+    justify-self: end;
+  }
+
+  .transport-controls .play-button {
+    justify-self: center;
+    width: var(--transport-play);
+    height: var(--transport-play);
+    margin: 0;
+    border-radius: 50%;
+  }
+
+  .transport-controls .play-button > svg {
+    width: clamp(19px, 5vw, 23px);
+    height: clamp(19px, 5vw, 23px);
+  }
+}
+
+@media (max-width: 380px) {
+  .transport-controls {
+    --transport-btn: 32px;
+    --transport-play: 38px;
+  }
+}
