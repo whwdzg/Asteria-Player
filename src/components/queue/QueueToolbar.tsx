@@ -5,6 +5,7 @@ import {
   Dismiss24Regular,
   FolderOpen24Regular,
   FullScreenMaximize24Regular,
+  Link24Regular,
   PanelRightContract24Regular,
   Search24Regular,
   SelectAllOn24Regular,
@@ -69,7 +70,7 @@ export function QueueToolbar({
   onClose,
 }: QueueToolbarProps): React.ReactElement {
   const { t } = useI18n();
-  const { openFiles, openFolder } = useImporter();
+  const { openFiles, openFolder, openUrl } = useImporter();
   const autoPlayNext = useSettingsStore((state) => state.autoPlayNext);
   const patchSettings = useSettingsStore((state) => state.patch);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -233,6 +234,7 @@ export function QueueToolbar({
             items={[
               { id: 'files', label: t('menu.importFiles'), icon: <ArrowImport24Regular />, onSelect: openFiles },
               { id: 'folder', label: t('menu.importFolder'), icon: <FolderOpen24Regular />, onSelect: openFolder },
+              { id: 'url', label: t('menu.importUrl'), icon: <Link24Regular />, onSelect: openUrl },
               { id: 'hint', label: t('menu.importHint'), heading: true },
             ]}
             onClose={() => setImportAnchor(null)}

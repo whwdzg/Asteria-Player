@@ -52,6 +52,14 @@ interface BilibiliSearchPayload {
   data?: { result?: BilibiliSearchItem[] };
 }
 
+interface BilibiliPlayUrlPayload {
+  code?: number;
+  message?: string;
+  data?: {
+    durl?: Array<{ url?: string; backup_url?: string[]; size?: number }>;
+  };
+}
+
 interface BilibiliViewPayload {
   code?: number;
   message?: string;
@@ -158,8 +166,10 @@ export async function fetchBilibiliPages(bvid: string, proxy: string, signal?: A
   video: BilibiliVideo;
   pages: BilibiliPage[];
 }> {
+  const isAid = /^av\d+$/i.test(bvid);
+  const idParam = isAid ? `aid=${Number(bvid.slice(2))}` : `bvid=${encodeURIComponent(bvid)}`;
   const payload = await json<BilibiliViewPayload>(
-    `https://api.bilibili.com/x/web-interface/view?bvid=${encodeURIComponent(bvid)}`,
+    `https://api.bilibili.com/x/web-interface/view?${idParam}`,
     proxy,
     signal,
   );
@@ -177,7 +187,7 @@ export async function fetchBilibiliPages(bvid: string, proxy: string, signal?: A
     }));
   return {
     video: {
-      bvid,
+      bvid: data.bvid ?? bvid,
       title: data.title ?? bvid,
       author: data.owner?.name ?? '',
       cover: data.pic ? normalizeUrl(data.pic) : undefined,
@@ -186,6 +196,42 @@ export async function fetchBilibiliPages(bvid: string, proxy: string, signal?: A
     },
     pages,
   };
+}
+
+/**
+ * Resolve a progressive MP4/FLV stream for a page. Bilibili returns DASH
+ * (separate audio/video) for most modern clients; the html5 platform request
+ * asks for a progressive `durl` instead so a single <video> element can play it.
+ * The URL must normally travel through the configured CORS/media proxy.
+ */
+export async function fetchBilibiliPlayUrl(bvid: string, cid: number, proxy: string): Promise<string> {
+  const params = new URLSearchParams({
+    bvid,
+    cid: String(cid),
+    qn: '64',
+    fnval: '0',
+    fnver: '0',
+    fourk: '1',
+    platform: 'html5',
+    high_quality: '1',
+  });
+  const payload = await json<BilibiliPlayUrlPayload>(
+    `https://api.bilibili.com/x/player/playurl?${params.toString()}`,
+    proxy,
+  );
+  if (payload.code !== 0) {
+    throw new Error(payload.message || `Bilibili playurl returned ${payload.code ?? 'an error'}`);
+  }
+  const stream = (payload.data?.durl ?? [])
+    .map((item) => item.url || item.backup_url?.[0])
+    .filter((url): url is string => Boolean(url))
+    .sort((a, b) => {
+      const sizeA = payload.data?.durl?.find((item) => item.url === a)?.size ?? 0;
+      const sizeB = payload.data?.durl?.find((item) => item.url === b)?.size ?? 0;
+      return sizeB - sizeA;
+    })[0];
+  if (!stream) throw new Error('Bilibili did not return a progressive video stream.');
+  return proxied(stream, proxy);
 }
 
 /** Pick the page referenced by a P1/P2 subtitle, otherwise the first page. */

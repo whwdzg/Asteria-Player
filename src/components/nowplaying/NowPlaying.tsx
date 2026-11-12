@@ -98,7 +98,13 @@ export function ArtworkPanel(): React.ReactElement | null {
 
       <div className="np-source-note">
         <MusicNote224Regular />
-        <span>{track.source === 'demo' ? t('details.demo') : t('details.local')}</span>
+        <span>{track.source === 'demo'
+          ? t('details.demo')
+          : track.source === 'bilibili'
+            ? t('details.bilibili')
+            : track.source === 'url'
+              ? t('details.url')
+              : t('details.local')}</span>
         <span className="np-source-sep" aria-hidden="true">·</span>
         <span>{track.fileName ?? track.format ?? t('np.video')}</span>
       </div>

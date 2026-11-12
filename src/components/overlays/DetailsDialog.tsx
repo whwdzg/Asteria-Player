@@ -53,7 +53,13 @@ export function DetailsDialog(): React.ReactElement | null {
           { label: t('details.hasDanmaku'), value: hasDanmaku ? t('details.yes') : t('details.no') },
         ]),
     { label: t('details.file'), value: track.fileName ?? track.title },
-    { label: t('details.source'), value: track.source === 'demo' ? t('details.demo') : t('details.local') },
+    { label: t('details.source'), value: track.source === 'demo'
+      ? t('details.demo')
+      : track.source === 'bilibili'
+        ? t('details.bilibili')
+        : track.source === 'url'
+          ? t('details.url')
+          : t('details.local') },
     { label: t('np.format'), value: track.format ?? '—' },
     { label: t('np.sampleRate'), value: formatSampleRate(track.sampleRate) ?? '—' },
     { label: t('np.bitDepth'), value: track.bitDepth ? `${track.bitDepth}-bit` : '—' },

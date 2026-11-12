@@ -3,7 +3,7 @@
  * layout and global chrome/gesture coordination.
  */
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { ArrowDownload24Regular, ArrowImport24Regular, FolderOpen24Regular } from '@fluentui/react-icons';
+import { ArrowDownload24Regular, ArrowImport24Regular, FolderOpen24Regular, Link24Regular } from '@fluentui/react-icons';
 import './styles/index.css';
 import type { Track } from './lib/types';
 import { BottomBar } from './components/chrome/BottomBar';
@@ -134,7 +134,7 @@ function StageSkeleton(): React.ReactElement {
 
 function EmptyStage(): React.ReactElement {
   const { t } = useI18n();
-  const { openFiles, openFolder } = useImporter();
+  const { openFiles, openFolder, openUrl } = useImporter();
   return (
     <section className="empty-stage">
       <div className="empty-orb" aria-hidden="true">
@@ -149,6 +149,9 @@ function EmptyStage(): React.ReactElement {
         </button>
         <button type="button" className="fluent-button" onClick={openFolder}>
           <FolderOpen24Regular /> {t('menu.importFolder')}
+        </button>
+        <button type="button" className="fluent-button" onClick={openUrl}>
+          <Link24Regular /> {t('menu.importUrl')}
         </button>
       </div>
       <div className="empty-formats">

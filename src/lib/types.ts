@@ -54,7 +54,7 @@ export interface Track {
   duration: number;
   cover?: string;
   accent?: string;
-  source: 'demo' | 'local';
+  source: 'demo' | 'local' | 'url' | 'bilibili';
   /** Inline or already-loaded lyrics text. */
   lyrics?: string;
   /** Remote lyrics URL for the demo library. */

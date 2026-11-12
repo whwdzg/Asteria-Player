@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   fetchBilibiliDanmaku,
+  fetchBilibiliPlayUrl,
   fetchDanmuApiDanmaku,
   searchDanmuApiEpisodes,
   fetchBilibiliPages,
@@ -131,6 +132,24 @@ describe('Bilibili service', () => {
     });
     const danmaku = JSON.parse(await fetchDanmuApiDanmaku(77, 'https://danmu.example/87654321'));
     expect(danmaku[0]).toMatchObject({ time: 1, text: 'Hello' });
+  });
+
+  it('resolves a progressive Bilibili stream through the proxy', async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const raw = String(input);
+      const url = raw.includes('url=') ? decodeURIComponent(raw.slice(raw.indexOf('url=') + 4)) : raw;
+      expect(url).toContain('player/playurl');
+      expect(url).toContain('fnval=0');
+      return jsonResponse({
+        code: 0,
+        data: { durl: [{ url: 'https://cdn.example/video.mp4', size: 2048 }] },
+      });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(fetchBilibiliPlayUrl('BV1xx411c7mD', 123, '')).resolves.toBe('https://cdn.example/video.mp4');
+    await expect(fetchBilibiliPlayUrl('BV1xx411c7mD', 123, 'https://proxy.example/?url='))
+      .resolves.toBe(`https://proxy.example/?url=${encodeURIComponent('https://cdn.example/video.mp4')}`);
   });
 
   it('reports API and empty-result errors', async () => {
