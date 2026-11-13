@@ -530,5 +530,11 @@
   "queue.sortBy.title": "标题首字母",
   "queue.sortBy.added": "添加时间",
   "queue.sortBy.album": "专辑首字母",
-  "queue.sortBy.artist": "作者首字母"
+  "queue.sortBy.artist": "作者首字母",
+  "settings.onlineUpdate": "联网更新",
+  "settings.onlineUpdateHint": "联网获取最新页面、语言 JSON 和资源文件，然后刷新页面。",
+  "settings.updateNow": "检查更新并刷新",
+  "settings.updating": "正在更新…",
+  "settings.updateFailed": "更新检查失败，请检查网络后重试。",
+  "welcome.pwaHint": "安装为 PWA 应用可在刷新或重新打开后保留媒体库、播放队列和播放进度。"
 }

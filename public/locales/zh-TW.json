@@ -530,5 +530,11 @@
   "queue.sortBy.title": "標題首字母",
   "queue.sortBy.added": "加入時間",
   "queue.sortBy.album": "專輯首字母",
-  "queue.sortBy.artist": "作者首字母"
+  "queue.sortBy.artist": "作者首字母",
+  "settings.onlineUpdate": "聯網更新",
+  "settings.onlineUpdateHint": "聯網取得最新頁面、語言 JSON 和資源檔案，然後重新整理。",
+  "settings.updateNow": "檢查更新並重新整理",
+  "settings.updating": "正在更新…",
+  "settings.updateFailed": "更新檢查失敗，請檢查網路後重試。",
+  "welcome.pwaHint": "安裝為 PWA 應用程式可在重新整理或重新開啟後保留媒體庫、播放佇列和播放進度。"
 }

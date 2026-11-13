@@ -530,5 +530,11 @@
   "queue.sortBy.title": "Title A–Z",
   "queue.sortBy.added": "Date added",
   "queue.sortBy.album": "Album A–Z",
-  "queue.sortBy.artist": "Artist A–Z"
+  "queue.sortBy.artist": "Artist A–Z",
+  "settings.onlineUpdate": "Online update",
+  "settings.onlineUpdateHint": "Fetch the latest page, language JSON and cached assets, then refresh.",
+  "settings.updateNow": "Check & refresh",
+  "settings.updating": "Updating…",
+  "settings.updateFailed": "Update check failed. Check your connection and try again.",
+  "welcome.pwaHint": "Install Asteria Player as a PWA to keep your media library, queue and playback position after a refresh."
 }

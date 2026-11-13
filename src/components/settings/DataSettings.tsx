@@ -1,8 +1,9 @@
-import { Code24Regular, MusicNote224Regular, TextBulletListLtr24Regular } from '@fluentui/react-icons';
+import { ArrowSync24Regular, Code24Regular, MusicNote224Regular, TextBulletListLtr24Regular } from '@fluentui/react-icons';
 import { useCallback, useEffect, useState } from 'react';
 import { useI18n } from '../../i18n/I18nProvider';
 import { clearApplicationCaches } from '../../lib/cache';
 import { clearPwaLibrary } from '../../lib/pwaLibrary';
+import { refreshWithLatest } from '../../lib/refresh';
 import { formatStorageBytes, measureStorageUsage, type StorageUsage } from '../../lib/storageUsage';
 import { player } from '../../player/engine';
 import { useLibraryStore } from '../../state/library';
@@ -18,7 +19,7 @@ type ClearAction = 'cache' | 'playlists' | 'media' | null;
  * operation asks for confirmation because it cannot be undone.
  */
 export function DataSettings(): React.ReactElement {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const pushToast = useUiStore((state) => state.pushToast);
   const tracks = useLibraryStore((state) => state.tracks);
   const playlists = useLibraryStore((state) => state.playlists);
@@ -26,6 +27,7 @@ export function DataSettings(): React.ReactElement {
   const [confirm, setConfirm] = useState<ClearAction>(null);
   const [usage, setUsage] = useState<StorageUsage | null>(null);
   const [usageLoading, setUsageLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
 
   const refreshUsage = useCallback(async (): Promise<void> => {
     setUsageLoading(true);
@@ -39,6 +41,17 @@ export function DataSettings(): React.ReactElement {
   useEffect(() => {
     void refreshUsage();
   }, [refreshUsage]);
+
+  const checkUpdates = async (): Promise<void> => {
+    setUpdating(true);
+    try {
+      await refreshWithLatest(language);
+    } catch (error) {
+      console.error(error);
+      pushToast(t('settings.updateFailed'), 'error');
+      setUpdating(false);
+    }
+  };
 
   const runClear = async (): Promise<void> => {
     const action = confirm;
@@ -119,6 +132,17 @@ export function DataSettings(): React.ReactElement {
             </div>
           </>
         ) : <p className="storage-usage-loading">{t('settings.storageMeasuring')}</p>}
+      </div>
+
+      <div className="setting-row">
+        <div className="setting-label">
+          <span>{t('settings.onlineUpdate')}</span>
+          <small>{t('settings.onlineUpdateHint')}</small>
+        </div>
+        <button type="button" className="fluent-button" disabled={updating} onClick={() => void checkUpdates()}>
+          <ArrowSync24Regular className={updating ? 'spin-slow' : ''} />
+          {updating ? t('settings.updating') : t('settings.updateNow')}
+        </button>
       </div>
 
       <div className="setting-row">

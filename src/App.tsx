@@ -26,7 +26,7 @@ import { useMediaQuery } from './hooks/useMediaQuery';
 import { useOrientationFullscreen } from './hooks/useOrientationFullscreen';
 import { useI18n } from './i18n/I18nProvider';
 import { loadDemoLibrary } from './lib/demo';
-import { getDemoPreference, setDemoPreference } from './lib/demoPreference';
+import { getDemoPreference, hasUsedApp, markAppUsed, setDemoPreference } from './lib/demoPreference';
 import { findUnreadableTracks } from './lib/mediaIntegrity';
 import { isPwaStandalone, restorePwaLibrary, startPwaLibraryPersistence } from './lib/pwaLibrary';
 import { coverThemeColor, NEUTRAL_PLAYER_ACCENT } from './lib/coverTheme';
@@ -214,6 +214,7 @@ export default function App(): React.ReactElement {
   const sleepMode = useSleepTimerStore((state) => state.mode);
   const sleepEndsAt = useSleepTimerStore((state) => state.endsAt);
   const [welcomeOpen, setWelcomeOpen] = useState(false);
+  const [welcomePwaHint, setWelcomePwaHint] = useState(false);
   const [bootReady, setBootReady] = useState(false);
   const barCollapsed = useUiStore((state) => state.barCollapsed);
   const bootStarted = useRef(false);
@@ -285,14 +286,23 @@ export default function App(): React.ReactElement {
         }
       }
 
-      const preference = getDemoPreference();
-      if (preference === 'demo') {
-        loadDemoContent();
+      if (isPwaStandalone()) {
+        const preference = getDemoPreference();
+        if (preference === 'demo') {
+          loadDemoContent();
+          setBootReady(true);
+          return;
+        }
+        useLibraryStore.getState().setLoaded(true);
+        player.initialize();
+        setWelcomeOpen(true);
         setBootReady(true);
         return;
       }
-      // First launch, or a previous import choice: do not download demo media.
-      // Let the user choose real content first; skipping will load the demo.
+
+      // A normal browser tab never persists imported media across reloads.
+      // Ask again on every refresh; returning visitors also get the PWA hint.
+      setWelcomePwaHint(hasUsedApp());
       useLibraryStore.getState().setLoaded(true);
       player.initialize();
       setWelcomeOpen(true);
@@ -308,6 +318,7 @@ export default function App(): React.ReactElement {
   }, [bootReady]);
 
   const useDemoContent = useCallback(() => {
+    markAppUsed();
     setDemoPreference('demo');
     setWelcomeOpen(false);
     loadDemoContent();
@@ -457,9 +468,10 @@ export default function App(): React.ReactElement {
       <ScanMediaPrompt />
       {welcomeOpen ? (
         <WelcomeDialog
-          onOpenFiles={() => { setWelcomeOpen(false); openFiles(); }}
-          onOpenFolder={() => { setWelcomeOpen(false); openFolder(); }}
-          onOpenUrl={() => { setWelcomeOpen(false); openUrl(); }}
+          showPwaHint={welcomePwaHint}
+          onOpenFiles={() => { markAppUsed(); setWelcomeOpen(false); openFiles(); }}
+          onOpenFolder={() => { markAppUsed(); setWelcomeOpen(false); openFolder(); }}
+          onOpenUrl={() => { markAppUsed(); setWelcomeOpen(false); openUrl(); }}
           onUseDemo={useDemoContent}
         />
       ) : null}

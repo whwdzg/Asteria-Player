@@ -2,12 +2,14 @@ import {
   ArrowImport24Regular,
   FolderOpen24Regular,
   Link24Regular,
+  PhoneDesktop24Regular,
   Play24Filled,
 } from '@fluentui/react-icons';
 import { useI18n } from '../../i18n/I18nProvider';
 import { Modal } from '../common/Modal';
 
 interface WelcomeDialogProps {
+  showPwaHint?: boolean;
   onOpenFiles: () => void;
   onOpenFolder: () => void;
   onOpenUrl: () => void;
@@ -16,6 +18,7 @@ interface WelcomeDialogProps {
 
 /** First-run choice: import real content now, or deliberately load the demo. */
 export function WelcomeDialog({
+  showPwaHint = false,
   onOpenFiles,
   onOpenFolder,
   onOpenUrl,
@@ -50,6 +53,12 @@ export function WelcomeDialog({
             <Link24Regular /> {t('menu.importUrl')}
           </button>
         </div>
+        {showPwaHint ? (
+          <div className="welcome-pwa-hint">
+            <PhoneDesktop24Regular />
+            <span>{t('welcome.pwaHint')}</span>
+          </div>
+        ) : null}
         <p className="welcome-note">{t('welcome.note')}</p>
       </div>
     </Modal>

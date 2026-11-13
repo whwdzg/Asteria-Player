@@ -18,3 +18,21 @@ export function setDemoPreference(value: DemoPreference): void {
     // Private browsing / disabled storage: keep the in-memory session usable.
   }
 }
+
+export const APP_USED_KEY = 'asteria-has-used';
+
+export function hasUsedApp(): boolean {
+  try {
+    return localStorage.getItem(APP_USED_KEY) === '1' || getDemoPreference() !== null;
+  } catch {
+    return false;
+  }
+}
+
+export function markAppUsed(): void {
+  try {
+    localStorage.setItem(APP_USED_KEY, '1');
+  } catch {
+    // Ignore blocked storage.
+  }
+}

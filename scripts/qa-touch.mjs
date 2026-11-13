@@ -22,6 +22,9 @@ const check = (condition, message) => {
 };
 
 await page.goto(url, { waitUntil: 'networkidle' });
+await page.waitForSelector('.welcome-dialog', { timeout: 20000 });
+await page.locator('.modal-footer .fluent-button').click();
+await page.waitForTimeout(900);
 await page.waitForSelector('.np-title', { timeout: 20000 });
 check(await page.locator('.mobile-player').count() === 1, 'mobile cover player renders on a phone');
 await page.locator('.volume-slot > .icon-button').click();
