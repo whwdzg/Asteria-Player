@@ -536,5 +536,8 @@
   "settings.updateNow": "Check & refresh",
   "settings.updating": "Updating…",
   "settings.updateFailed": "Update check failed. Check your connection and try again.",
-  "welcome.pwaHint": "Install Asteria Player as a PWA to keep your media library, queue and playback position after a refresh."
+  "welcome.pwaHint": "Install Asteria Player as a PWA to keep your media library, queue and playback position after a refresh.",
+  "queue.deleteSequence": "Delete current sequence",
+  "queue.deleteSequenceConfirm": "Delete the sequence “{name}” from the sequence list? The media files remain in the library.",
+  "queue.sequenceDeleted": "Sequence deleted"
 }

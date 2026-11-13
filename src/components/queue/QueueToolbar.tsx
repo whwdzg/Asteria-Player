@@ -46,6 +46,7 @@ interface QueueToolbarProps {
   onNewPlaylist: (trackIds: string[]) => void;
   onScanMedia: () => void;
   onSortChange: (sort: QueueSort) => void;
+  onDeleteSequence: () => void;
   onSequenceChange: (id: string) => void;
   onExpand: () => void;
   onCollapse: () => void;
@@ -73,6 +74,7 @@ export function QueueToolbar({
   onNewPlaylist,
   onScanMedia,
   onSortChange,
+  onDeleteSequence,
   onSequenceChange,
   onExpand,
   onCollapse,
@@ -216,6 +218,15 @@ export function QueueToolbar({
             >
               <ArrowSort24Regular />
             </IconButton>
+            {sequenceId !== 'all' ? (
+              <IconButton
+                label={t('queue.deleteSequence')}
+                tooltip={t('queue.deleteSequence')}
+                onClick={onDeleteSequence}
+              >
+                <Delete24Regular />
+              </IconButton>
+            ) : null}
             <IconButton
               label={t('queue.scanMedia')}
               tooltip={t('queue.scanMedia')}

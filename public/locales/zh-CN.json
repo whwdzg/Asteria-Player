@@ -536,5 +536,8 @@
   "settings.updateNow": "检查更新并刷新",
   "settings.updating": "正在更新…",
   "settings.updateFailed": "更新检查失败，请检查网络后重试。",
-  "welcome.pwaHint": "安装为 PWA 应用可在刷新或重新打开后保留媒体库、播放队列和播放进度。"
+  "welcome.pwaHint": "安装为 PWA 应用可在刷新或重新打开后保留媒体库、播放队列和播放进度。",
+  "queue.deleteSequence": "删除当前播放序列",
+  "queue.deleteSequenceConfirm": "从序列列表删除「{name}」？媒体文件仍会保留在媒体库中。",
+  "queue.sequenceDeleted": "播放序列已删除"
 }

@@ -536,5 +536,8 @@
   "settings.updateNow": "檢查更新並重新整理",
   "settings.updating": "正在更新…",
   "settings.updateFailed": "更新檢查失敗，請檢查網路後重試。",
-  "welcome.pwaHint": "安裝為 PWA 應用程式可在重新整理或重新開啟後保留媒體庫、播放佇列和播放進度。"
+  "welcome.pwaHint": "安裝為 PWA 應用程式可在重新整理或重新開啟後保留媒體庫、播放佇列和播放進度。",
+  "queue.deleteSequence": "刪除目前播放序列",
+  "queue.deleteSequenceConfirm": "從序列清單刪除「{name}」？媒體檔案仍會保留在媒體庫中。",
+  "queue.sequenceDeleted": "播放序列已刪除"
 }

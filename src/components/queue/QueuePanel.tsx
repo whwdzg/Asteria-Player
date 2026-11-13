@@ -17,6 +17,7 @@ import { player } from '../../player/engine';
 import { useI18n } from '../../i18n/I18nProvider';
 import { useImporter } from '../../player/ImportProvider';
 import { Menu, type MenuAnchor } from '../common/Menu';
+import { ConfirmDialog } from '../common/ConfirmDialog';
 import { PlayModeIcon } from '../chrome/TransportControls';
 import { QueueList } from './QueueList';
 import { QueueToolbar } from './QueueToolbar';
@@ -36,6 +37,7 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
   const sequenceId = useLibraryStore((state) => state.sequenceId);
   const queueSort = useLibraryStore((state) => state.queueSort);
   const sortQueue = useLibraryStore((state) => state.sortQueue);
+  const deletePlaylist = useLibraryStore((state) => state.deletePlaylist);
   const playlists = useLibraryStore((state) => state.playlists);
   const isPlaying = usePlaybackStore((state) => state.isPlaying);
   const playMode = useSettingsStore((state) => state.playMode);
@@ -46,6 +48,7 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
   const openPlaylistDialog = useUiStore((state) => state.openPlaylistDialog);
   const openScanMedia = useUiStore((state) => state.openScanMedia);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [deleteSequenceOpen, setDeleteSequenceOpen] = useState(false);
   const [query, setQuery] = useState('');
   const deferredQuery = useDeferredValue(query);
   const [batch, setBatch] = useState(false);
@@ -86,6 +89,15 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
     sortQueue(sort);
     setSelected(new Set());
     useUiStore.getState().pushToast(t('queue.sorted', { mode: t(`queue.sortBy.${sort}`) }));
+  };
+
+  const confirmDeleteSequence = (): void => {
+    if (sequenceId === ALL_SEQUENCE) return;
+    deletePlaylist(sequenceId);
+    setDeleteSequenceOpen(false);
+    setBatch(false);
+    setSelected(new Set());
+    useUiStore.getState().pushToast(t('queue.sequenceDeleted'));
   };
 
   const cycleQueueMode = (): void => {
@@ -256,6 +268,7 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
           onNewPlaylist={(trackIds) => openPlaylistDialog(trackIds)}
           onScanMedia={openScanMedia}
           onSortChange={changeSort}
+          onDeleteSequence={() => setDeleteSequenceOpen(true)}
           onSequenceChange={(id) => {
             setSequence(id);
             setSelected(new Set());
@@ -288,6 +301,17 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
           </button>
         </footer>
       </aside>
+
+      <ConfirmDialog
+        open={deleteSequenceOpen}
+        title={t('queue.deleteSequence')}
+        message={t('queue.deleteSequenceConfirm', { name: sequenceName })}
+        confirmLabel={t('queue.deleteSequence')}
+        cancelLabel={t('common.cancel')}
+        danger
+        onConfirm={confirmDeleteSequence}
+        onClose={() => setDeleteSequenceOpen(false)}
+      />
 
       <Menu
         open={Boolean(itemMenu)}
