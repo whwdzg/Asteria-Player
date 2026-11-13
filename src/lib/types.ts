@@ -5,6 +5,7 @@ export type FontChoice = 'display' | 'sans' | 'serif' | 'rounded' | 'mono';
 export type DanmakuArea = 'quarter' | 'half' | 'threeQuarter' | 'full';
 export type VideoFit = 'contain' | 'cover' | 'fill';
 export type VideoHudPosition = 'centerTop' | 'centerBottom' | 'topLeft' | 'bottomLeft' | 'topRight' | 'bottomRight';
+export type LyricAlign = 'left' | 'center';
 
 export type ShortcutAction =
   | 'playPause'
@@ -170,6 +171,7 @@ export interface Settings {
   lyricTranslationSize: number;
   lyricBlur: boolean;
   lyricFont: FontChoice;
+  lyricAlign: LyricAlign;
   showTranslation: boolean;
   subtitleLang: string;
   subtitleBgOpacity: number;

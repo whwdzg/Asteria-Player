@@ -473,7 +473,7 @@
 .lyric-line.is-active {
   color: var(--lyric-sung);
   font-size: calc(clamp(21px, 2.1vw, 31px) * var(--lyric-scale, 1));
-  transform: translateX(2px) scale(1.006);
+  transform: none;
   filter: blur(0);
   opacity: 1;
 }
@@ -636,4 +636,18 @@
   transform: scaleY(0.025);
   transform-origin: bottom;
   will-change: transform;
+}
+
+.lyrics-panel[data-align="center"] .lyric-line {
+  align-items: center;
+  text-align: center;
+}
+
+.lyrics-panel[data-align="center"] .lyric-text,
+.lyrics-panel[data-align="center"] .lyric-translation {
+  text-align: center;
+}
+
+.lyrics-panel[data-align="center"] .lyrics-static {
+  text-align: center;
 }

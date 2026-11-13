@@ -16,6 +16,7 @@ const FONTS = new Set<FontChoice>(['display', 'sans', 'serif', 'rounded', 'mono'
 const DANMAKU_AREAS = new Set<Settings['danmakuArea']>(['quarter', 'half', 'threeQuarter', 'full']);
 const VIDEO_FITS = new Set<Settings['videoFit']>(['contain', 'cover', 'fill']);
 const VIDEO_HUD_POSITIONS = new Set<Settings['videoHudPosition']>(['centerTop', 'centerBottom', 'topLeft', 'bottomLeft', 'topRight', 'bottomRight']);
+const LYRIC_ALIGNS = new Set<Settings['lyricAlign']>(['left', 'center']);
 
 type RawSettings = Record<string, unknown>;
 
@@ -47,6 +48,7 @@ const FALLBACK_SETTINGS: Settings = {
   lyricTranslationSize: 0.62,
   lyricBlur: true,
   lyricFont: 'display',
+  lyricAlign: 'left',
   showTranslation: true,
   subtitleLang: 'auto',
   subtitleBgOpacity: 0.35,
@@ -128,6 +130,9 @@ export function normalizeSettings(input: unknown, base: Settings = DEFAULT_SETTI
   const videoFit = typeof raw.videoFit === 'string' && VIDEO_FITS.has(raw.videoFit as Settings['videoFit'])
     ? raw.videoFit as Settings['videoFit']
     : base.videoFit;
+  const lyricAlign = typeof raw.lyricAlign === 'string' && LYRIC_ALIGNS.has(raw.lyricAlign as Settings['lyricAlign'])
+    ? raw.lyricAlign as Settings['lyricAlign']
+    : base.lyricAlign;
   const videoHudPosition = typeof raw.videoHudPosition === 'string' && VIDEO_HUD_POSITIONS.has(raw.videoHudPosition as Settings['videoHudPosition'])
     ? raw.videoHudPosition as Settings['videoHudPosition']
     : base.videoHudPosition;
@@ -150,6 +155,7 @@ export function normalizeSettings(input: unknown, base: Settings = DEFAULT_SETTI
     lyricTranslationSize: numberValue(raw.lyricTranslationSize, base.lyricTranslationSize, 0.4, 1.2),
     lyricBlur: booleanValue(raw.lyricBlur, base.lyricBlur),
     lyricFont: font(raw.lyricFont, base.lyricFont),
+    lyricAlign,
     showTranslation: booleanValue(raw.showTranslation, base.showTranslation),
     subtitleLang: stringValue(raw.subtitleLang, base.subtitleLang),
     subtitleBgOpacity: numberValue(raw.subtitleBgOpacity, base.subtitleBgOpacity, 0, 1),
@@ -217,6 +223,7 @@ export function settingsDocument(settings: Settings): SettingsJsonDocument {
       lyricTranslationSize: settings.lyricTranslationSize,
       lyricBlur: settings.lyricBlur,
       lyricFont: settings.lyricFont,
+      lyricAlign: settings.lyricAlign,
       showTranslation: settings.showTranslation,
       subtitleLang: settings.subtitleLang,
       subtitleBgOpacity: settings.subtitleBgOpacity,

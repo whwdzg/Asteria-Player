@@ -90,6 +90,7 @@ export function LyricsView(): React.ReactElement {
   const track = useLibraryStore((state) => state.tracks.find((item) => item.id === state.currentId));
   const settings = useSettingsStore(useShallow((state) => ({
     lyricFont: state.lyricFont,
+    lyricAlign: state.lyricAlign,
     showTranslation: state.showTranslation,
     lyricSize: state.lyricSize,
     lyricWeight: state.lyricWeight,
@@ -204,6 +205,7 @@ export function LyricsView(): React.ReactElement {
       className="lyrics-panel"
       aria-label={t('np.lyrics')}
       data-font={settings.lyricFont}
+      data-align={settings.lyricAlign}
       style={{
         '--lyric-scale': settings.lyricSize,
         '--lyric-weight': settings.lyricWeight,

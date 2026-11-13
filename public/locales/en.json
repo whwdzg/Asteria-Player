@@ -512,5 +512,9 @@
   "scan.promptTitle": "Check media library",
   "scan.promptMessage": "{count} restored items may be unreadable. Scan the library now?",
   "scan.later": "Later",
-  "scan.scanNow": "Scan now"
+  "scan.scanNow": "Scan now",
+  "settings.lyricAlign": "Lyric alignment",
+  "settings.lyricAlignHint": "Left-aligned text or centred on the middle axis.",
+  "settings.lyricAlignLeft": "Left aligned",
+  "settings.lyricAlignCenter": "Centre aligned"
 }

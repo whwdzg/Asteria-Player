@@ -15,6 +15,7 @@
     "lyricTranslationSize": 0.7,
     "lyricBlur": true,
     "lyricFont": "display",
+    "lyricAlign": "left",
     "showTranslation": true,
     "subtitleLang": "auto",
     "subtitleBgOpacity": 0.35,

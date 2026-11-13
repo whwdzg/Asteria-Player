@@ -20,6 +20,7 @@ describe('settings JSON', () => {
     expect(DEFAULT_SETTINGS.lyricSize).toBe(1.1);
     expect(DEFAULT_SETTINGS.lyricWeight).toBe(700);
     expect(DEFAULT_SETTINGS.lyricTranslationSize).toBe(0.7);
+    expect(DEFAULT_SETTINGS.lyricAlign).toBe('left');
     expect(DEFAULT_SETTINGS.danmakuSize).toBe(25);
     expect(DEFAULT_SETTINGS.danmakuArea).toBe('full');
     expect(DEFAULT_SETTINGS.autoPlayNext).toBe(true);

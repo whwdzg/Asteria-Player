@@ -512,5 +512,9 @@
   "scan.promptTitle": "檢查媒體庫",
   "scan.promptMessage": "還原的媒體庫中有 {count} 個項目可能無法讀取，是否立即掃描？",
   "scan.later": "稍後",
-  "scan.scanNow": "立即掃描"
+  "scan.scanNow": "立即掃描",
+  "settings.lyricAlign": "歌詞對齊方式",
+  "settings.lyricAlignHint": "可選擇左對齊或沿中軸線居中顯示。",
+  "settings.lyricAlignLeft": "左對齊",
+  "settings.lyricAlignCenter": "居中對齊（中軸線）"
 }

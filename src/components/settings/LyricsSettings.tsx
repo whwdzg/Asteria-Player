@@ -119,6 +119,23 @@ export function LyricsSettings(): React.ReactElement {
 
       <div className="setting-row">
         <div className="setting-label">
+          <span>{t('settings.lyricAlign')}</span>
+          <small>{t('settings.lyricAlignHint')}</small>
+        </div>
+        <Dropdown
+          value={settings.lyricAlign}
+          onChange={(value) => set('lyricAlign', value as Settings['lyricAlign'])}
+          options={[
+            { value: 'left', label: t('settings.lyricAlignLeft') },
+            { value: 'center', label: t('settings.lyricAlignCenter') },
+          ]}
+          ariaLabel={t('settings.lyricAlign')}
+          menuLabel={t('settings.lyricAlign')}
+        />
+      </div>
+
+      <div className="setting-row">
+        <div className="setting-label">
           <span>{t('settings.lyricBlur')}</span>
           <small>{t('settings.lyricBlurHint')}</small>
         </div>

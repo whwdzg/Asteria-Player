@@ -588,7 +588,7 @@
 
   .lyric-line.is-active {
     font-size: calc(clamp(19px, 4.8vw, 23px) * var(--lyric-scale, 1));
-    transform: translateX(4px);
+    transform: none;
   }
 
   .lyrics-empty h2 {
