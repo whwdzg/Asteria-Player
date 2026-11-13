@@ -26,6 +26,7 @@ const PRESETS: Record<string, number[]> = {
 };
 
 const FREQ_LABELS = ['60 Hz', '230 Hz', '910 Hz', '3.6 kHz', '14 kHz'];
+const CLEAR_SOUND_GAINS = [3, 1, 0, 2, 3] as const;
 
 function VolumeIcon({ volume, muted }: { volume: number; muted: boolean }): React.ReactElement {
   if (muted || volume <= 0.001) return <SpeakerMute24Regular />;
@@ -46,7 +47,9 @@ export function VolumePanel(): React.ReactElement {
   const [expanded, setExpanded] = useState(eqEnabled);
   const isMobile = useMediaQuery('(max-width: 700px)');
   const pushToast = useUiStore((state) => state.pushToast);
-  const clearActive = eqEnabled && eqGains.some((gain) => gain !== 0);
+  const clearActive = eqEnabled
+    && eqGains.length === CLEAR_SOUND_GAINS.length
+    && eqGains.every((gain, index) => gain === CLEAR_SOUND_GAINS[index]);
   const { t } = useI18n();
   const muteTooltip = useShortcutTooltip('mute', muted ? t('player.unmute') : t('player.mute'));
 
@@ -55,7 +58,7 @@ export function VolumePanel(): React.ReactElement {
       patch({ eqEnabled: false, eqGains: [0, 0, 0, 0, 0] });
       pushToast(t('mobile.clearSoundOff'));
     } else {
-      patch({ eqEnabled: true, eqGains: [3, 1, 0, 2, 3] });
+      patch({ eqEnabled: true, eqGains: [...CLEAR_SOUND_GAINS] });
       setExpanded(true);
       pushToast(t('mobile.clearSoundOn'));
     }
