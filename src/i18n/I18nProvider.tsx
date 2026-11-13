@@ -44,6 +44,26 @@ function baseUrl(): string {
   return new URL('locales/', document.baseURI).href;
 }
 
+function updateQuery(): string {
+  if (typeof window === 'undefined') return '';
+  const token = new URLSearchParams(window.location.search).get('__update');
+  return token ? `?__update=${encodeURIComponent(token)}` : '';
+}
+
+function localeUrl(file: string): string {
+  return new URL(`${file}${updateQuery()}`, baseUrl()).href;
+}
+
+async function fetchLocaleJson<T>(file: string, signal?: AbortSignal): Promise<T> {
+  const response = await fetch(localeUrl(file), {
+    signal,
+    credentials: 'omit',
+    cache: updateQuery() ? 'no-store' : 'default',
+  });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return (await response.json()) as T;
+}
+
 export function resolveSystemLanguage(languages: readonly string[], available: LanguagePack[]): string {
   if (!available.length) return 'en';
   const codes = available.map((item) => item.code);
@@ -73,12 +93,6 @@ function currentSystemLanguages(): string[] {
   return navigator.languages?.length ? [...navigator.languages] : [navigator.language || 'en'];
 }
 
-async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
-  const response = await fetch(url, { signal, credentials: 'omit' });
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  return (await response.json()) as T;
-}
-
 export function I18nProvider({ children }: { children: ReactNode }): ReactNode {
   const preference = useSettingsStore((state) => state.language);
   const patchSettings = useSettingsStore((state) => state.patch);
@@ -93,7 +107,7 @@ export function I18nProvider({ children }: { children: ReactNode }): ReactNode {
 
   useEffect(() => {
     let cancelled = false;
-    fetchJson<{ languages?: LanguagePack[] }>(new URL('manifest.json', baseUrl()).href)
+    fetchLocaleJson<{ languages?: LanguagePack[] }>('manifest.json')
       .then((manifest) => {
         if (!cancelled && Array.isArray(manifest.languages) && manifest.languages.length) {
           setRemoteLanguages(manifest.languages);
@@ -127,7 +141,7 @@ export function I18nProvider({ children }: { children: ReactNode }): ReactNode {
     if (fallback || !dictionary || language === 'en') return;
     let cancelled = false;
     const request = window.setTimeout(() => {
-      fetchJson<Record<string, string>>(new URL('en.json', baseUrl()).href)
+      fetchLocaleJson<Record<string, string>>('en.json')
         .then((payload) => {
           if (cancelled) return;
           dictionaries.set('en', payload);
@@ -158,7 +172,7 @@ export function I18nProvider({ children }: { children: ReactNode }): ReactNode {
     }
     let request = dictionaryRequests.get(pack.file);
     if (!request) {
-      request = fetchJson<Record<string, string>>(new URL(pack.file, baseUrl()).href);
+      request = fetchLocaleJson<Record<string, string>>(pack.file);
       dictionaryRequests.set(pack.file, request);
       request.finally(() => dictionaryRequests.delete(pack.file)).catch(() => {});
     }

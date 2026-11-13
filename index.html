@@ -46,7 +46,8 @@
           locale.as = 'fetch';
           locale.type = 'application/json';
           locale.crossOrigin = 'anonymous';
-          locale.href = 'locales/' + pref + '.json';
+          var update = new URLSearchParams(location.search).get('__update');
+          locale.href = 'locales/' + pref + '.json' + (update ? '?__update=' + encodeURIComponent(update) : '');
           locale.setAttribute('fetchpriority', 'high');
           document.head.appendChild(locale);
         }

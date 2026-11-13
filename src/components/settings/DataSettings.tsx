@@ -19,7 +19,7 @@ type ClearAction = 'cache' | 'playlists' | 'media' | null;
  * operation asks for confirmation because it cannot be undone.
  */
 export function DataSettings(): React.ReactElement {
-  const { t, language } = useI18n();
+  const { t, language, languages } = useI18n();
   const pushToast = useUiStore((state) => state.pushToast);
   const tracks = useLibraryStore((state) => state.tracks);
   const playlists = useLibraryStore((state) => state.playlists);
@@ -45,7 +45,8 @@ export function DataSettings(): React.ReactElement {
   const checkUpdates = async (): Promise<void> => {
     setUpdating(true);
     try {
-      await refreshWithLatest(language);
+      const activePack = languages.find((pack) => pack.code === language);
+      await refreshWithLatest(language, activePack?.translations ? null : activePack?.file);
     } catch (error) {
       console.error(error);
       pushToast(t('settings.updateFailed'), 'error');
