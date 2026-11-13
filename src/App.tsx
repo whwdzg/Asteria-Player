@@ -13,6 +13,8 @@ import { MobilePlayer } from './components/mobile/MobilePlayer';
 import { VideoStage } from './components/video/VideoStage';
 import { Toasts } from './components/overlays/Toasts';
 import { WelcomeDialog } from './components/overlays/WelcomeDialog';
+import { ScanMediaDialog } from './components/overlays/ScanMediaDialog';
+import { ScanMediaPrompt } from './components/overlays/ScanMediaPrompt';
 
 import { useAppearance } from './hooks/useTheme';
 import { useFullscreen } from './hooks/useFullscreen';
@@ -24,6 +26,7 @@ import { useOrientationFullscreen } from './hooks/useOrientationFullscreen';
 import { useI18n } from './i18n/I18nProvider';
 import { loadDemoLibrary } from './lib/demo';
 import { getDemoPreference, setDemoPreference } from './lib/demoPreference';
+import { findUnreadableTracks } from './lib/mediaIntegrity';
 import { isPwaStandalone, restorePwaLibrary, startPwaLibraryPersistence } from './lib/pwaLibrary';
 import { coverFallback } from './lib/cover';
 import { clamp } from './lib/format';
@@ -268,6 +271,13 @@ export default function App(): React.ReactElement {
             player.ensureCurrent();
           }
           setBootReady(true);
+          window.setTimeout(() => {
+            void findUnreadableTracks(restored.tracks, { timeout: 3000, concurrency: 2 })
+              .then((invalid) => {
+                if (invalid.length) useUiStore.getState().promptScanMedia(invalid.length);
+              })
+              .catch(() => {});
+          }, 1200);
           return;
         }
       }
@@ -427,6 +437,8 @@ export default function App(): React.ReactElement {
       </main>
 
       <BottomBar onToggleFullscreen={toggleFullscreen} />
+      <ScanMediaDialog />
+      <ScanMediaPrompt />
       {welcomeOpen ? (
         <WelcomeDialog
           onOpenFiles={() => { setWelcomeOpen(false); openFiles(); }}

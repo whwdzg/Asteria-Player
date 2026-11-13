@@ -1036,3 +1036,118 @@
     justify-content: flex-start;
   }
 }
+
+.scan-media {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.scan-media-hint {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 10.5px;
+  line-height: 1.55;
+}
+
+.scan-media-status {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--text-3);
+  font-size: 9.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.scan-media-bar {
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-3) 20%, transparent);
+}
+
+.scan-media-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--track-accent), var(--accent));
+  transition: width 200ms var(--ease-fluent);
+}
+
+.scan-media-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 42vh;
+  margin-top: 4px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.scan-media-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  padding: 7px 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.scan-media-cover {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 7px;
+}
+
+.scan-media-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.scan-media-copy strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scan-media-copy span {
+  overflow: hidden;
+  color: var(--text-3);
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scan-media-source {
+  flex: none;
+  margin-left: auto;
+  color: var(--text-4);
+  font-size: 8.5px;
+}
+
+.scan-media-empty {
+  margin: 10px 0 2px;
+  padding: 9px 11px;
+  border: 1px solid color-mix(in srgb, var(--success) 35%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--success) 9%, transparent);
+  color: var(--text-2);
+  font-size: 10.5px;
+}
+
+.scan-media-again {
+  align-self: flex-start;
+  margin-top: 4px;
+  gap: 5px;
+}
+
+.scan-media-again svg {
+  width: 14px;
+  height: 14px;
+}

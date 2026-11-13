@@ -40,6 +40,7 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
   const setSequence = useLibraryStore((state) => state.setSequence);
   const setDetailsTrackId = useUiStore((state) => state.setDetailsTrackId);
   const openPlaylistDialog = useUiStore((state) => state.openPlaylistDialog);
+  const openScanMedia = useUiStore((state) => state.openScanMedia);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
   const deferredQuery = useDeferredValue(query);
@@ -236,6 +237,7 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
           onBatchRemove={() => removeIds(selectedIds)}
           onAddSelected={addSelectedTo}
           onNewPlaylist={(trackIds) => openPlaylistDialog(trackIds)}
+          onScanMedia={openScanMedia}
           onSequenceChange={(id) => {
             setSequence(id);
             setSelected(new Set());

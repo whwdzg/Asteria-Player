@@ -24,6 +24,8 @@ interface UiState {
   videoLocked: boolean;
   dragActive: boolean;
   importing: { done: number; total: number } | null;
+  scanMediaOpen: boolean;
+  scanPromptCount: number | null;
   toasts: Toast[];
   openQueue: (view?: QueueView) => void;
   setQueueView: (view: QueueView) => void;
@@ -39,6 +41,10 @@ interface UiState {
   setChromeVisible: (visible: boolean) => void;
   setDragActive: (active: boolean) => void;
   setImporting: (progress: { done: number; total: number } | null) => void;
+  openScanMedia: () => void;
+  closeScanMedia: () => void;
+  promptScanMedia: (count: number) => void;
+  dismissScanPrompt: () => void;
   pushToast: (message: string, tone?: Toast['tone']) => void;
   dismissToast: (id: string) => void;
   closeOverlays: () => void;
@@ -57,6 +63,8 @@ export const useUiStore = create<UiState>()((set) => ({
   videoLocked: false,
   dragActive: false,
   importing: null,
+  scanMediaOpen: false,
+  scanPromptCount: null,
   toasts: [],
   openQueue: (view = 'sidebar') => set({ queueView: view, settingsOpen: false, popover: null }),
   setQueueView: (queueView) => set({ queueView }),
@@ -78,6 +86,10 @@ export const useUiStore = create<UiState>()((set) => ({
   setChromeVisible: (chromeVisible) => set({ chromeVisible }),
   setDragActive: (dragActive) => set({ dragActive }),
   setImporting: (importing) => set({ importing }),
+  openScanMedia: () => set({ scanMediaOpen: true, scanPromptCount: null }),
+  closeScanMedia: () => set({ scanMediaOpen: false }),
+  promptScanMedia: (scanPromptCount) => set({ scanPromptCount }),
+  dismissScanPrompt: () => set({ scanPromptCount: null }),
   pushToast: (message, tone = 'default') => {
     const id = uid('toast');
     set((state) => ({ toasts: [...state.toasts.slice(-2), { id, message, tone }] }));

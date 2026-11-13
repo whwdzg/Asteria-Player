@@ -1,6 +1,7 @@
 import {
   Add24Regular,
   ArrowImport24Regular,
+  ArrowSync24Regular,
   ChevronDown24Regular,
   Dismiss24Regular,
   FolderOpen24Regular,
@@ -40,6 +41,7 @@ interface QueueToolbarProps {
   onBatchRemove: () => void;
   onAddSelected: (playlistId: string) => void;
   onNewPlaylist: (trackIds: string[]) => void;
+  onScanMedia: () => void;
   onSequenceChange: (id: string) => void;
   onExpand: () => void;
   onCollapse: () => void;
@@ -64,6 +66,7 @@ export function QueueToolbar({
   onBatchRemove,
   onAddSelected,
   onNewPlaylist,
+  onScanMedia,
   onSequenceChange,
   onExpand,
   onCollapse,
@@ -192,6 +195,13 @@ export function QueueToolbar({
                 <Search24Regular />
               </IconButton>
             )}
+            <IconButton
+              label={t('queue.scanMedia')}
+              tooltip={t('queue.scanMedia')}
+              onClick={onScanMedia}
+            >
+              <ArrowSync24Regular />
+            </IconButton>
             <IconButton
               label={t('common.import')}
               tooltip={t('common.import')}
