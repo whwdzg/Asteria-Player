@@ -28,7 +28,7 @@ import { loadDemoLibrary } from './lib/demo';
 import { getDemoPreference, setDemoPreference } from './lib/demoPreference';
 import { findUnreadableTracks } from './lib/mediaIntegrity';
 import { isPwaStandalone, restorePwaLibrary, startPwaLibraryPersistence } from './lib/pwaLibrary';
-import { coverFallback } from './lib/cover';
+import { coverThemeColor, NEUTRAL_PLAYER_ACCENT } from './lib/coverTheme';
 import { clamp } from './lib/format';
 import { collectDroppedFiles } from './lib/importer';
 import { player } from './player/engine';
@@ -208,6 +208,7 @@ export default function App(): React.ReactElement {
   const playbackError = usePlaybackStore((state) => state.error);
   const setError = usePlaybackStore((state) => state.setError);
   const [bootError, setBootError] = useState(false);
+  const [playerAccent, setPlayerAccent] = useState(NEUTRAL_PLAYER_ACCENT);
   const sleepEnabled = useSleepTimerStore((state) => state.enabled);
   const sleepMode = useSleepTimerStore((state) => state.mode);
   const sleepEndsAt = useSleepTimerStore((state) => state.endsAt);
@@ -345,10 +346,21 @@ export default function App(): React.ReactElement {
   }, [playbackError, setError, t]);
 
   useEffect(() => {
-    const accent = current?.accent ?? (current ? coverFallback(current).accent : '#6fd6ff');
-    document.documentElement.style.setProperty('--track-accent', accent);
+    let cancelled = false;
+    if (!current) {
+      setPlayerAccent(NEUTRAL_PLAYER_ACCENT);
+      return () => { cancelled = true; };
+    }
+    void coverThemeColor(current).then((accent) => {
+      if (!cancelled) setPlayerAccent(accent);
+    });
+    return () => { cancelled = true; };
+  }, [current?.id, current?.cover]);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--track-accent', playerAccent);
     document.documentElement.style.setProperty('--media-brightness', String(brightness));
-  }, [current, brightness]);
+  }, [playerAccent, brightness]);
 
   const isVideo = current?.kind === 'video';
   const isTouch = useTouchDevice();
@@ -424,7 +436,7 @@ export default function App(): React.ReactElement {
 
   return (
     <div ref={appRef} className={rootClasses} data-kind={isVideo ? 'video' : 'audio'}>
-      <AmbientBackdrop track={current} accent={current?.accent ?? '#6fd6ff'} />
+      <AmbientBackdrop track={current} accent={playerAccent} />
       <AppHeader />
       <main className="app-main">
         {!loaded ? <StageSkeleton /> : !tracks.length ? <EmptyStage /> : current?.kind === 'video' ? (

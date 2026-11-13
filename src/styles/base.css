@@ -1607,3 +1607,12 @@ a:focus:not(:focus-visible),
 [role="button"]:focus:not(:focus-visible) {
   outline: none;
 }
+
+/* Settings and queue keep their fixed blue controls instead of following the
+   current cover artwork. */
+.settings-panel,
+.settings-popover,
+.queue-panel,
+.queue-scrim {
+  --track-accent: var(--accent);
+}

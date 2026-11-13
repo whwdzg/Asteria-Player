@@ -149,7 +149,7 @@
 }
 
 .progress-played {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--track-accent) 72%, var(--accent)), var(--accent));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--track-accent) 72%, #ffffff), var(--track-accent));
   box-shadow: 0 0 12px color-mix(in srgb, var(--track-accent) 35%, transparent);
 }
 

@@ -471,7 +471,7 @@
 }
 
 .lyric-line.is-active {
-  color: var(--lyric-sung);
+  color: color-mix(in srgb, var(--track-accent) 68%, var(--lyric-sung));
   font-size: calc(clamp(21px, 2.1vw, 31px) * var(--lyric-scale, 1));
   transform: none;
   filter: blur(0);
@@ -488,7 +488,7 @@
 }
 
 .lyric-word.is-done {
-  color: var(--lyric-sung);
+  color: color-mix(in srgb, var(--track-accent) 55%, var(--lyric-sung));
 }
 
 .lyric-word.is-pending {
