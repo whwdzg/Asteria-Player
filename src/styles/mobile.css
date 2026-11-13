@@ -913,3 +913,88 @@
     box-shadow: 0 -16px 44px rgba(0, 0, 0, 0.3);
   }
 }
+
+@media (max-width: 700px) {
+  /* Full-screen animated blur layers are a common source of Android flicker.
+     Keep the ambient tint but render opaque-minded surfaces without filters. */
+  .mobile-sheet,
+  .queue-panel,
+  .settings-popover,
+  .utility-popover .popover-card,
+  .mobile-tech-popover,
+  .modal-panel,
+  .fluent-menu,
+  .queue-scrim,
+  .modal-backdrop {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .mobile-sheet {
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+  }
+
+  .queue-panel.is-sidebar,
+  .queue-panel.is-full {
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+  }
+
+  .settings-popover {
+    background: color-mix(in srgb, var(--bg) 94%, transparent);
+  }
+
+  .utility-popover .popover-card,
+  .mobile-tech-popover {
+    background: color-mix(in srgb, var(--panel) 97%, transparent);
+  }
+
+  .modal-panel {
+    background: var(--surface-solid);
+  }
+
+  .settings-json-shell {
+    background: var(--surface-1);
+  }
+
+  .settings-json-editor,
+  .settings-json-highlight {
+    overscroll-behavior: contain;
+  }
+
+  .mobile-sheet {
+    animation-name: mobile-sheet-fade;
+  }
+
+  .mobile-swipe-preview {
+    will-change: opacity;
+  }
+
+  .mobile-home {
+    will-change: auto;
+  }
+
+  .mobile-player.is-dragging .mobile-home {
+    will-change: transform;
+  }
+
+  .mobile-lyric-preview {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .settings-json-shell {
+    isolation: isolate;
+    transform: translateZ(0);
+  }
+
+  .settings-json-highlight,
+  .settings-json-editor {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+}
+
+@keyframes mobile-sheet-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

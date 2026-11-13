@@ -1579,3 +1579,31 @@ svg {
   from { transform: translateX(0); }
   to { transform: translateX(calc(-50% - 1.2rem)); }
 }
+
+/* Android shows a blue tap highlight on every interactive element by default. */
+*,
+*::before,
+*::after {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+input,
+textarea,
+select,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible),
+[role="button"]:focus:not(:focus-visible) {
+  outline: none;
+}
