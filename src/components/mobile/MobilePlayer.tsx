@@ -15,6 +15,8 @@ import { useUiStore } from '../../state/ui';
 import { CoverArt } from '../common/CoverArt';
 import { AlbumLink, ArtistLinks } from '../common/CollectionLinks';
 import { ScrollText } from '../common/ScrollText';
+import { ArtworkLightbox } from '../nowplaying/ArtworkLightbox';
+import { highResolutionCover } from '../../lib/cover';
 import { AudioVisualizer } from '../nowplaying/AudioVisualizer';
 import { LyricsView } from '../nowplaying/LyricsView';
 import { MobileDetailsSheet } from './MobileDetailsSheet';
@@ -46,7 +48,9 @@ export function MobilePlayer({ onToggleFullscreen }: MobilePlayerProps): React.R
   const [drag, setDrag] = useState<DragState | null>(null);
   const [dragging, setDragging] = useState(false);
   const [techOpen, setTechOpen] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const start = useRef<{ x: number; y: number } | null>(null);
+  const fromLyrics = useRef(false);
   const techRef = useRef<HTMLDivElement>(null);
   useDismiss(techRef, () => setTechOpen(false), techOpen);
 
@@ -56,7 +60,10 @@ export function MobilePlayer({ onToggleFullscreen }: MobilePlayerProps): React.R
   const openSettings = (): void => useUiStore.getState().setSettingsOpen(true);
 
   const onTouchStart = (event: React.TouchEvent): void => {
-    if (sheet !== 'none' || techOpen || event.touches.length !== 1) return;
+    if (sheet !== 'none' || techOpen || lightboxOpen || event.touches.length !== 1) return;
+    // Vertical swipes over the lyric preview scroll lyrics instead of opening
+    // a different page. Horizontal swipes can still navigate.
+    fromLyrics.current = Boolean((event.target as HTMLElement).closest('.mobile-lyric-preview'));
     start.current = { x: event.touches[0].clientX, y: event.touches[0].clientY };
   };
 
@@ -67,6 +74,11 @@ export function MobilePlayer({ onToggleFullscreen }: MobilePlayerProps): React.R
     const dx = touch.clientX - from.x;
     const dy = touch.clientY - from.y;
     if (Math.max(Math.abs(dx), Math.abs(dy)) < 8) return;
+    if (fromLyrics.current && Math.abs(dy) >= Math.abs(dx)) {
+      start.current = null;
+      fromLyrics.current = false;
+      return;
+    }
     const horizontal = Math.abs(dx) > Math.abs(dy) * 1.12;
     const target: DragTarget = horizontal
       ? (dx > 0 ? 'details' : 'lyrics')
@@ -84,6 +96,7 @@ export function MobilePlayer({ onToggleFullscreen }: MobilePlayerProps): React.R
     const from = start.current;
     const current = drag;
     start.current = null;
+    fromLyrics.current = false;
     setDragging(false);
     setDrag(null);
     if (!from || !current || sheet !== 'none') return;
@@ -175,7 +188,7 @@ export function MobilePlayer({ onToggleFullscreen }: MobilePlayerProps): React.R
           </div>
         </header>
 
-        <button type="button" className="mobile-cover" onClick={() => setSheet('details')} aria-label={t('np.viewArtwork')}>
+        <button type="button" className="mobile-cover" onClick={() => setLightboxOpen(true)} aria-label={t('np.viewArtwork')}>
           <CoverArt track={track} className="mobile-cover-art" alt={t('a11y.cover', { title: track.title })} eager showKind />
           <span className="mobile-cover-glow" aria-hidden="true" />
         </button>
@@ -191,6 +204,14 @@ export function MobilePlayer({ onToggleFullscreen }: MobilePlayerProps): React.R
           <span><ArrowDown24Regular />{t('mobile.swipeSettings')}</span>
         </div>
       </div>
+
+      {lightboxOpen ? (
+        <ArtworkLightbox
+          track={track}
+          source={highResolutionCover(track.cover)}
+          onClose={() => setLightboxOpen(false)}
+        />
+      ) : null}
 
       {sheet === 'lyrics' ? (
         <section className="mobile-sheet mobile-lyrics-sheet" aria-label={t('np.lyrics')}>
