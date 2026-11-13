@@ -1101,3 +1101,19 @@
     padding: 9px 14px calc(9px + env(safe-area-inset-bottom));
   }
 }
+
+@media (max-width: 700px) {
+  .mobile-details,
+  .mobile-lyrics-sheet {
+    animation: none;
+    touch-action: pan-y;
+    will-change: transform;
+    transition: transform 210ms var(--ease-fluent), opacity 210ms var(--ease-fluent);
+  }
+
+  .mobile-details.is-dragging,
+  .mobile-lyrics-sheet.is-dragging {
+    transition: none;
+    will-change: transform;
+  }
+}

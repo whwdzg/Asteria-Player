@@ -4,7 +4,7 @@ import {
   Info24Regular,
   Play24Filled,
 } from '@fluentui/react-icons';
-import { useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 import { useI18n } from '../../i18n/I18nProvider';
 import { formatDuration } from '../../lib/format';
 import { parseArtists, tracksForArtist } from '../../lib/artists';
@@ -13,6 +13,7 @@ import { useUiStore } from '../../state/ui';
 import { CoverArt } from '../common/CoverArt';
 import { AlbumLink, ArtistLinks } from '../common/CollectionLinks';
 import { ScrollText } from '../common/ScrollText';
+import { useSwipeBackGesture } from '../../hooks/useSwipeBackGesture';
 import { BlurredBackdrop } from '../common/BlurredBackdrop';
 
 interface MobileDetailsSheetProps {
@@ -28,7 +29,7 @@ export function MobileDetailsSheet({ onClose, onSwipeBack, onImmersive }: Mobile
   const tracks = useLibraryStore((state) => state.tracks);
   const openCollection = useUiStore((state) => state.openCollection);
   const setDetailsTrackId = useUiStore((state) => state.setDetailsTrackId);
-  const backStart = useRef<{ x: number; y: number } | null>(null);
+  const swipe = useSwipeBackGesture({ direction: 'left', onClose: onSwipeBack });
 
 
   const contributors = useMemo(() => {
@@ -46,24 +47,6 @@ export function MobileDetailsSheet({ onClose, onSwipeBack, onImmersive }: Mobile
     setDetailsTrackId(track.id);
   };
 
-  const onBackTouchStart = (event: React.TouchEvent): void => {
-    if (event.touches.length !== 1) return;
-    backStart.current = { x: event.touches[0].clientX, y: event.touches[0].clientY };
-  };
-
-  const onBackTouchEnd = (event: React.TouchEvent): void => {
-    const from = backStart.current;
-    backStart.current = null;
-    if (!from) return;
-    const touch = event.changedTouches[0];
-    if (!touch) return;
-    const dx = touch.clientX - from.x;
-    const dy = touch.clientY - from.y;
-    if (Math.max(Math.abs(dx), Math.abs(dy)) < 60 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
-    // Details were entered with a right swipe, so swipe left to return.
-    if (dx < 0) onSwipeBack();
-  };
-
   const openCollectionPage = (kind: 'artist' | 'album', name: string): void => {
     onClose();
     openCollection(kind, name);
@@ -71,11 +54,13 @@ export function MobileDetailsSheet({ onClose, onSwipeBack, onImmersive }: Mobile
 
   return (
     <section
-      className="mobile-sheet mobile-details"
+      className={`mobile-sheet mobile-details ${swipe.dragging ? 'is-dragging' : ''}`.trim()}
       aria-label={t('mobile.details')}
-      onTouchStart={onBackTouchStart}
-      onTouchEnd={onBackTouchEnd}
-      onTouchCancel={() => { backStart.current = null; }}
+      style={swipe.dragX !== 0 ? {
+        transform: `translateX(${swipe.dragX}px)`,
+        opacity: Math.max(0.82, 1 - Math.abs(swipe.dragX) / window.innerWidth * 0.18),
+      } : undefined}
+      {...swipe.handlers}
     >
       <BlurredBackdrop cover={track.cover} />
       <header className="mobile-sheet-head">
