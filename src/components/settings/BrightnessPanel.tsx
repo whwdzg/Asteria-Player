@@ -1,4 +1,5 @@
-import { ArrowReset24Regular, WeatherSunny24Regular } from '@fluentui/react-icons';
+import { ArrowReset24Regular, Cast24Regular, WeatherSunny24Regular } from '@fluentui/react-icons';
+import { useState } from 'react';
 import { useSettingsStore } from '../../state/settings';
 import { useI18n } from '../../i18n/I18nProvider';
 import { IconButton } from '../common/IconButton';
@@ -6,6 +7,9 @@ import { NumberField } from '../common/NumberField';
 import { RangeSlider } from '../common/RangeSlider';
 import { Switch } from '../common/Switch';
 import { Dropdown } from '../common/Dropdown';
+import { Modal } from '../common/Modal';
+import { useLibraryStore } from '../../state/library';
+import { useUiStore } from '../../state/ui';
 
 export function BrightnessPanel(): React.ReactElement {
   const brightness = useSettingsStore((state) => state.brightness);
@@ -15,6 +19,19 @@ export function BrightnessPanel(): React.ReactElement {
   const fit = useSettingsStore((state) => state.videoFit);
   const patch = useSettingsStore((state) => state.patch);
   const { t } = useI18n();
+  const track = useLibraryStore((state) => state.tracks.find((item) => item.id === state.currentId));
+  const pushToast = useUiStore((state) => state.pushToast);
+  const [castOpen, setCastOpen] = useState(false);
+
+  const copyStream = async (): Promise<void> => {
+    if (!track) return;
+    try {
+      await navigator.clipboard.writeText(track.src);
+      pushToast(t('mobile.dlnaCopied'));
+    } catch {
+      pushToast(t('toast.error'), 'error');
+    }
+  };
 
   return (
     <div className="panel brightness-panel">
@@ -80,7 +97,29 @@ export function BrightnessPanel(): React.ReactElement {
             menuLabel={t('video.fit')}
           />
         </div>
+        {track ? (
+          <button type="button" className="video-option-row video-option-button" onClick={() => setCastOpen(true)}>
+            <div><strong>DLNA (beta)</strong><small>{t('mobile.dlnaShortHint')}</small></div>
+            <Cast24Regular />
+          </button>
+        ) : null}
       </div>
+
+      <Modal
+        open={castOpen}
+        onClose={() => setCastOpen(false)}
+        title="DLNA (beta)"
+        closeLabel={t('common.close')}
+        size="sm"
+        footer={<button type="button" className="fluent-button primary" onClick={() => setCastOpen(false)}>{t('common.close')}</button>}
+      >
+        <div className="dlna-help">
+          <p>{t('mobile.dlnaHint')}</p>
+          <button type="button" className="fluent-button" onClick={() => void copyStream()}>
+            {t('mobile.dlnaCopy')}
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import {
   FullScreenMaximize24Regular,
   FullScreenMinimize24Regular,
   Settings24Regular,
+  Timer24Regular,
   Speaker224Regular,
   TextBulletListLtr24Regular,
   Video24Regular,
@@ -19,6 +20,8 @@ import { PopoverCard } from '../common/PopoverCard';
 import { VolumePanel } from '../settings/VolumePanel';
 import { BrightnessPanel } from '../settings/BrightnessPanel';
 import { PlaybackRatePanel } from '../settings/PlaybackRatePanel';
+import { SleepTimerPanel } from '../settings/SleepTimerPanel';
+import { useSleepTimerStore } from '../../state/sleepTimer';
 
 const SettingsPanel = lazy(() => import('../settings/SettingsPanel').then((module) => ({ default: module.SettingsPanel })));
 
@@ -79,6 +82,9 @@ export function UtilityBar({ onToggleFullscreen }: UtilityBarProps): React.React
   const openQueue = useUiStore((state) => state.openQueue);
   const setQueueView = useUiStore((state) => state.setQueueView);
   const isLoading = usePlaybackStore((state) => state.isLoading);
+  const sleepEnabled = useSleepTimerStore((state) => state.enabled);
+  const sleepMinutes = useSleepTimerStore((state) => state.minutes);
+  const sleepMode = useSleepTimerStore((state) => state.mode);
   const { t } = useI18n();
   const fullscreenHint = useShortcutHint('fullscreen');
   const queueHint = useShortcutHint('queue');
@@ -88,6 +94,9 @@ export function UtilityBar({ onToggleFullscreen }: UtilityBarProps): React.React
   const fullscreenLabel = `${fullscreen ? t('player.exitFullscreen') : t('player.fullscreen')}${fullscreenHint}`;
   const queueLabel = `${t('player.queue')}${queueHint}`;
   const settingsLabel = `${t('player.settings')}${settingsHint}`;
+  const sleepLabel = sleepEnabled
+    ? `${t('sleep.title')} · ${sleepMode === 'trackEnd' ? t('sleep.afterTrackShort') : `${sleepMinutes} ${t('sleep.minuteShort')}`}`
+    : t('sleep.title');
   const speedLabel = `${t('player.playbackRate')} · ${formatRate(playbackRate)}`;
 
   const togglePopover = (id: PopoverId): void => {
@@ -132,6 +141,16 @@ export function UtilityBar({ onToggleFullscreen }: UtilityBarProps): React.React
       >
         {fullscreen ? <FullScreenMinimize24Regular /> : <FullScreenMaximize24Regular />}
       </IconButton>
+      <UtilitySlot
+        open={popover === 'sleep'}
+        onClose={() => setPopover(null)}
+        onClick={() => togglePopover('sleep')}
+        label={sleepLabel}
+        active={sleepEnabled}
+        trigger={<Timer24Regular />}
+        className="sleep-slot"
+        panel={<PopoverCard label={t('sleep.title')}><SleepTimerPanel /></PopoverCard>}
+      />
       <IconButton
         label={queueLabel}
         tooltip={queueLabel}

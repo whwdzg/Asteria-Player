@@ -5,6 +5,7 @@ import {
   Speaker224Regular,
   SpeakerMute24Regular,
   ArrowReset24Regular,
+  MusicNote224Regular,
 } from '@fluentui/react-icons';
 import { useState } from 'react';
 import { useSettingsStore, EQ_FREQUENCIES } from '../../state/settings';
@@ -14,6 +15,8 @@ import { IconButton } from '../common/IconButton';
 import { NumberField } from '../common/NumberField';
 import { RangeSlider } from '../common/RangeSlider';
 import { Switch } from '../common/Switch';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
+import { useUiStore } from '../../state/ui';
 
 const PRESETS: Record<string, number[]> = {
   flat: [0, 0, 0, 0, 0],
@@ -41,8 +44,22 @@ export function VolumePanel(): React.ReactElement {
   const setEqGain = useSettingsStore((state) => state.setEqGain);
   const patch = useSettingsStore((state) => state.patch);
   const [expanded, setExpanded] = useState(eqEnabled);
+  const isMobile = useMediaQuery('(max-width: 700px)');
+  const pushToast = useUiStore((state) => state.pushToast);
+  const clearActive = eqEnabled && eqGains.some((gain) => gain !== 0);
   const { t } = useI18n();
   const muteTooltip = useShortcutTooltip('mute', muted ? t('player.unmute') : t('player.mute'));
+
+  const toggleClearSound = (): void => {
+    if (clearActive) {
+      patch({ eqEnabled: false, eqGains: [0, 0, 0, 0, 0] });
+      pushToast(t('mobile.clearSoundOff'));
+    } else {
+      patch({ eqEnabled: true, eqGains: [3, 1, 0, 2, 3] });
+      setExpanded(true);
+      pushToast(t('mobile.clearSoundOn'));
+    }
+  };
 
   const setPreset = (name: string): void => {
     patch({ eqEnabled: true, eqGains: [...PRESETS[name]] });
@@ -88,6 +105,18 @@ export function VolumePanel(): React.ReactElement {
           className="volume-range"
         />
       </div>
+
+      {isMobile ? (
+        <button
+          type="button"
+          className={`clear-sound-row ${clearActive ? 'is-active' : ''}`.trim()}
+          onClick={toggleClearSound}
+          aria-pressed={clearActive}
+        >
+          <span><MusicNote224Regular /> {t('mobile.clearSound')}</span>
+          <span>{clearActive ? t('common.on') : t('common.off')}</span>
+        </button>
+      ) : null}
 
       <div className={`eq-section ${expanded ? 'is-expanded' : ''}`.trim()}>
         <button

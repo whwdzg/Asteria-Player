@@ -443,5 +443,20 @@
   "mobile.swipeSettings": "設定",
   "mobile.shuffleMode": "隨機播放模式",
   "mobile.audioOptions": "音訊選項",
-  "mobile.audioParams": "音訊參數"
+  "mobile.audioParams": "音訊參數",
+  "sleep.title": "定時關閉",
+  "sleep.hint": "到達設定時間或目前內容播放完後自動暫停。",
+  "sleep.active": "已開啟",
+  "sleep.off": "未開啟",
+  "sleep.enable": "開啟定時關閉",
+  "sleep.enableHint": "選擇常用時間或自訂分鐘數。",
+  "sleep.minutes": "關閉時間",
+  "sleep.custom": "自訂",
+  "sleep.minuteShort": "分鐘",
+  "sleep.afterTrack": "播放完目前內容後暫停",
+  "sleep.afterTrackHint": "目前媒體結束後不進入下一項，直接暫停。",
+  "sleep.afterTrackShort": "播完目前內容",
+  "sleep.remaining": "將在 {time} 後暫停",
+  "sleep.finished": "定時關閉已暫停播放",
+  "mobile.dlnaShortHint": "複製目前串流位址，用於 DLNA 接收裝置。"
 }

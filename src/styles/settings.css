@@ -703,3 +703,147 @@
 .fluent-button.danger:hover {
   background: color-mix(in srgb, #ff7b7b 13%, transparent);
 }
+
+.clear-sound-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 34px;
+  margin-top: 8px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+  color: var(--text-2);
+  font-size: 10.5px;
+}
+
+.clear-sound-row > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.clear-sound-row svg {
+  width: 15px;
+  height: 15px;
+}
+
+.clear-sound-row > span:last-child {
+  color: var(--text-4);
+  font-size: 9px;
+}
+
+.clear-sound-row.is-active {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--text);
+}
+
+.clear-sound-row.is-active > span:last-child {
+  color: var(--accent);
+}
+
+.video-option-button {
+  width: 100%;
+  min-height: 42px;
+  border: 0;
+  border-top: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-2);
+  text-align: left;
+  cursor: pointer;
+}
+
+.video-option-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.sleep-panel .panel-heading {
+  align-items: flex-start;
+}
+
+.sleep-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-4);
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.sleep-state.is-on {
+  color: var(--accent);
+}
+
+.sleep-state svg {
+  width: 14px;
+  height: 14px;
+}
+
+.sleep-presets {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.sleep-chip {
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 10px;
+}
+
+.sleep-chip.is-selected {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.sleep-custom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 7px;
+  color: var(--text-3);
+  font-size: 10px;
+}
+
+.sleep-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 43px;
+  border-top: 1px solid var(--border);
+}
+
+.sleep-row:first-of-type {
+  margin-top: 9px;
+}
+
+.sleep-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sleep-row strong {
+  color: var(--text);
+  font-size: 10.5px;
+  font-weight: 500;
+}
+
+.sleep-row small {
+  color: var(--text-4);
+  font-size: 9px;
+  line-height: 1.4;
+}

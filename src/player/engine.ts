@@ -5,6 +5,7 @@ import { ALL_SEQUENCE, useLibraryStore } from '../state/library';
 import { usePlaybackStore } from '../state/playback';
 import { useSettingsStore, EQ_FREQUENCIES } from '../state/settings';
 import { revokeTrackUrls } from '../lib/importer';
+import { useSleepTimerStore } from '../state/sleepTimer';
 
 const SEEK_STEP = 10;
 
@@ -462,6 +463,14 @@ export class PlayerEngine {
   }
 
   private handleEnded(): void {
+    const sleep = useSleepTimerStore.getState();
+    if (sleep.enabled && sleep.mode === 'trackEnd') {
+      sleep.finish();
+      usePlaybackStore.getState().setPlaying(false);
+      this.stopClock();
+      this.syncClock(true);
+      return;
+    }
     const { autoPlayNext, playMode } = useSettingsStore.getState();
     if (!autoPlayNext) {
       usePlaybackStore.getState().setPlaying(false);

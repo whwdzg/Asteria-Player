@@ -33,8 +33,11 @@ await page.waitForTimeout(200);
 await page.locator('.queue-button').click();
 await page.waitForSelector('.queue-panel');
 await page.getByText('Chromatic Fields', { exact: true }).first().click();
-await page.waitForTimeout(250);
-await page.locator('.queue-toolbar-actions button[aria-label="关闭"]').click();
+await page.waitForTimeout(500);
+check(await page.locator('.queue-panel').count() === 0, 'selecting a video returns to its main page');
+if (await page.locator('.queue-panel').count()) {
+  await page.locator('.queue-toolbar-actions button[aria-label="关闭"]').click();
+}
 await page.waitForTimeout(3700);
 
 const appClass = () => page.locator('.app').getAttribute('class');

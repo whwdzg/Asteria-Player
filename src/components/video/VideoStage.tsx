@@ -31,6 +31,8 @@ import { useTouchDevice } from '../../hooks/useTouchDevice';
 import { useVideoGestures } from '../../hooks/useVideoGestures';
 import { IconButton } from '../common/IconButton';
 import { ScrollText } from '../common/ScrollText';
+import { AlbumLink, ArtistLinks } from '../common/CollectionLinks';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { Menu, type MenuAnchor } from '../common/Menu';
 import { DanmakuLayer } from './DanmakuLayer';
 import { FullscreenClock } from './FullscreenClock';
@@ -56,6 +58,8 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
   const setDetailsTrackId = useUiStore((state) => state.setDetailsTrackId);
   const updateTrack = useLibraryStore((state) => state.updateTrack);
   const { t } = useI18n();
+  const isMobileViewport = useMediaQuery('(max-width: 700px)');
+  const nonVideoTouch = useRef<{ x: number; y: number } | null>(null);
   const hostRef = useRef<HTMLDivElement>(null);
   const [subtitleMenu, setSubtitleMenu] = useState<MenuAnchor | null>(null);
   const isTouch = useTouchDevice();
@@ -128,6 +132,30 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
   }, [showTools, subtitleMenu]);
 
   const gestures = useVideoGestures({ track, isTouch });
+  const openQueue = (): void => useUiStore.getState().openQueue('full');
+  const openSettings = (): void => useUiStore.getState().setSettingsOpen(true);
+
+  const onVideoViewTouchStart = (event: React.TouchEvent): void => {
+    if (!isTouch || fullscreen || event.touches.length !== 1) return;
+    const target = event.target as HTMLElement;
+    if (target.closest('.video-frame, button, a')) {
+      nonVideoTouch.current = null;
+      return;
+    }
+    nonVideoTouch.current = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+  };
+  const onVideoViewTouchEnd = (event: React.TouchEvent): void => {
+    const from = nonVideoTouch.current;
+    nonVideoTouch.current = null;
+    if (!from || fullscreen) return;
+    const touch = event.changedTouches[0];
+    if (!touch) return;
+    const dx = touch.clientX - from.x;
+    const dy = touch.clientY - from.y;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 54 || Math.abs(dy) < Math.abs(dx)) return;
+    if (dy < 0) openQueue();
+    else openSettings();
+  };
   const hud = gestures.hud;
 
   useEffect(() => {
@@ -266,7 +294,28 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
   ];
 
   return (
-    <section className="video-view" aria-label={track.title}>
+    <section
+      className="video-view"
+      aria-label={track.title}
+      onTouchStart={onVideoViewTouchStart}
+      onTouchEnd={onVideoViewTouchEnd}
+      onTouchCancel={() => { nonVideoTouch.current = null; }}
+    >
+      {isTouch && isMobileViewport && !fullscreen ? (
+        <header className="mobile-video-head">
+          <span className="video-badge"><span className="live-dot" /> {t('np.video')}</span>
+          <h1 className="np-title"><ScrollText text={track.title} /></h1>
+          <p className="mobile-video-artist">
+            {track.artist ? <ArtistLinks artist={track.artist} /> : (track.subtitle || t('common.unknownArtist'))}
+            {track.album ? <><span className="mobile-dot" aria-hidden="true">·</span><AlbumLink album={track.album} /></> : null}
+          </p>
+          <div className="mobile-video-chips">
+            {track.format ? <span>{track.format}</span> : null}
+            {track.videoWidth && track.videoHeight ? <span>{track.videoWidth} × {track.videoHeight}</span> : null}
+            <span>{formatTime(track.duration)}</span>
+          </div>
+        </header>
+      ) : null}
       <div
         className={`video-frame ${toolsHidden && !fullscreen && !isTouch ? 'tools-hidden' : ''} ${colorVision ? 'has-color-vision' : ''}`.trim()}
         data-fit={fullscreen ? videoFit : 'contain'}

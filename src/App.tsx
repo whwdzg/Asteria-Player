@@ -32,6 +32,7 @@ import { player } from './player/engine';
 import { useImporter } from './player/ImportProvider';
 import { useLibraryStore } from './state/library';
 import { usePlaybackStore } from './state/playback';
+import { useSleepTimerStore } from './state/sleepTimer';
 import { useSettingsStore } from './state/settings';
 import { useUiStore } from './state/ui';
 
@@ -204,6 +205,9 @@ export default function App(): React.ReactElement {
   const playbackError = usePlaybackStore((state) => state.error);
   const setError = usePlaybackStore((state) => state.setError);
   const [bootError, setBootError] = useState(false);
+  const sleepEnabled = useSleepTimerStore((state) => state.enabled);
+  const sleepMode = useSleepTimerStore((state) => state.mode);
+  const sleepEndsAt = useSleepTimerStore((state) => state.endsAt);
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const [bootReady, setBootReady] = useState(false);
   const bootStarted = useRef(false);
@@ -297,6 +301,29 @@ export default function App(): React.ReactElement {
   }, [loadDemoContent]);
 
   useEffect(() => {
+    if (!sleepEnabled || sleepMode !== 'duration' || !sleepEndsAt) return;
+    let timer = 0;
+    const check = (): void => {
+      window.clearTimeout(timer);
+      if (!useSleepTimerStore.getState().enabled) return;
+      const remaining = sleepEndsAt - Date.now();
+      if (remaining <= 0) {
+        player.pause();
+        useSleepTimerStore.getState().finish();
+        useUiStore.getState().pushToast(t('sleep.finished'));
+        return;
+      }
+      timer = window.setTimeout(check, Math.min(remaining, 60_000));
+    };
+    check();
+    document.addEventListener('visibilitychange', check);
+    return () => {
+      window.clearTimeout(timer);
+      document.removeEventListener('visibilitychange', check);
+    };
+  }, [sleepEnabled, sleepEndsAt, sleepMode, t]);
+
+  useEffect(() => {
     if (!bootError) return;
     useUiStore.getState().pushToast(t('toast.error'), 'error');
   }, [bootError, t]);
@@ -317,6 +344,12 @@ export default function App(): React.ReactElement {
   const isTouch = useTouchDevice();
   const isMobileViewport = useMediaQuery('(max-width: 700px)');
   const useMobilePlayer = isTouch && isMobileViewport && !isVideo && !fullscreen;
+
+  useEffect(() => {
+    // Selecting a video returns to its main surface instead of leaving the
+    // queue or settings sheet on top of the new item.
+    if (isTouch && isMobileViewport && isVideo) useUiStore.getState().closeOverlays();
+  }, [current?.id, isMobileViewport, isTouch, isVideo]);
   useAutoHideChrome(fullscreen, Boolean(isVideo), isTouch);
   useOrientationFullscreen(Boolean(isVideo), exitFullscreen);
   useKeyboardShortcuts({ toggleFullscreen, exitFullscreen, isVideo: Boolean(isVideo) });

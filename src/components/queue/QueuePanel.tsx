@@ -92,7 +92,10 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
 
   const playTrack = useCallback((track: Track): void => {
     player.playTrack(track.id);
-  }, []);
+    if (track.kind === 'video' && window.matchMedia('(max-width: 700px)').matches) {
+      setQueueView('closed');
+    }
+  }, [setQueueView]);
 
   const openItemMenu = useCallback((track: Track, element: HTMLElement): void => {
     setItemMenu({

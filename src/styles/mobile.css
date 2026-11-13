@@ -834,3 +834,82 @@
     background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--bg-deep) 35%, transparent));
   }
 }
+
+@media (max-width: 700px) {
+  .mobile-video-head {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    flex: none;
+    padding: 0 4px 3px;
+    min-width: 0;
+  }
+
+  .mobile-video-head .video-badge {
+    align-self: flex-start;
+  }
+
+  .mobile-video-head h1 {
+    width: 100%;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(20px, 5.8vw, 26px);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.15;
+  }
+
+  .mobile-video-head .mobile-video-artist {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    max-width: 100%;
+    color: var(--text-2);
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
+  .mobile-video-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .mobile-video-chips span {
+    padding: 2px 6px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: color-mix(in srgb, var(--surface-2) 48%, transparent);
+    color: var(--text-3);
+    font-size: 8px;
+  }
+
+  .video-view {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 9px;
+  }
+
+  .video-frame {
+    flex: 1;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+  }
+
+  .video-top-tools .video-identity {
+    display: none;
+  }
+
+  .video-meta-card {
+    display: none;
+  }
+
+  .is-touch.is-video-fullscreen .bottom-bar {
+    background: color-mix(in srgb, var(--bg-deep) 72%, transparent);
+    backdrop-filter: blur(30px) saturate(150%);
+    box-shadow: 0 -16px 44px rgba(0, 0, 0, 0.3);
+  }
+}

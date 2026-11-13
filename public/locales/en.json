@@ -443,5 +443,20 @@
   "mobile.swipeSettings": "Settings",
   "mobile.shuffleMode": "Shuffle play",
   "mobile.audioOptions": "Audio options",
-  "mobile.audioParams": "Audio parameters"
+  "mobile.audioParams": "Audio parameters",
+  "sleep.title": "Sleep timer",
+  "sleep.hint": "Pause playback after a set time or at the end of the current track.",
+  "sleep.active": "On",
+  "sleep.off": "Off",
+  "sleep.enable": "Enable timer",
+  "sleep.enableHint": "Choose a preset or custom minutes.",
+  "sleep.minutes": "Sleep duration",
+  "sleep.custom": "Custom",
+  "sleep.minuteShort": "min",
+  "sleep.afterTrack": "Pause after this track",
+  "sleep.afterTrackHint": "Stop at the end of the current media instead of advancing.",
+  "sleep.afterTrackShort": "after this track",
+  "sleep.remaining": "Pausing in {time}",
+  "sleep.finished": "Sleep timer paused playback",
+  "mobile.dlnaShortHint": "Copy the current stream address for a DLNA renderer."
 }
