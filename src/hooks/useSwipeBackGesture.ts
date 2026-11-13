@@ -4,6 +4,7 @@ type BackDirection = 'left' | 'right';
 
 interface Options {
   direction: BackDirection;
+  active?: boolean;
   onClose: () => void;
 }
 
@@ -25,7 +26,7 @@ export interface SwipeBackGesture {
  * Follow-finger horizontal sheet dismissal. Vertical movement is left to the
  * sheet's normal scrolling; only the opposite of the entry direction moves it.
  */
-export function useSwipeBackGesture({ direction, onClose }: Options): SwipeBackGesture {
+export function useSwipeBackGesture({ direction, active = true, onClose }: Options): SwipeBackGesture {
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
   const start = useRef<{ x: number; y: number } | null>(null);
@@ -36,6 +37,19 @@ export function useSwipeBackGesture({ direction, onClose }: Options): SwipeBackG
   const closeTimer = useRef(0);
 
   useEffect(() => () => window.clearTimeout(closeTimer.current), []);
+
+  useEffect(() => {
+    if (!active) return;
+    // This hook stays mounted while its sheet opens and closes. A completed
+    // swipe-back must not leave the next opening permanently "closing".
+    closing.current = false;
+    start.current = null;
+    axis.current = null;
+    offset.current = 0;
+    didDrag.current = false;
+    setDragging(false);
+    setDragX(0);
+  }, [active]);
 
   const onTouchStart = useCallback((event: React.TouchEvent): void => {
     if (closing.current || event.touches.length !== 1) return;

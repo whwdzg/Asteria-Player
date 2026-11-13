@@ -51,7 +51,11 @@ export function MobilePlayer({ onToggleFullscreen }: MobilePlayerProps): React.R
   const [dragging, setDragging] = useState(false);
   const [techOpen, setTechOpen] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const lyricSwipe = useSwipeBackGesture({ direction: 'right', onClose: () => setSheet('none') });
+  const lyricSwipe = useSwipeBackGesture({
+    direction: 'right',
+    active: sheet === 'lyrics',
+    onClose: () => setSheet('none'),
+  });
   const start = useRef<{ x: number; y: number } | null>(null);
   const fromLyrics = useRef(false);
   const techRef = useRef<HTMLDivElement>(null);
