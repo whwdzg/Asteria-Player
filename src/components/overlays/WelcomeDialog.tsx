@@ -1,11 +1,15 @@
 import {
+  ArrowDownload24Regular,
   ArrowImport24Regular,
   FolderOpen24Regular,
   Link24Regular,
   PhoneDesktop24Regular,
   Play24Filled,
 } from '@fluentui/react-icons';
+import { useEffect, useState } from 'react';
 import { useI18n } from '../../i18n/I18nProvider';
+import { promptPwaInstall, subscribeInstallPrompt } from '../../lib/pwaInstall';
+import { useUiStore } from '../../state/ui';
 import { Modal } from '../common/Modal';
 
 interface WelcomeDialogProps {
@@ -25,6 +29,24 @@ export function WelcomeDialog({
   onUseDemo,
 }: WelcomeDialogProps): React.ReactElement {
   const { t } = useI18n();
+  const [installAvailable, setInstallAvailable] = useState(false);
+  const [installHelp, setInstallHelp] = useState(false);
+
+  useEffect(() => subscribeInstallPrompt(setInstallAvailable), []);
+
+  const install = async (): Promise<void> => {
+    const outcome = await promptPwaInstall();
+    if (outcome === 'accepted') {
+      useUiStore.getState().pushToast(t('settings.installAccepted'));
+      return;
+    }
+    if (outcome === 'dismissed') {
+      useUiStore.getState().pushToast(t('settings.installDismissed'), 'error');
+      return;
+    }
+    setInstallHelp(true);
+  };
+
   return (
     <Modal
       open
@@ -56,7 +78,23 @@ export function WelcomeDialog({
         {showPwaHint ? (
           <div className="welcome-pwa-hint">
             <PhoneDesktop24Regular />
-            <span>{t('welcome.pwaHint')}</span>
+            <div className="welcome-pwa-copy">
+              <span>{t('welcome.pwaHint')}</span>
+              <button
+                type="button"
+                className={`fluent-button welcome-pwa-install ${installAvailable ? 'primary' : ''}`.trim()}
+                onClick={() => void install()}
+              >
+                <ArrowDownload24Regular /> {t('welcome.installPwa')}
+              </button>
+              {installHelp ? (
+                <div className="welcome-pwa-guide">
+                  <span>{t('welcome.installUnavailable')}</span>
+                  <span>{t('settings.installChromium')}</span>
+                  <span>{t('settings.installIos')}</span>
+                </div>
+              ) : null}
+            </div>
           </div>
         ) : null}
         <p className="welcome-note">{t('welcome.note')}</p>

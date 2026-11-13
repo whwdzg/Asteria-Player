@@ -546,5 +546,7 @@
   "performance.disableAll": "一键关闭这些效果",
   "performance.later": "暂不处理",
   "performance.never": "不再提示",
-  "performance.disabled": "已关闭高开销效果"
+  "performance.disabled": "已关闭高开销效果",
+  "welcome.installPwa": "安装为 PWA",
+  "welcome.installUnavailable": "当前浏览器无法直接弹出安装窗口，请使用浏览器菜单安装："
 }

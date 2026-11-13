@@ -480,12 +480,42 @@
   text-align: left;
 }
 
-.welcome-pwa-hint svg {
+.welcome-pwa-hint > svg {
   flex: none;
   width: 16px;
   height: 16px;
   margin-top: 1px;
   color: var(--accent);
+}
+
+.welcome-pwa-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  min-width: 0;
+}
+
+.welcome-pwa-install {
+  min-height: 28px;
+  padding: 0 10px;
+  font-size: 10px;
+  gap: 4px;
+}
+
+.welcome-pwa-install svg {
+  width: 14px;
+  height: 14px;
+}
+
+.welcome-pwa-guide {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-top: 4px;
+  color: var(--text-3);
+  font-size: 9px;
+  line-height: 1.45;
 }
 
 .performance-dialog {

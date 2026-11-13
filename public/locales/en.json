@@ -546,5 +546,7 @@
   "performance.disableAll": "Turn off these effects",
   "performance.later": "Not now",
   "performance.never": "Don’t show again",
-  "performance.disabled": "High-cost effects turned off"
+  "performance.disabled": "High-cost effects turned off",
+  "welcome.installPwa": "Install as PWA",
+  "welcome.installUnavailable": "This browser cannot open the install prompt directly. Use the browser menu:"
 }

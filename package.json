@@ -1,7 +1,7 @@
 {
   "name": "asteria-player",
   "private": true,
-  "version": "0.9.1",
+  "version": "0.9.2",
   "type": "module",
   "description": "A Fluent Design web player for music and video",
   "scripts": {

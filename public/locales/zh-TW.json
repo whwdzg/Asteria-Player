@@ -546,5 +546,7 @@
   "performance.disableAll": "一鍵關閉這些效果",
   "performance.later": "暫不處理",
   "performance.never": "不再提示",
-  "performance.disabled": "已關閉高開銷效果"
+  "performance.disabled": "已關閉高開銷效果",
+  "welcome.installPwa": "安裝為 PWA",
+  "welcome.installUnavailable": "目前瀏覽器無法直接顯示安裝視窗，請使用瀏覽器選單安裝："
 }
