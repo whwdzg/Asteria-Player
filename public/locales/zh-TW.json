@@ -401,7 +401,7 @@
   "settings.installApp": "安裝為 PWA 應用",
   "settings.installed": "已安裝",
   "settings.installedHint": "目前正以已安裝應用模式執行。",
-  "settings.installHint": "安裝後可獲得獨立視窗、主畫面圖示和離線外殼。",
+  "settings.installHint": "安裝後可保留媒體庫與播放進度，並獲得獨立視窗、主畫面圖示和離線啟動。",
   "settings.installAction": "安裝",
   "settings.installHelp": "安裝方法",
   "settings.installHelpBody": "開啟瀏覽器選單並選擇安裝選項。支援的瀏覽器可以讓 Asteria Player 在獨立視窗中執行。",
@@ -482,5 +482,16 @@
   "settings.storagePwa": "PWA 離線副本",
   "settings.storageCache": "離線快取",
   "settings.storageSettings": "設定與歌單",
-  "settings.storageOther": "其他瀏覽器儲存"
+  "settings.storageOther": "其他瀏覽器儲存",
+  "settings.installGuide": "使用說明",
+  "settings.installBenefits": "安裝後的好處",
+  "settings.installBenefitLibrary": "媒體庫、匯入內容和同名歌詞/字幕會在重新開啟 PWA 後恢復。",
+  "settings.installBenefitProgress": "記住目前播放項目、播放佇列和上次播放進度。",
+  "settings.installBenefitWindow": "以獨立應用程式視窗執行，並在主畫面或應用程式列表中顯示圖示。",
+  "settings.installBenefitOffline": "離線載入應用程式外殼和已快取資源。",
+  "settings.installUsage": "安裝後如何使用",
+  "settings.installUsageOpen": "從主畫面或應用程式列表開啟 Asteria Player。",
+  "settings.installUsageImport": "匯入一次媒體；在已安裝的 PWA 中重新整理或重新開啟仍會保留播放清單。",
+  "settings.installUsageStorage": "需要釋放空間時，可在設定 → 資料與備份中查看佔用並清理。",
+  "settings.installBrowser": "安裝方式"
 }

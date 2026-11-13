@@ -401,7 +401,7 @@
   "settings.installApp": "Install as an app",
   "settings.installed": "Installed",
   "settings.installedHint": "Asteria Player is running as an installed app.",
-  "settings.installHint": "Install for a standalone window, home-screen icon and offline shell.",
+  "settings.installHint": "Keep your library and playback position, and get a standalone window, home-screen icon and offline shell.",
   "settings.installAction": "Install",
   "settings.installHelp": "How to install",
   "settings.installHelpBody": "Open the browser menu and choose the install option. In a supported browser, Asteria Player can run in its own window.",
@@ -482,5 +482,16 @@
   "settings.storagePwa": "PWA offline copies",
   "settings.storageCache": "Offline cache",
   "settings.storageSettings": "Settings & playlists",
-  "settings.storageOther": "Other browser storage"
+  "settings.storageOther": "Other browser storage",
+  "settings.installGuide": "Usage guide",
+  "settings.installBenefits": "Why install",
+  "settings.installBenefitLibrary": "Your imported media library and sidecars are restored when the PWA is reopened.",
+  "settings.installBenefitProgress": "The current track, queue and last playback position are remembered.",
+  "settings.installBenefitWindow": "Runs in its own window with a home-screen / app-list icon.",
+  "settings.installBenefitOffline": "Loads the app shell and cached assets offline.",
+  "settings.installUsage": "How to use it",
+  "settings.installUsageOpen": "Open Asteria Player from your home screen or app list.",
+  "settings.installUsageImport": "Import your media once; in the installed PWA it survives refreshes and relaunches.",
+  "settings.installUsageStorage": "Check Settings → Data & backup to review storage usage and clear items when needed.",
+  "settings.installBrowser": "Installation methods"
 }

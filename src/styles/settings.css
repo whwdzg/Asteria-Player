@@ -958,3 +958,81 @@
   color: var(--text-4);
   font-size: 9.5px;
 }
+
+.install-row {
+  align-items: flex-start;
+}
+
+.install-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  flex: none;
+}
+
+.install-actions .fluent-button {
+  min-height: 28px;
+  padding: 0 9px;
+  font-size: 9.5px;
+}
+
+.install-help h4 {
+  margin: 15px 0 6px;
+  color: var(--text-2);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.install-help h4:first-of-type {
+  margin-top: 12px;
+}
+
+.install-help .install-benefits {
+  gap: 6px;
+  margin-top: 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.install-help .install-benefits li {
+  position: relative;
+  padding-left: 16px;
+  color: var(--text-2);
+}
+
+.install-help .install-benefits li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--success);
+  font-size: 10px;
+}
+
+.install-help .install-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding-left: 17px;
+  color: var(--text-2);
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+.install-help .install-steps li::marker {
+  color: var(--accent);
+}
+
+@media (max-width: 700px) {
+  .install-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 9px;
+  }
+
+  .install-actions {
+    justify-content: flex-start;
+  }
+}
