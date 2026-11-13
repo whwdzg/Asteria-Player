@@ -105,6 +105,7 @@ export function SettingsJsonDialog({ onClose }: SettingsJsonDialogProps): React.
       title={t('settings.settingsJson')}
       closeLabel={t('common.close')}
       size="lg"
+      className="json-modal"
       footer={
         <>
           <button type="button" className="fluent-button" onClick={onClose}>{t('common.cancel')}</button>

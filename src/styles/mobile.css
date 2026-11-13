@@ -1020,3 +1020,84 @@
     z-index: 1;
   }
 }
+
+@media (max-width: 700px) {
+  /* JSON workbench is a full-height sheet on phones: keep the textarea as
+     the single visible layer and reserve a stable flex area for controls. */
+  .modal-panel.json-modal {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+    background: var(--surface-solid);
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .json-modal .modal-header {
+    flex: none;
+    padding: 12px 16px 10px;
+  }
+
+  .json-modal .modal-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    padding: 10px 14px 0;
+    overflow: hidden;
+  }
+
+  .json-modal .settings-json-dialog {
+    flex: 1;
+    min-height: 0;
+    gap: 8px;
+  }
+
+  .json-modal .settings-json-toolbar,
+  .json-modal .settings-json-check,
+  .json-modal .settings-json-actions {
+    flex: none;
+  }
+
+  .json-modal .settings-json-shell {
+    flex: 1;
+    min-height: 120px;
+    height: auto;
+    transform: none;
+  }
+
+  .json-modal .settings-json-highlight {
+    display: none;
+  }
+
+  .json-modal .settings-json-editor {
+    padding: 10px;
+    background: var(--surface-solid);
+    color: var(--text-1);
+    caret-color: var(--accent);
+    -webkit-text-fill-color: currentColor;
+    font-size: 12px;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .json-modal .settings-json-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .json-modal .settings-json-actions .fluent-button {
+    width: 100%;
+    min-width: 0;
+    padding: 0 7px;
+    font-size: 9.5px;
+  }
+
+  .json-modal .modal-footer {
+    flex: none;
+    padding: 9px 14px calc(9px + env(safe-area-inset-bottom));
+  }
+}
