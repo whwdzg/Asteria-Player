@@ -16,12 +16,14 @@ import { Toasts } from './components/overlays/Toasts';
 import { WelcomeDialog } from './components/overlays/WelcomeDialog';
 import { ScanMediaDialog } from './components/overlays/ScanMediaDialog';
 import { ScanMediaPrompt } from './components/overlays/ScanMediaPrompt';
+import { PerformanceDialog } from './components/overlays/PerformanceDialog';
 
 import { useAppearance } from './hooks/useTheme';
 import { useFullscreen } from './hooks/useFullscreen';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useAutoHideChrome } from './hooks/useAutoHideChrome';
 import { useTouchDevice } from './hooks/useTouchDevice';
+import { usePerformanceGuard } from './hooks/usePerformanceGuard';
 import { useMediaQuery } from './hooks/useMediaQuery';
 import { useOrientationFullscreen } from './hooks/useOrientationFullscreen';
 import { useI18n } from './i18n/I18nProvider';
@@ -206,6 +208,14 @@ export default function App(): React.ReactElement {
   const videoLocked = useUiStore((state) => state.videoLocked);
   const brightness = useSettingsStore((state) => state.brightness);
   const dynamicBackground = useSettingsStore((state) => state.dynamicBackground);
+  const performanceEffectsOn = useSettingsStore((state) =>
+    state.liquidGlass
+    || state.dynamicBackground
+    || state.backgroundBpm
+    || state.backgroundVideo
+    || state.audioVisualizer
+    || state.lyricBlur);
+  const performanceGuard = usePerformanceGuard(performanceEffectsOn);
   const playbackError = usePlaybackStore((state) => state.error);
   const setError = usePlaybackStore((state) => state.setError);
   const [bootError, setBootError] = useState(false);
@@ -466,6 +476,15 @@ export default function App(): React.ReactElement {
       <CollapsedBarButton />
       <ScanMediaDialog />
       <ScanMediaPrompt />
+      <PerformanceDialog
+        open={performanceGuard.open}
+        onClose={performanceGuard.dismiss}
+        onDismissPermanently={performanceGuard.dismissPermanently}
+        onApply={() => {
+          performanceGuard.applyRecommendation();
+          useUiStore.getState().pushToast(t('performance.disabled'));
+        }}
+      />
       {welcomeOpen ? (
         <WelcomeDialog
           showPwaHint={welcomePwaHint}

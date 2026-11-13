@@ -539,5 +539,12 @@
   "welcome.pwaHint": "安装为 PWA 应用可在刷新或重新打开后保留媒体库、播放队列和播放进度。",
   "queue.deleteSequence": "删除当前播放序列",
   "queue.deleteSequenceConfirm": "从序列列表删除「{name}」？媒体文件仍会保留在媒体库中。",
-  "queue.sequenceDeleted": "播放序列已删除"
+  "queue.sequenceDeleted": "播放序列已删除",
+  "performance.title": "性能提示",
+  "performance.message": "检测到播放时渲染帧率较低（网络缓冲等待不计入）。关闭以下高开销效果可提升流畅度。",
+  "performance.note": "只会修改外观效果，不影响音质、媒体库和播放进度。",
+  "performance.disableAll": "一键关闭这些效果",
+  "performance.later": "暂不处理",
+  "performance.never": "不再提示",
+  "performance.disabled": "已关闭高开销效果"
 }

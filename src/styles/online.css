@@ -487,3 +487,82 @@
   margin-top: 1px;
   color: var(--accent);
 }
+
+.performance-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.performance-lead {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.performance-lead p,
+.performance-note {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 11.5px;
+  line-height: 1.6;
+}
+
+.performance-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--warning, #eab308) 16%, transparent);
+  color: var(--warning, #eab308);
+}
+
+.performance-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.performance-list li {
+  padding: 7px 9px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-1);
+  color: var(--text-2);
+  font-size: 10.5px;
+}
+
+.performance-note {
+  color: var(--text-3);
+  font-size: 10px;
+}
+
+@media (max-width: 700px) {
+  .performance-list {
+    grid-template-columns: 1fr;
+  }
+
+  .performance-modal .modal-footer {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .performance-modal .modal-footer .text-button {
+    justify-self: start;
+  }
+
+  .performance-modal .modal-footer .fluent-button {
+    width: 100%;
+  }
+
+  .performance-modal .modal-footer .fluent-button.primary {
+    grid-column: 1 / -1;
+    order: -1;
+  }
+}
