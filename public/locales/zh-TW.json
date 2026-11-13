@@ -548,5 +548,7 @@
   "performance.never": "不再提示",
   "performance.disabled": "已關閉高開銷效果",
   "welcome.installPwa": "安裝為 PWA",
-  "welcome.installUnavailable": "目前瀏覽器無法直接顯示安裝視窗，請使用瀏覽器選單安裝："
+  "welcome.installUnavailable": "目前瀏覽器無法直接顯示安裝視窗，請使用瀏覽器選單安裝：",
+  "queue.removeMediaConfirm": "確定要從媒體庫刪除 {count} 首歌曲？此操作無法復原。",
+  "queue.removeSequenceConfirm": "確定要從目前播放序列移除 {count} 首歌曲？媒體檔案仍會保留。"
 }

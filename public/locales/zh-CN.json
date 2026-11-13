@@ -548,5 +548,7 @@
   "performance.never": "不再提示",
   "performance.disabled": "已关闭高开销效果",
   "welcome.installPwa": "安装为 PWA",
-  "welcome.installUnavailable": "当前浏览器无法直接弹出安装窗口，请使用浏览器菜单安装："
+  "welcome.installUnavailable": "当前浏览器无法直接弹出安装窗口，请使用浏览器菜单安装：",
+  "queue.removeMediaConfirm": "确定要从媒体库删除 {count} 首歌曲？此操作无法撤销。",
+  "queue.removeSequenceConfirm": "确定要从当前播放序列移除 {count} 首歌曲？媒体文件仍会保留。"
 }

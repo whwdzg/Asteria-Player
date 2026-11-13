@@ -548,5 +548,7 @@
   "performance.never": "Don’t show again",
   "performance.disabled": "High-cost effects turned off",
   "welcome.installPwa": "Install as PWA",
-  "welcome.installUnavailable": "This browser cannot open the install prompt directly. Use the browser menu:"
+  "welcome.installUnavailable": "This browser cannot open the install prompt directly. Use the browser menu:",
+  "queue.removeMediaConfirm": "Delete {count} track(s) from the media library? This cannot be undone.",
+  "queue.removeSequenceConfirm": "Remove {count} track(s) from this playback sequence? Media files will remain."
 }

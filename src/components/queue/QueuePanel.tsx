@@ -50,6 +50,7 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
   const openScanMedia = useUiStore((state) => state.openScanMedia);
   const [searchOpen, setSearchOpen] = useState(false);
   const [deleteSequenceOpen, setDeleteSequenceOpen] = useState(false);
+  const [pendingRemoval, setPendingRemoval] = useState<string[] | null>(null);
   const [query, setQuery] = useState('');
   const deferredQuery = useDeferredValue(query);
   const [batch, setBatch] = useState(false);
@@ -142,6 +143,10 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
     });
   };
 
+  const requestRemove = (ids: string[]): void => {
+    if (ids.length) setPendingRemoval([...ids]);
+  };
+
   const removeIds = (ids: string[]): void => {
     if (!ids.length) return;
     if (sequenceId === ALL_SEQUENCE) {
@@ -220,7 +225,7 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
         label: t('queue.remove'),
         icon: <Delete24Regular />,
         danger: true,
-        onSelect: () => removeIds([track.id]),
+        onSelect: () => requestRemove([track.id]),
       },
     ];
   }, [itemMenu, playlists, t, openPlaylistDialog, setDetailsTrackId]);
@@ -264,7 +269,7 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
           onQueryChange={setQuery}
           onBatchToggle={() => setBatch((value) => !value)}
           onSelectAll={selectAll}
-          onBatchRemove={() => removeIds(selectedIds)}
+          onBatchRemove={() => requestRemove(selectedIds)}
           onAddSelected={addSelectedTo}
           onNewPlaylist={(trackIds) => openPlaylistDialog(trackIds)}
           onScanMedia={openScanMedia}
@@ -302,6 +307,21 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
           </button>
         </footer>
       </aside>
+
+      <ConfirmDialog
+        open={Boolean(pendingRemoval)}
+        title={t('queue.remove')}
+        message={t(sequenceId === ALL_SEQUENCE ? 'queue.removeMediaConfirm' : 'queue.removeSequenceConfirm', { count: pendingRemoval?.length ?? 0 })}
+        confirmLabel={t(sequenceId === ALL_SEQUENCE ? 'common.delete' : 'common.remove')}
+        cancelLabel={t('common.cancel')}
+        danger
+        onConfirm={() => {
+          const ids = pendingRemoval ?? [];
+          setPendingRemoval(null);
+          removeIds(ids);
+        }}
+        onClose={() => setPendingRemoval(null)}
+      />
 
       <ConfirmDialog
         open={deleteSequenceOpen}
