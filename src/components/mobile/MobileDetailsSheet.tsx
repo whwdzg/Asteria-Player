@@ -15,6 +15,7 @@ import { useUiStore } from '../../state/ui';
 import { CoverArt } from '../common/CoverArt';
 import { AlbumLink, ArtistLinks } from '../common/CollectionLinks';
 import { Modal } from '../common/Modal';
+import { ScrollText } from '../common/ScrollText';
 
 interface MobileDetailsSheetProps {
   onClose: () => void;
@@ -54,6 +55,11 @@ export function MobileDetailsSheet({ onClose, onImmersive }: MobileDetailsSheetP
     }
   };
 
+  const openCollectionPage = (kind: 'artist' | 'album', name: string): void => {
+    onClose();
+    openCollection(kind, name);
+  };
+
   const copyStream = async (): Promise<void> => {
     try {
       await navigator.clipboard.writeText(track.src);
@@ -73,7 +79,7 @@ export function MobileDetailsSheet({ onClose, onImmersive }: MobileDetailsSheetP
         <span aria-hidden="true" />
       </header>
       <div className="mobile-sheet-track">
-        <h2>{track.title}</h2>
+        <h2><ScrollText text={track.title} /></h2>
         <p><ArtistLinks artist={track.artist} /></p>
       </div>
 
@@ -109,7 +115,7 @@ export function MobileDetailsSheet({ onClose, onImmersive }: MobileDetailsSheetP
         </div>
 
         {track.album ? (
-          <button type="button" className="mobile-info-card mobile-album-card" onClick={() => openCollection('album', track.album!)}>
+          <button type="button" className="mobile-info-card mobile-album-card" onClick={() => openCollectionPage('album', track.album!)}>
             <span className="mobile-card-eyebrow">{t('mobile.fromAlbum')}</span>
             <span className="mobile-album-main">
               <span className="mobile-album-cover">
@@ -132,7 +138,7 @@ export function MobileDetailsSheet({ onClose, onImmersive }: MobileDetailsSheetP
                   type="button"
                   className="mobile-contributor"
                   key={contributor.name}
-                  onClick={() => openCollection('artist', contributor.name)}
+                  onClick={() => openCollectionPage('artist', contributor.name)}
                 >
                   <span className="mobile-contributor-avatar">
                     {contributor.cover

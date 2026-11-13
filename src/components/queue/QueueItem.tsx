@@ -3,6 +3,7 @@ import { Checkmark24Regular, MoreHorizontal24Regular } from '@fluentui/react-ico
 import type { Track } from '../../lib/types';
 import { formatDuration } from '../../lib/format';
 import { CoverArt } from '../common/CoverArt';
+import { ScrollText } from '../common/ScrollText';
 import { IconButton } from '../common/IconButton';
 import { useI18n } from '../../i18n/I18nProvider';
 
@@ -50,7 +51,7 @@ export const QueueItem = memo(function QueueItem({
           ) : null}
         </span>
         <span className="queue-copy">
-          <span className="queue-title" title={track.title}>{track.title}</span>
+          <span className="queue-title"><ScrollText text={track.title} /></span>
           <span className="queue-artist">
             {track.subtitle || track.artist || t('common.unknownArtist')}
             {track.album ? <><span className="dot" aria-hidden="true">·</span>{track.album}</> : null}

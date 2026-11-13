@@ -441,5 +441,7 @@
   "mobile.swipeLyrics": "Lyrics",
   "mobile.swipeQueue": "Queue",
   "mobile.swipeSettings": "Settings",
-  "mobile.shuffleMode": "Shuffle play"
+  "mobile.shuffleMode": "Shuffle play",
+  "mobile.audioOptions": "Audio options",
+  "mobile.audioParams": "Audio parameters"
 }

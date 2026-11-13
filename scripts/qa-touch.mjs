@@ -24,6 +24,12 @@ const check = (condition, message) => {
 await page.goto(url, { waitUntil: 'networkidle' });
 await page.waitForSelector('.np-title', { timeout: 20000 });
 check(await page.locator('.mobile-player').count() === 1, 'mobile cover player renders on a phone');
+await page.locator('.volume-slot > .icon-button').click();
+await page.waitForTimeout(320);
+const mobilePopover = await page.locator('.utility-popover').boundingBox();
+check(Boolean(mobilePopover && mobilePopover.y > 0 && mobilePopover.y + mobilePopover.height <= 844), 'mobile utility popover renders above the bottom bar');
+await page.locator('.volume-slot > .icon-button').click();
+await page.waitForTimeout(200);
 await page.locator('.queue-button').click();
 await page.waitForSelector('.queue-panel');
 await page.getByText('Chromatic Fields', { exact: true }).first().click();

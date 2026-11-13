@@ -30,6 +30,7 @@ import { useShortcutHint } from '../../hooks/useShortcuts';
 import { useTouchDevice } from '../../hooks/useTouchDevice';
 import { useVideoGestures } from '../../hooks/useVideoGestures';
 import { IconButton } from '../common/IconButton';
+import { ScrollText } from '../common/ScrollText';
 import { Menu, type MenuAnchor } from '../common/Menu';
 import { DanmakuLayer } from './DanmakuLayer';
 import { FullscreenClock } from './FullscreenClock';
@@ -314,7 +315,7 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
         >
           <div className="video-identity">
             <span className="video-badge"><span className="live-dot" /> {t('np.video')}</span>
-            <h1>{track.title}</h1>
+            <h1><ScrollText text={track.title} /></h1>
             <p>{track.subtitle || track.artist}{track.album ? ` · ${track.album}` : ''}</p>
           </div>
           <div className="video-quick-tools">

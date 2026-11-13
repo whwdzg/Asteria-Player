@@ -15,6 +15,7 @@ import { ArtworkLightbox } from './ArtworkLightbox';
 import { LyricsView } from './LyricsView';
 import { AudioVisualizer } from './AudioVisualizer';
 import { AlbumLink, ArtistLinks } from '../common/CollectionLinks';
+import { ScrollText } from '../common/ScrollText';
 
 export function ArtworkPanel(): React.ReactElement | null {
   const track = useLibraryStore((state) => state.tracks.find((item) => item.id === state.currentId));
@@ -57,7 +58,7 @@ export function ArtworkPanel(): React.ReactElement | null {
           <span className="kicker-line" aria-hidden="true" />
           <span>{formatTime(duration || track.duration)}</span>
         </div>
-        <h1 className="np-title">{track.title}</h1>
+        <h1 className="np-title"><ScrollText text={track.title} /></h1>
         <p className="np-artist">
           <ArtistLinks artist={track.artist} />
           {track.album ? <><span className="np-dot" aria-hidden="true">·</span><AlbumLink album={track.album} /></> : null}

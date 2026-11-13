@@ -16,6 +16,7 @@ import { player } from '../../player/engine';
 import { ArtistLinks, AlbumLink } from '../common/CollectionLinks';
 import { Menu, type MenuAnchor } from '../common/Menu';
 import { CoverArt } from '../common/CoverArt';
+import { ScrollText } from '../common/ScrollText';
 
 function TrackRow({ track, entry }: { track: Track; entry?: { disc: number; number: number } }): React.ReactElement {
   const { t } = useI18n();
@@ -157,7 +158,7 @@ export function CollectionPage(): React.ReactElement | null {
           </div>
           <div className="collection-heading">
             <span className="soft-badge">{data.kind === 'artist' ? t('collection.artist') : t('collection.album')}</span>
-            <h1>{data.title}</h1>
+            <h1><ScrollText text={data.title} /></h1>
             <p>{artistMeta}</p>
             {data.kind === 'album' ? (
               <p className="collection-artists">

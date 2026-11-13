@@ -375,6 +375,7 @@ export default function App(): React.ReactElement {
     dynamicBackground ? 'has-dynamic-bg' : 'is-static-bg',
     isTouch ? 'is-touch' : 'is-desktop',
     useMobilePlayer ? 'is-mobile-player' : '',
+    collectionView ? 'is-collection-open' : '',
     videoLocked && isVideo ? 'is-video-locked' : '',
   ].filter(Boolean).join(' ');
 

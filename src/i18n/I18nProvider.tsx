@@ -38,6 +38,7 @@ export interface I18nValue {
  */
 const I18nContext = createContext<I18nValue | null>(null);
 const dictionaries = new Map<string, Record<string, string>>();
+const dictionaryRequests = new Map<string, Promise<Record<string, string>>>();
 
 function baseUrl(): string {
   return new URL('locales/', document.baseURI).href;
@@ -114,6 +115,10 @@ export function I18nProvider({ children }: { children: ReactNode }): ReactNode {
     if (preference !== 'system' && languages.some((item) => item.code === preference)) return preference;
     return resolveSystemLanguage(systemLanguages, languages);
   }, [preference, languages, systemLanguages]);
+  const activePack = useMemo(
+    () => languages.find((item) => item.code === language) ?? languages[0],
+    [language, languages],
+  );
 
   // Imported packs are allowed to be partial; English is the readable fallback
   // for keys the author has not translated yet. Load the active locale first:
@@ -139,34 +144,36 @@ export function I18nProvider({ children }: { children: ReactNode }): ReactNode {
 
   useEffect(() => {
     let cancelled = false;
-    const controller = new AbortController();
     setError(null);
     const cached = dictionaries.get(language);
     if (cached) {
       setDictionary(cached);
-      return () => { cancelled = true; controller.abort(); };
+      return () => { cancelled = true; };
     }
-    const pack = languages.find((item) => item.code === language) ?? languages[0];
+    const pack = activePack;
     if (pack.translations) {
       dictionaries.set(language, pack.translations);
       setDictionary(pack.translations);
-      return () => { cancelled = true; controller.abort(); };
+      return () => { cancelled = true; };
     }
-    fetchJson<Record<string, string>>(new URL(pack.file, baseUrl()).href, controller.signal)
+    let request = dictionaryRequests.get(pack.file);
+    if (!request) {
+      request = fetchJson<Record<string, string>>(new URL(pack.file, baseUrl()).href);
+      dictionaryRequests.set(pack.file, request);
+      request.finally(() => dictionaryRequests.delete(pack.file)).catch(() => {});
+    }
+    request
       .then((payload) => {
         if (cancelled) return;
         dictionaries.set(language, payload);
         setDictionary(payload);
       })
       .catch((reason: unknown) => {
-        if (cancelled || (reason instanceof DOMException && reason.name === 'AbortError')) return;
+        if (cancelled) return;
         setError(reason instanceof Error ? reason.message : String(reason));
       });
-    return () => {
-      cancelled = true;
-      controller.abort();
-    };
-  }, [language, languages, reloadToken]);
+    return () => { cancelled = true; };
+  }, [activePack?.file, activePack?.translations, language, reloadToken]);
 
   useEffect(() => {
     document.documentElement.lang = language;

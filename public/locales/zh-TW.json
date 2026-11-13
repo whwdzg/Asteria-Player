@@ -441,5 +441,7 @@
   "mobile.swipeLyrics": "歌詞",
   "mobile.swipeQueue": "佇列",
   "mobile.swipeSettings": "設定",
-  "mobile.shuffleMode": "隨機播放模式"
+  "mobile.shuffleMode": "隨機播放模式",
+  "mobile.audioOptions": "音訊選項",
+  "mobile.audioParams": "音訊參數"
 }

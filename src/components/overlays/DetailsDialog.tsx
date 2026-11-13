@@ -16,6 +16,7 @@ import { SongMatchPanel } from './SongMatchPanel';
 import { ArtworkLightbox } from '../nowplaying/ArtworkLightbox';
 import { highResolutionCover } from '../../lib/cover';
 import { AlbumLink, ArtistLinks } from '../common/CollectionLinks';
+import { ScrollText } from '../common/ScrollText';
 
 export function DetailsDialog(): React.ReactElement | null {
   const trackId = useUiStore((state) => state.detailsTrackId);
@@ -108,7 +109,7 @@ export function DetailsDialog(): React.ReactElement | null {
         </button>
         <div className="details-heading">
           <span className="soft-badge">{track.kind === 'video' ? t('np.video') : t('np.music')}</span>
-          <h3>{track.title}</h3>
+          <h3><ScrollText text={track.title} /></h3>
           <p>{track.kind === 'audio'
             ? <ArtistLinks artist={track.artist} />
             : (track.subtitle || track.artist || t('common.unknownArtist'))}</p>

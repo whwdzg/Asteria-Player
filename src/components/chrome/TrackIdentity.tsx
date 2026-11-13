@@ -6,6 +6,7 @@ import { useI18n } from '../../i18n/I18nProvider';
 import { ArtworkLightbox } from '../nowplaying/ArtworkLightbox';
 import { highResolutionCover } from '../../lib/cover';
 import { AlbumLink, ArtistLinks } from '../common/CollectionLinks';
+import { ScrollText } from '../common/ScrollText';
 
 export function TrackIdentity(): React.ReactElement {
   const track = useLibraryStore((state) => state.tracks.find((item) => item.id === state.currentId));
@@ -45,7 +46,7 @@ export function TrackIdentity(): React.ReactElement {
         </span>
       </button>
       <div className="track-copy">
-        <div className="track-title" title={track.title}>{track.title}</div>
+        <div className="track-title"><ScrollText text={track.title} /></div>
         <div className="track-subtitle">
           {track.kind === 'audio'
             ? <ArtistLinks artist={track.artist} />

@@ -1551,3 +1551,31 @@ svg {
   /* Touch devices have no hover; keep focus from leaving a sticky tooltip. */
   .app-tooltip { display: none; }
 }
+
+/* Single-line titles scroll instead of truncating when they overflow. */
+.scroll-text {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.scroll-text-inner {
+  display: inline-flex;
+  gap: 2.4rem;
+  min-width: max-content;
+  white-space: nowrap;
+}
+
+.scroll-text.is-overflow .scroll-text-inner {
+  animation: scroll-text-marquee var(--scroll-duration, 12s) linear infinite;
+}
+
+.scroll-text:hover .scroll-text-inner {
+  animation-play-state: paused;
+}
+
+@keyframes scroll-text-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-50% - 1.2rem)); }
+}
