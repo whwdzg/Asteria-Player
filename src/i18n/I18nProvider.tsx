@@ -110,25 +110,32 @@ export function I18nProvider({ children }: { children: ReactNode }): ReactNode {
     return () => window.removeEventListener('languagechange', update);
   }, []);
 
-  // Imported packs are allowed to be partial; English is the readable fallback
-  // for keys the author has not translated yet.
-  useEffect(() => {
-    if (fallback) return;
-    let cancelled = false;
-    fetchJson<Record<string, string>>(new URL('en.json', baseUrl()).href)
-      .then((payload) => {
-        if (cancelled) return;
-        dictionaries.set('en', payload);
-        setFallback(payload);
-      })
-      .catch(() => {});
-    return () => { cancelled = true; };
-  }, [fallback]);
-
   const language = useMemo(() => {
     if (preference !== 'system' && languages.some((item) => item.code === preference)) return preference;
     return resolveSystemLanguage(systemLanguages, languages);
   }, [preference, languages, systemLanguages]);
+
+  // Imported packs are allowed to be partial; English is the readable fallback
+  // for keys the author has not translated yet. Load the active locale first:
+  // the fallback request is deferred until the current dictionary is ready.
+  useEffect(() => {
+    if (fallback || !dictionary || language === 'en') return;
+    let cancelled = false;
+    const request = window.setTimeout(() => {
+      fetchJson<Record<string, string>>(new URL('en.json', baseUrl()).href)
+        .then((payload) => {
+          if (cancelled) return;
+          dictionaries.set('en', payload);
+          setFallback(payload);
+        })
+        .catch(() => {});
+    }, 0);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(request);
+    };
+  }, [dictionary, fallback, language]);
+
 
   useEffect(() => {
     let cancelled = false;

@@ -9,6 +9,7 @@ import type { Track } from './lib/types';
 import { BottomBar } from './components/chrome/BottomBar';
 import { TooltipLayer } from './components/common/TooltipLayer';
 import { NowPlaying } from './components/nowplaying/NowPlaying';
+import { MobilePlayer } from './components/mobile/MobilePlayer';
 import { VideoStage } from './components/video/VideoStage';
 import { Toasts } from './components/overlays/Toasts';
 import { WelcomeDialog } from './components/overlays/WelcomeDialog';
@@ -18,6 +19,7 @@ import { useFullscreen } from './hooks/useFullscreen';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useAutoHideChrome } from './hooks/useAutoHideChrome';
 import { useTouchDevice } from './hooks/useTouchDevice';
+import { useMediaQuery } from './hooks/useMediaQuery';
 import { useOrientationFullscreen } from './hooks/useOrientationFullscreen';
 import { useI18n } from './i18n/I18nProvider';
 import { loadDemoLibrary } from './lib/demo';
@@ -313,6 +315,8 @@ export default function App(): React.ReactElement {
 
   const isVideo = current?.kind === 'video';
   const isTouch = useTouchDevice();
+  const isMobileViewport = useMediaQuery('(max-width: 700px)');
+  const useMobilePlayer = isTouch && isMobileViewport && !isVideo && !fullscreen;
   useAutoHideChrome(fullscreen, Boolean(isVideo), isTouch);
   useOrientationFullscreen(Boolean(isVideo), exitFullscreen);
   useKeyboardShortcuts({ toggleFullscreen, exitFullscreen, isVideo: Boolean(isVideo) });
@@ -370,6 +374,7 @@ export default function App(): React.ReactElement {
     queueView !== 'closed' ? 'queue-is-open' : '',
     dynamicBackground ? 'has-dynamic-bg' : 'is-static-bg',
     isTouch ? 'is-touch' : 'is-desktop',
+    useMobilePlayer ? 'is-mobile-player' : '',
     videoLocked && isVideo ? 'is-video-locked' : '',
   ].filter(Boolean).join(' ');
 
@@ -380,6 +385,8 @@ export default function App(): React.ReactElement {
       <main className="app-main">
         {!loaded ? <StageSkeleton /> : !tracks.length ? <EmptyStage /> : current?.kind === 'video' ? (
           <VideoStage onToggleFullscreen={toggleFullscreen} />
+        ) : useMobilePlayer ? (
+          <MobilePlayer onToggleFullscreen={toggleFullscreen} />
         ) : (
           <NowPlaying />
         )}

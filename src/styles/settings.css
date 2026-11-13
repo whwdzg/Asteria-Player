@@ -662,3 +662,44 @@
     flex: 1 1 auto;
   }
 }
+
+.install-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--ok, #6ee7a8);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.install-help p {
+  color: var(--text-2);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.install-help ul {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 12px;
+  padding-left: 17px;
+  color: var(--text-3);
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+.confirm-message {
+  color: var(--text-2);
+  font-size: 11.5px;
+  line-height: 1.6;
+}
+
+.fluent-button.danger {
+  border-color: color-mix(in srgb, #ff7b7b 42%, var(--border));
+  color: #ff9a9a;
+}
+
+.fluent-button.danger:hover {
+  background: color-mix(in srgb, #ff7b7b 13%, transparent);
+}

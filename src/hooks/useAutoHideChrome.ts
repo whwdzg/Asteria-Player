@@ -11,7 +11,9 @@ export function useAutoHideChrome(fullscreen: boolean, isVideo: boolean, isTouch
   const overlayOpen = useUiStore((state) => state.settingsOpen || state.popover !== null || state.queueView !== 'closed');
 
   useEffect(() => {
-    if (!isVideo || (!fullscreen && !isTouch) || overlayOpen) {
+    // The mobile bar stays visible outside fullscreen; only immersive
+    // fullscreen video may hide chrome.
+    if (!isVideo || !fullscreen || overlayOpen) {
       setChromeVisible(true);
       return;
     }

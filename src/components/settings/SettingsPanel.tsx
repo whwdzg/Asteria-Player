@@ -12,6 +12,7 @@ import { APP_VERSION, COMMIT_HASH, COMMIT_TIME, formatCommitTime } from '../../l
 import { IconButton } from '../common/IconButton';
 import { AppearanceSettings } from './AppearanceSettings';
 import { DataSettings } from './DataSettings';
+import { InstallSettings } from './InstallSettings';
 import { LyricsSettings } from './LyricsSettings';
 import { ShortcutSettings } from './ShortcutSettings';
 import { VideoSettings } from './VideoSettings';
@@ -41,6 +42,7 @@ export function SettingsPanel({ onClose }: SettingsPanelProps): React.ReactEleme
         <VideoSettings />
         <ShortcutSettings />
         <DataSettings />
+        <InstallSettings />
 
         <section className="settings-section about-section" aria-labelledby="settings-about">
           <h3 id="settings-about" className="section-title">

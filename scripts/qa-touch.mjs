@@ -23,6 +23,7 @@ const check = (condition, message) => {
 
 await page.goto(url, { waitUntil: 'networkidle' });
 await page.waitForSelector('.np-title', { timeout: 20000 });
+check(await page.locator('.mobile-player').count() === 1, 'mobile cover player renders on a phone');
 await page.locator('.queue-button').click();
 await page.waitForSelector('.queue-panel');
 await page.getByText('Chromatic Fields', { exact: true }).first().click();
@@ -32,17 +33,12 @@ await page.waitForTimeout(3700);
 
 const appClass = () => page.locator('.app').getAttribute('class');
 const playLabel = () => page.locator('.play-button').getAttribute('aria-label');
-check((await appClass()).includes('chrome-hidden'), 'video chrome auto-hides on touch');
+check(!(await appClass()).includes('chrome-hidden'), 'controls stay visible outside fullscreen');
+check(await page.locator('.bottom-bar').evaluate((element) => getComputedStyle(element).opacity) === '1', 'bottom bar is visible outside fullscreen');
 
 await page.touchscreen.tap(200, 300);
 await page.waitForTimeout(500);
-check((await appClass()).includes('chrome-visible'), 'single tap reveals chrome');
-await page.touchscreen.tap(200, 300);
-await page.waitForTimeout(500);
-check((await appClass()).includes('chrome-hidden'), 'another single tap hides chrome');
-await page.touchscreen.tap(200, 300);
-await page.waitForTimeout(500);
-check((await appClass()).includes('chrome-visible'), 'tap toggles chrome back on');
+check(!(await appClass()).includes('chrome-hidden'), 'single tap does not hide the non-fullscreen bar');
 
 const beforeTap = await playLabel();
 await page.touchscreen.tap(200, 300);
@@ -86,9 +82,9 @@ const volumeAfter = await page.evaluate(() => JSON.parse(localStorage.getItem('a
 check(volumeAfter > volumeBefore, 'right vertical swipe raises volume');
 
 const brightnessBefore = await page.evaluate(() => JSON.parse(localStorage.getItem('asteria-settings')).state.brightness);
-await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [at(45, 215)] });
+await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [at(45, 330)] });
 for (let i = 1; i <= 8; i += 1) {
-  await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [at(45, 215 + i * 13)] });
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [at(45, 330 + i * 13)] });
   await page.waitForTimeout(25);
 }
 check(await page.locator('.gesture-hud.is-brightness').count() === 1, 'left vertical swipe shows brightness HUD');
@@ -112,6 +108,11 @@ check(timeAfter > timeBefore, 'horizontal swipe seeks forward');
 await page.setViewportSize({ width: 844, height: 390 });
 await page.waitForTimeout(700);
 check((await appClass()).includes('is-video-fullscreen'), 'landscape rotation enters immersive fullscreen');
+await page.waitForTimeout(3400);
+check((await appClass()).includes('chrome-hidden'), 'fullscreen video chrome still auto-hides');
+await page.touchscreen.tap(200, 180);
+await page.waitForTimeout(500);
+check((await appClass()).includes('chrome-visible'), 'tap reveals fullscreen chrome');
 await page.setViewportSize({ width: 390, height: 844 });
 await page.waitForTimeout(600);
 check(!(await appClass()).includes('is-video-fullscreen'), 'portrait rotation leaves immersive fullscreen');

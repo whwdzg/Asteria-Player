@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import { I18nProvider } from './i18n/I18nProvider';
 import { ImportProvider } from './player/ImportProvider';
+import './lib/pwaInstall';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Root element not found');

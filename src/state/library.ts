@@ -23,6 +23,7 @@ interface LibraryState {
   addPlaylist: (name: string, trackIds?: string[]) => Playlist;
   addToPlaylist: (playlistId: string, trackIds: string[]) => void;
   removeFromPlaylist: (playlistId: string, trackIds: string[]) => void;
+  clearPlaylists: () => void;
   insertNext: (trackId: string) => void;
   addToQueue: (trackId: string) => void;
   queueTrack: (trackId: string) => void;
@@ -130,6 +131,11 @@ export const useLibraryStore = create<LibraryState>()(persist((set, get) => ({
       queue: active ? state.queue.filter((id) => !idSet.has(id)) : state.queue,
     };
   }),
+  clearPlaylists: () => set((state) => ({
+    playlists: [],
+    sequenceId: ALL_SEQUENCE,
+    queue: state.tracks.map((track) => track.id),
+  })),
   insertNext: (trackId) => set((state) => {
     const queue = [...state.queue];
     if (queue.includes(trackId)) queue.splice(queue.indexOf(trackId), 1);

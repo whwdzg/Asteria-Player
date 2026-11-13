@@ -80,6 +80,11 @@ export function useVideoGestures({ track, isTouch }: GestureOptions): {
 
   const toggleChrome = (): void => {
     const ui = useUiStore.getState();
+    // Outside immersive fullscreen the mobile controls are always visible.
+    if (!ui.fullscreen) {
+      ui.setChromeVisible(true);
+      return;
+    }
     if (ui.chromeVisible) ui.setChromeVisible(false);
     else window.dispatchEvent(new Event('asteria:reveal-chrome'));
   };

@@ -164,6 +164,21 @@ export async function restorePwaLibrary(): Promise<RestoredPwaLibrary | null> {
  * session-only import behaviour. Writes are serialised so a quick add/remove
  * cannot resurrect a deleted track.
  */
+export async function clearPwaLibrary(): Promise<void> {
+  try {
+    const db = await openDatabase();
+    const transaction = db.transaction([TRACK_STORE, META_STORE], 'readwrite');
+    transaction.objectStore(TRACK_STORE).clear();
+    transaction.objectStore(META_STORE).clear();
+    await new Promise<void>((resolve) => {
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => resolve();
+    });
+  } catch (error) {
+    console.warn('PWA library clear failed', error);
+  }
+}
+
 export function startPwaLibraryPersistence(): (() => void) | undefined {
   if (!isPwaStandalone()) return undefined;
   void navigator.storage?.persist?.().catch?.(() => undefined);

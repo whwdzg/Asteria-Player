@@ -1,5 +1,5 @@
-import { ArrowLeft24Regular, Play24Filled } from '@fluentui/react-icons';
-import { useEffect, useMemo, useRef } from 'react';
+import { ArrowLeft24Regular, ArrowShuffle24Regular, ChevronDown24Regular, Play24Filled } from '@fluentui/react-icons';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Track } from '../../lib/types';
 import {
   albumsFromTracks,
@@ -14,6 +14,7 @@ import { useLibraryStore } from '../../state/library';
 import { useUiStore } from '../../state/ui';
 import { player } from '../../player/engine';
 import { ArtistLinks, AlbumLink } from '../common/CollectionLinks';
+import { Menu, type MenuAnchor } from '../common/Menu';
 import { CoverArt } from '../common/CoverArt';
 
 function TrackRow({ track, entry }: { track: Track; entry?: { disc: number; number: number } }): React.ReactElement {
@@ -52,6 +53,7 @@ export function CollectionPage(): React.ReactElement | null {
   const tracks = useLibraryStore((state) => state.tracks);
   const { t } = useI18n();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [allMenu, setAllMenu] = useState<MenuAnchor | null>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0 });
@@ -90,9 +92,23 @@ export function CollectionPage(): React.ReactElement | null {
 
   if (!view || !data) return null;
 
-  const playFirst = (): void => {
-    const first = data.tracks[0];
-    if (first) player.playTrack(first.id);
+  const playAll = (shuffle = false): void => {
+    const ids = data.tracks.map((track) => track.id);
+    if (!ids.length) return;
+    if (shuffle) {
+      for (let index = ids.length - 1; index > 0; index -= 1) {
+        const swap = Math.floor(Math.random() * (index + 1));
+        [ids[index], ids[swap]] = [ids[swap], ids[index]];
+      }
+    }
+    const playlist = useLibraryStore.getState().addPlaylist(
+      t('collection.playAllName', { name: data.title }),
+      ids,
+    );
+    useLibraryStore.getState().setSequence(playlist.id);
+    player.playTrack(ids[0]);
+    useUiStore.getState().pushToast(t('collection.playAllCreated', { count: ids.length }));
+    setAllMenu(null);
   };
 
   const artistMeta = data.kind === 'artist'
@@ -106,9 +122,22 @@ export function CollectionPage(): React.ReactElement | null {
           <button type="button" className="fluent-button" onClick={close}>
             <ArrowLeft24Regular /> {t('common.back')}
           </button>
-          <button type="button" className="fluent-button primary" onClick={playFirst} disabled={!data.tracks.length}>
-            <Play24Filled /> {t('collection.playFirst')}
-          </button>
+          <div className="collection-play-all">
+            <button type="button" className="fluent-button primary" onClick={() => playAll()} disabled={!data.tracks.length}>
+              <Play24Filled /> {t('collection.playAll')}
+            </button>
+            <button
+              type="button"
+              className="fluent-button primary collection-play-more"
+              aria-label={t('collection.playAllOptions')}
+              aria-haspopup="menu"
+              aria-expanded={Boolean(allMenu)}
+              disabled={!data.tracks.length}
+              onClick={(event) => setAllMenu({ rect: event.currentTarget.getBoundingClientRect(), element: event.currentTarget })}
+            >
+              <ChevronDown24Regular />
+            </button>
+          </div>
         </header>
 
         <div className="collection-hero">
@@ -201,6 +230,18 @@ export function CollectionPage(): React.ReactElement | null {
           {!data.tracks.length ? <p className="collection-empty">{t('collection.empty')}</p> : null}
         </section>
       </div>
+      <Menu
+        open={Boolean(allMenu)}
+        anchor={allMenu}
+        label={t('collection.playAllOptions')}
+        onClose={() => setAllMenu(null)}
+        items={[{
+          id: 'shuffle',
+          label: t('collection.playAllShuffle'),
+          icon: <ArrowShuffle24Regular />,
+          onSelect: () => playAll(true),
+        }]}
+      />
     </section>
   );
 }

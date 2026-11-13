@@ -2,6 +2,7 @@ import {
   Add24Regular,
   ArrowImport24Regular,
   ArrowNext24Regular,
+  ArrowShuffle24Regular,
   Delete24Regular,
   Info24Regular,
   MusicNote224Regular,
@@ -11,6 +12,7 @@ import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'rea
 import type { Track } from '../../lib/types';
 import { ALL_SEQUENCE, useLibraryStore } from '../../state/library';
 import { usePlaybackStore } from '../../state/playback';
+import { useSettingsStore } from '../../state/settings';
 import { useUiStore } from '../../state/ui';
 import { player } from '../../player/engine';
 import { useI18n } from '../../i18n/I18nProvider';
@@ -32,6 +34,8 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
   const sequenceId = useLibraryStore((state) => state.sequenceId);
   const playlists = useLibraryStore((state) => state.playlists);
   const isPlaying = usePlaybackStore((state) => state.isPlaying);
+  const playMode = useSettingsStore((state) => state.playMode);
+  const patchSettings = useSettingsStore((state) => state.patch);
   const setQueueView = useUiStore((state) => state.setQueueView);
   const setSequence = useLibraryStore((state) => state.setSequence);
   const setDetailsTrackId = useUiStore((state) => state.setDetailsTrackId);
@@ -249,6 +253,16 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
           onMenu={openItemMenu}
           empty={emptyState}
         />
+        <footer className="queue-mobile-footer">
+          <button
+            type="button"
+            className={`queue-mode-pill ${playMode === 'shuffle' ? 'is-active' : ''}`.trim()}
+            onClick={() => patchSettings({ playMode: playMode === 'shuffle' ? 'all' : 'shuffle' })}
+          >
+            <ArrowShuffle24Regular />
+            {playMode === 'shuffle' ? t('player.mode.shuffle') : t('mobile.shuffleMode')}
+          </button>
+        </footer>
       </aside>
 
       <Menu
