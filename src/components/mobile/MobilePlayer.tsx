@@ -15,6 +15,7 @@ import { useUiStore } from '../../state/ui';
 import { CoverArt } from '../common/CoverArt';
 import { AlbumLink, ArtistLinks } from '../common/CollectionLinks';
 import { ScrollText } from '../common/ScrollText';
+import { AudioVisualizer } from '../nowplaying/AudioVisualizer';
 import { LyricsView } from '../nowplaying/LyricsView';
 import { MobileDetailsSheet } from './MobileDetailsSheet';
 
@@ -114,6 +115,8 @@ export function MobilePlayer({ onToggleFullscreen }: MobilePlayerProps): React.R
       onTouchEnd={onTouchEnd}
       onTouchCancel={onTouchEnd}
     >
+      <AudioVisualizer />
+
       {drag ? (
         <div className={`mobile-swipe-preview is-${drag.target}`} style={{ opacity: 0.25 + progress * 0.75 }} aria-hidden="true">
           <span className="mobile-swipe-preview-icon">
