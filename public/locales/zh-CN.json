@@ -516,5 +516,6 @@
   "settings.lyricAlign": "歌词对齐方式",
   "settings.lyricAlignHint": "可选择左对齐或沿中轴线居中显示。",
   "settings.lyricAlignLeft": "左对齐",
-  "settings.lyricAlignCenter": "居中对齐（中轴线）"
+  "settings.lyricAlignCenter": "居中对齐（中轴线）",
+  "mobile.mediaInfo": "媒体信息"
 }

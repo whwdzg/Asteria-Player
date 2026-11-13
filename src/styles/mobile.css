@@ -458,15 +458,16 @@
     padding: 10px 12px;
     border: 1px solid var(--border);
     border-radius: 13px;
-    background: color-mix(in srgb, var(--surface-2) 56%, transparent);
+    background: var(--surface-solid);
     color: var(--text-2);
+    backdrop-filter: none;
     font-size: 11px;
     text-align: left;
   }
 
   .mobile-action-card.is-active {
     border-color: color-mix(in srgb, var(--accent) 50%, transparent);
-    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    background: color-mix(in srgb, var(--accent) 18%, var(--surface-solid));
     color: var(--text);
   }
 
@@ -492,8 +493,9 @@
     padding: 14px;
     border: 1px solid var(--border);
     border-radius: 15px;
-    background: color-mix(in srgb, var(--surface-2) 52%, transparent);
+    background: var(--surface-solid);
     color: var(--text);
+    backdrop-filter: none;
     text-align: left;
   }
 
@@ -1004,6 +1006,12 @@
      text out of the bar itself. */
   .mobile-lyrics-sheet {
     z-index: 39;
+    background: var(--bg);
+  }
+}
+
+@media (max-width: 700px) {
+  .mobile-details {
     background: var(--bg);
   }
 }

@@ -516,5 +516,6 @@
   "settings.lyricAlign": "Lyric alignment",
   "settings.lyricAlignHint": "Left-aligned text or centred on the middle axis.",
   "settings.lyricAlignLeft": "Left aligned",
-  "settings.lyricAlignCenter": "Centre aligned"
+  "settings.lyricAlignCenter": "Centre aligned",
+  "mobile.mediaInfo": "Media information"
 }

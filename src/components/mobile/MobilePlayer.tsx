@@ -49,6 +49,7 @@ export function MobilePlayer({ onToggleFullscreen }: MobilePlayerProps): React.R
   const [dragging, setDragging] = useState(false);
   const [techOpen, setTechOpen] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const lyricBackStart = useRef<{ x: number; y: number } | null>(null);
   const start = useRef<{ x: number; y: number } | null>(null);
   const fromLyrics = useRef(false);
   const techRef = useRef<HTMLDivElement>(null);
@@ -108,6 +109,24 @@ export function MobilePlayer({ onToggleFullscreen }: MobilePlayerProps): React.R
     else if (current.target === 'details') setSheet('details');
     else if (current.target === 'queue') openQueue();
     else openSettings();
+  };
+
+  const onLyricBackStart = (event: React.TouchEvent): void => {
+    if (event.touches.length !== 1) return;
+    lyricBackStart.current = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+  };
+
+  const onLyricBackEnd = (event: React.TouchEvent): void => {
+    const from = lyricBackStart.current;
+    lyricBackStart.current = null;
+    if (!from) return;
+    const touch = event.changedTouches[0];
+    if (!touch) return;
+    const dx = touch.clientX - from.x;
+    const dy = touch.clientY - from.y;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 60 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+    // Lyrics were entered with a left swipe, so the opposite swipe goes back.
+    if (dx > 0) setSheet('none');
   };
 
   const targetLabel = drag ? t(`mobile.swipe${drag.target[0].toUpperCase()}${drag.target.slice(1)}`) : '';
@@ -214,7 +233,13 @@ export function MobilePlayer({ onToggleFullscreen }: MobilePlayerProps): React.R
       ) : null}
 
       {sheet === 'lyrics' ? (
-        <section className="mobile-sheet mobile-lyrics-sheet" aria-label={t('np.lyrics')}>
+        <section
+          className="mobile-sheet mobile-lyrics-sheet"
+          aria-label={t('np.lyrics')}
+          onTouchStart={onLyricBackStart}
+          onTouchEnd={onLyricBackEnd}
+          onTouchCancel={() => { lyricBackStart.current = null; }}
+        >
           <header className="mobile-sheet-head">
             <button type="button" className="icon-button subtle" onClick={() => setSheet('none')} aria-label={t('common.back')}>
               <ArrowLeft24Regular />
@@ -235,6 +260,7 @@ export function MobilePlayer({ onToggleFullscreen }: MobilePlayerProps): React.R
       {sheet === 'details' ? (
         <MobileDetailsSheet
           onClose={() => setSheet('none')}
+          onSwipeBack={() => setSheet('none')}
           onImmersive={() => {
             setSheet('none');
             onToggleFullscreen();

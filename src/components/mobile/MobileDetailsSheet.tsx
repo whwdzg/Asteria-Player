@@ -1,9 +1,10 @@
 import {
   ArrowLeft24Regular,
   FullScreenMaximize24Regular,
+  Info24Regular,
   Play24Filled,
 } from '@fluentui/react-icons';
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { useI18n } from '../../i18n/I18nProvider';
 import { formatDuration } from '../../lib/format';
 import { parseArtists, tracksForArtist } from '../../lib/artists';
@@ -15,15 +16,18 @@ import { ScrollText } from '../common/ScrollText';
 
 interface MobileDetailsSheetProps {
   onClose: () => void;
+  onSwipeBack: () => void;
   onImmersive: () => void;
 }
 
 /** Mobile-only detail sheet: playback actions, technical info and credits. */
-export function MobileDetailsSheet({ onClose, onImmersive }: MobileDetailsSheetProps): React.ReactElement | null {
+export function MobileDetailsSheet({ onClose, onSwipeBack, onImmersive }: MobileDetailsSheetProps): React.ReactElement | null {
   const { t } = useI18n();
   const track = useLibraryStore((state) => state.tracks.find((item) => item.id === state.currentId));
   const tracks = useLibraryStore((state) => state.tracks);
   const openCollection = useUiStore((state) => state.openCollection);
+  const setDetailsTrackId = useUiStore((state) => state.setDetailsTrackId);
+  const backStart = useRef<{ x: number; y: number } | null>(null);
 
 
   const contributors = useMemo(() => {
@@ -36,13 +40,42 @@ export function MobileDetailsSheet({ onClose, onImmersive }: MobileDetailsSheetP
 
   if (!track) return null;
 
+  const openMediaInfo = (): void => {
+    onClose();
+    setDetailsTrackId(track.id);
+  };
+
+  const onBackTouchStart = (event: React.TouchEvent): void => {
+    if (event.touches.length !== 1) return;
+    backStart.current = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+  };
+
+  const onBackTouchEnd = (event: React.TouchEvent): void => {
+    const from = backStart.current;
+    backStart.current = null;
+    if (!from) return;
+    const touch = event.changedTouches[0];
+    if (!touch) return;
+    const dx = touch.clientX - from.x;
+    const dy = touch.clientY - from.y;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 60 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+    // Details were entered with a right swipe, so swipe left to return.
+    if (dx < 0) onSwipeBack();
+  };
+
   const openCollectionPage = (kind: 'artist' | 'album', name: string): void => {
     onClose();
     openCollection(kind, name);
   };
 
   return (
-    <section className="mobile-sheet mobile-details" aria-label={t('mobile.details')}>
+    <section
+      className="mobile-sheet mobile-details"
+      aria-label={t('mobile.details')}
+      onTouchStart={onBackTouchStart}
+      onTouchEnd={onBackTouchEnd}
+      onTouchCancel={() => { backStart.current = null; }}
+    >
       <header className="mobile-sheet-head">
         <button type="button" className="icon-button subtle" onClick={onClose} aria-label={t('common.back')}>
           <ArrowLeft24Regular />
@@ -64,6 +97,10 @@ export function MobileDetailsSheet({ onClose, onImmersive }: MobileDetailsSheetP
           <button type="button" className="mobile-action-card" onClick={onImmersive}>
             <span className="mobile-action-icon"><FullScreenMaximize24Regular /></span>
             {t('mobile.immersive')}
+          </button>
+          <button type="button" className="mobile-action-card" onClick={openMediaInfo}>
+            <span className="mobile-action-icon"><Info24Regular /></span>
+            {t('mobile.mediaInfo')}
           </button>
         </div>
 
