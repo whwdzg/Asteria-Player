@@ -520,5 +520,15 @@
   "mobile.mediaInfo": "媒體資訊",
   "player.collapseBar": "收起底部列",
   "player.expandBar": "展開底部列",
-  "player.cycleMode": "循環模式"
+  "player.cycleMode": "循環模式",
+  "queue.sort": "排序播放清單",
+  "queue.sorted": "已按{mode}排序",
+  "queue.sortTitle": "標題首字母",
+  "queue.sortAdded": "加入時間",
+  "queue.sortAlbum": "專輯首字母",
+  "queue.sortArtist": "作者首字母",
+  "queue.sortBy.title": "標題首字母",
+  "queue.sortBy.added": "加入時間",
+  "queue.sortBy.album": "專輯首字母",
+  "queue.sortBy.artist": "作者首字母"
 }

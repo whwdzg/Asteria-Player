@@ -34,6 +34,8 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
   const queue = useLibraryStore((state) => state.queue);
   const currentId = useLibraryStore((state) => state.currentId);
   const sequenceId = useLibraryStore((state) => state.sequenceId);
+  const queueSort = useLibraryStore((state) => state.queueSort);
+  const sortQueue = useLibraryStore((state) => state.sortQueue);
   const playlists = useLibraryStore((state) => state.playlists);
   const isPlaying = usePlaybackStore((state) => state.isPlaying);
   const playMode = useSettingsStore((state) => state.playMode);
@@ -79,6 +81,12 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
       return next.size === current.size ? current : next;
     });
   }, [allQueueTracks]);
+
+  const changeSort = (sort: typeof queueSort): void => {
+    sortQueue(sort);
+    setSelected(new Set());
+    useUiStore.getState().pushToast(t('queue.sorted', { mode: t(`queue.sortBy.${sort}`) }));
+  };
 
   const cycleQueueMode = (): void => {
     const next = PLAY_MODES[(PLAY_MODES.indexOf(playMode) + 1) % PLAY_MODES.length];
@@ -234,6 +242,7 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
           selectedIds={selectedIds}
           sequenceId={sequenceId}
           sequenceName={sequenceName}
+          queueSort={queueSort}
           playlists={playlists}
           searchOpen={searchOpen}
           query={query}
@@ -246,6 +255,7 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
           onAddSelected={addSelectedTo}
           onNewPlaylist={(trackIds) => openPlaylistDialog(trackIds)}
           onScanMedia={openScanMedia}
+          onSortChange={changeSort}
           onSequenceChange={(id) => {
             setSequence(id);
             setSelected(new Set());

@@ -1,6 +1,7 @@
 import {
   Add24Regular,
   ArrowImport24Regular,
+  ArrowSort24Regular,
   ArrowSync24Regular,
   ChevronDown24Regular,
   Dismiss24Regular,
@@ -16,6 +17,7 @@ import {
 } from '@fluentui/react-icons';
 import { useEffect, useRef, useState } from 'react';
 import type { Playlist } from '../../lib/types';
+import type { QueueSort } from '../../lib/queueSort';
 import { useI18n } from '../../i18n/I18nProvider';
 import { useImporter } from '../../player/ImportProvider';
 import { IconButton } from '../common/IconButton';
@@ -30,6 +32,7 @@ interface QueueToolbarProps {
   selectedIds: string[];
   sequenceId: string;
   sequenceName: string;
+  queueSort: QueueSort;
   playlists: Playlist[];
   searchOpen: boolean;
   query: string;
@@ -42,6 +45,7 @@ interface QueueToolbarProps {
   onAddSelected: (playlistId: string) => void;
   onNewPlaylist: (trackIds: string[]) => void;
   onScanMedia: () => void;
+  onSortChange: (sort: QueueSort) => void;
   onSequenceChange: (id: string) => void;
   onExpand: () => void;
   onCollapse: () => void;
@@ -55,6 +59,7 @@ export function QueueToolbar({
   selectedIds,
   sequenceId,
   sequenceName,
+  queueSort,
   playlists,
   searchOpen,
   query,
@@ -67,6 +72,7 @@ export function QueueToolbar({
   onAddSelected,
   onNewPlaylist,
   onScanMedia,
+  onSortChange,
   onSequenceChange,
   onExpand,
   onCollapse,
@@ -79,6 +85,7 @@ export function QueueToolbar({
   const searchRef = useRef<HTMLInputElement>(null);
   const [sequenceAnchor, setSequenceAnchor] = useState<MenuAnchor | null>(null);
   const [importAnchor, setImportAnchor] = useState<MenuAnchor | null>(null);
+  const [sortAnchor, setSortAnchor] = useState<MenuAnchor | null>(null);
   const [addAnchor, setAddAnchor] = useState<MenuAnchor | null>(null);
 
   useEffect(() => {
@@ -105,6 +112,13 @@ export function QueueToolbar({
       icon: <Add24Regular />,
       onSelect: () => onNewPlaylist([]),
     },
+  ];
+
+  const sortItems = [
+    { id: 'title', label: t('queue.sortTitle'), checked: queueSort === 'title', onSelect: () => onSortChange('title') },
+    { id: 'added', label: t('queue.sortAdded'), checked: queueSort === 'added', onSelect: () => onSortChange('added') },
+    { id: 'album', label: t('queue.sortAlbum'), checked: queueSort === 'album', onSelect: () => onSortChange('album') },
+    { id: 'artist', label: t('queue.sortArtist'), checked: queueSort === 'artist', onSelect: () => onSortChange('artist') },
   ];
 
   const addItems = [
@@ -196,6 +210,13 @@ export function QueueToolbar({
               </IconButton>
             )}
             <IconButton
+              label={t('queue.sort')}
+              tooltip={`${t('queue.sort')}: ${t(`queue.sortBy.${queueSort}`)}`}
+              onClick={(event) => setSortAnchor({ rect: event.currentTarget.getBoundingClientRect(), element: event.currentTarget })}
+            >
+              <ArrowSort24Regular />
+            </IconButton>
+            <IconButton
               label={t('queue.scanMedia')}
               tooltip={t('queue.scanMedia')}
               onClick={onScanMedia}
@@ -231,6 +252,13 @@ export function QueueToolbar({
             </IconButton>
           </div>
 
+          <Menu
+            open={Boolean(sortAnchor)}
+            anchor={sortAnchor}
+            items={sortItems}
+            onClose={() => setSortAnchor(null)}
+            label={t('queue.sort')}
+          />
           <Menu
             open={Boolean(sequenceAnchor)}
             anchor={sequenceAnchor}

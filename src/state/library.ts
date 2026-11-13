@@ -3,12 +3,14 @@ import { persist } from 'zustand/middleware';
 import type { Playlist, Track } from '../lib/types';
 import { uid } from '../lib/format';
 import { clearMediaCaches } from '../lib/media';
+import { sortQueueTracks, type QueueSort } from '../lib/queueSort';
 
 interface LibraryState {
   tracks: Track[];
   queue: string[];
   currentId: string | null;
   sequenceId: string;
+  queueSort: QueueSort;
   playlists: Playlist[];
   loaded: boolean;
   setLoaded: (loaded: boolean) => void;
@@ -20,6 +22,7 @@ interface LibraryState {
   setCurrent: (id: string | null) => void;
   setQueue: (ids: string[], sequenceId?: string) => void;
   setSequence: (id: string) => void;
+  sortQueue: (sort: QueueSort) => void;
   addPlaylist: (name: string, trackIds?: string[]) => Playlist;
   addToPlaylist: (playlistId: string, trackIds: string[]) => void;
   removeFromPlaylist: (playlistId: string, trackIds: string[]) => void;
@@ -36,6 +39,7 @@ export const useLibraryStore = create<LibraryState>()(persist((set, get) => ({
   queue: [],
   currentId: null,
   sequenceId: ALL_SEQUENCE,
+  queueSort: 'title',
   playlists: [],
   loaded: false,
   setLoaded: (loaded) => set({ loaded }),
@@ -51,7 +55,9 @@ export const useLibraryStore = create<LibraryState>()(persist((set, get) => ({
     }
     set({
       tracks: merged,
-      queue: get().sequenceId === ALL_SEQUENCE ? merged.map((track) => track.id) : get().queue,
+      queue: get().sequenceId === ALL_SEQUENCE
+        ? sortQueueTracks(merged, get().queueSort).map((track) => track.id)
+        : get().queue,
       loaded: true,
     });
   },
@@ -61,7 +67,7 @@ export const useLibraryStore = create<LibraryState>()(persist((set, get) => ({
     if (!accepted.length) return [];
     const merged = [...existing, ...accepted];
     const queue = get().sequenceId === ALL_SEQUENCE
-      ? merged.map((track) => track.id)
+      ? sortQueueTracks(merged, get().queueSort).map((track) => track.id)
       : [...get().queue, ...accepted.map((track) => track.id)];
     set({ tracks: merged, queue });
     return accepted;
@@ -95,13 +101,39 @@ export const useLibraryStore = create<LibraryState>()(persist((set, get) => ({
   setSequence: (id) => {
     const state = get();
     if (id === ALL_SEQUENCE) {
-      set({ sequenceId: ALL_SEQUENCE, queue: state.tracks.map((track) => track.id) });
+      set({
+        sequenceId: ALL_SEQUENCE,
+        queue: sortQueueTracks(state.tracks, state.queueSort).map((track) => track.id),
+      });
       return;
     }
     const playlist = state.playlists.find((item) => item.id === id);
     if (!playlist) return;
     const known = new Set(state.tracks.map((track) => track.id));
     set({ sequenceId: id, queue: playlist.trackIds.filter((trackId) => known.has(trackId)) });
+  },
+  sortQueue: (sort) => {
+    const state = get();
+    if (state.sequenceId === ALL_SEQUENCE) {
+      set({ queueSort: sort, queue: sortQueueTracks(state.tracks, sort).map((track) => track.id) });
+      return;
+    }
+    const playlist = state.playlists.find((item) => item.id === state.sequenceId);
+    if (!playlist) {
+      set({ queueSort: sort });
+      return;
+    }
+    const byId = new Map(state.tracks.map((track) => [track.id, track]));
+    const ordered = sortQueueTracks(
+      playlist.trackIds.map((id) => byId.get(id)).filter((track): track is Track => Boolean(track)),
+      sort,
+    );
+    const ids = ordered.map((track) => track.id);
+    set({
+      queueSort: sort,
+      queue: ids,
+      playlists: state.playlists.map((item) => item.id === playlist.id ? { ...item, trackIds: ids } : item),
+    });
   },
   addPlaylist: (name, trackIds = []) => {
     const playlist: Playlist = {
@@ -134,7 +166,7 @@ export const useLibraryStore = create<LibraryState>()(persist((set, get) => ({
   clearPlaylists: () => set((state) => ({
     playlists: [],
     sequenceId: ALL_SEQUENCE,
-    queue: state.tracks.map((track) => track.id),
+    queue: sortQueueTracks(state.tracks, state.queueSort).map((track) => track.id),
   })),
   insertNext: (trackId) => set((state) => {
     const queue = [...state.queue];
@@ -153,7 +185,7 @@ export const useLibraryStore = create<LibraryState>()(persist((set, get) => ({
 }), {
   name: 'asteria-sequences',
   version: 1,
-  partialize: (state) => ({ playlists: state.playlists }),
+  partialize: (state) => ({ playlists: state.playlists, queueSort: state.queueSort }),
 }));
 
 export function selectCurrentTrack(state: LibraryState): Track | undefined {

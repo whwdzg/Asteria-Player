@@ -520,5 +520,15 @@
   "mobile.mediaInfo": "Media information",
   "player.collapseBar": "Collapse player bar",
   "player.expandBar": "Show player bar",
-  "player.cycleMode": "Playback mode"
+  "player.cycleMode": "Playback mode",
+  "queue.sort": "Sort playlist",
+  "queue.sorted": "Playlist sorted by {mode}",
+  "queue.sortTitle": "Title A–Z",
+  "queue.sortAdded": "Date added",
+  "queue.sortAlbum": "Album A–Z",
+  "queue.sortArtist": "Artist A–Z",
+  "queue.sortBy.title": "Title A–Z",
+  "queue.sortBy.added": "Date added",
+  "queue.sortBy.album": "Album A–Z",
+  "queue.sortBy.artist": "Artist A–Z"
 }
