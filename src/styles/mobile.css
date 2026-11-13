@@ -315,12 +315,12 @@
 
   .mobile-lyric-preview .lyric-line {
     padding: 5px 8px;
-    font-size: clamp(15px, 4.2vw, 18px);
+    font-size: calc(clamp(15px, 4.2vw, 18px) * var(--lyric-scale, 1));
     line-height: 1.35;
   }
 
   .mobile-lyric-preview .lyric-line.is-active {
-    font-size: clamp(18px, 5vw, 21px);
+    font-size: calc(clamp(18px, 5vw, 21px) * var(--lyric-scale, 1));
   }
 
   .mobile-lyric-preview .lyric-line:not(.is-active):not(.is-next) {
@@ -423,7 +423,7 @@
   .mobile-sheet-lyrics {
     flex: 1;
     min-height: 0;
-    padding: 0 14px;
+    padding: 0 14px calc(var(--bottom-bar-height) + 10px);
   }
 
   .mobile-sheet-lyrics .lyrics-panel {
@@ -440,8 +440,7 @@
   }
 
   .mobile-sheet-lyrics .lyrics-list {
-    padding-top: 44%;
-    padding-bottom: 30%;
+    padding: 8px 4px 18px;
   }
 
   /* Details */
@@ -997,4 +996,14 @@
 @keyframes mobile-sheet-fade {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@media (max-width: 700px) {
+  /* Keep the lyrics sheet below the transport bar and opaque so the main
+     cover/lyrics cannot bleed through. The reserved bottom padding keeps the
+     text out of the bar itself. */
+  .mobile-lyrics-sheet {
+    z-index: 39;
+    background: var(--bg);
+  }
 }
