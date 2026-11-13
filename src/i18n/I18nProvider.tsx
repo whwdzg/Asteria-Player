@@ -74,7 +74,7 @@ function currentSystemLanguages(): string[] {
 }
 
 async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
-  const response = await fetch(url, { signal });
+  const response = await fetch(url, { signal, credentials: 'omit' });
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return (await response.json()) as T;
 }

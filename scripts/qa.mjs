@@ -113,7 +113,7 @@ await page.locator('.queue-panel .queue-toolbar-actions .icon-button').last().cl
 await page.locator('input[type=file]').first().setInputFiles([
   path.join(root, 'public/demo/audio/aurora-drift.mp3'),
   path.join(root, 'public/demo/audio/aurora-drift.spl'),
-  path.join(root, 'public/demo/covers/aurora-drift.jpg'),
+  path.join(root, 'public/demo/covers/aurora-drift.webp'),
 ]);
 await page.waitForTimeout(2500);
 await page.locator('.queue-button').click();

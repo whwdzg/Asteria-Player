@@ -8,7 +8,6 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { importFiles as readFiles } from '../lib/importer';
 import type { UrlKind } from '../lib/urlImport';
 import type { Track } from '../lib/types';
 import { markAppUsed, setDemoPreference } from '../lib/demoPreference';
@@ -71,6 +70,7 @@ export function ImportProvider({ children }: { children: ReactNode }): ReactNode
     useUiStore.getState().setImporting({ done: 0, total: files.length });
     try {
       let imported = 0;
+      const { importFiles: readFiles } = await import('../lib/importer');
       const result = await readFiles(files, (done, total) => {
         useUiStore.getState().setImporting({ done, total });
       }, (track) => {

@@ -36,8 +36,3 @@ export function highResolutionCover(url: string | undefined): string | undefined
   if (/mzstatic\.com/.test(url)) return url.replace(/\/\d+x\d+bb\.(jpg|jpeg|png|webp)$/i, '/1200x1200bb.$1');
   return url;
 }
-
-export function accentFor(track: Track | undefined): string {
-  if (!track) return '#4cc2ff';
-  return track.accent ?? coverFallback(track).accent;
-}

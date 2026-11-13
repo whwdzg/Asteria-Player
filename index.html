@@ -25,6 +25,33 @@
         document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
       } catch (error) {}
     </script>
+    <script>
+      // Start the locale request while the module graph is still downloading.
+      try {
+        var settings = JSON.parse(localStorage.getItem('asteria-settings') || '{}').state || {};
+        var pref = settings.language || 'system';
+        var builtIn = { 'zh-CN': 1, 'zh-TW': 1, en: 1 };
+        if (pref === 'system') {
+          var langs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || 'en'];
+          pref = 'en';
+          for (var i = 0; i < langs.length; i += 1) {
+            var tag = String(langs[i]).toLowerCase();
+            if (tag.indexOf('zh') === 0) { pref = /hant|tw|hk|mo/.test(tag) ? 'zh-TW' : 'zh-CN'; break; }
+            if (tag.indexOf('en') === 0) { pref = 'en'; break; }
+          }
+        }
+        if (builtIn[pref]) {
+          var locale = document.createElement('link');
+          locale.rel = 'preload';
+          locale.as = 'fetch';
+          locale.type = 'application/json';
+          locale.crossOrigin = 'anonymous';
+          locale.href = 'locales/' + pref + '.json';
+          locale.setAttribute('fetchpriority', 'high');
+          document.head.appendChild(locale);
+        }
+      } catch (error) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

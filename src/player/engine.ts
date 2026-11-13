@@ -4,7 +4,7 @@ import { useClockStore } from '../state/clock';
 import { ALL_SEQUENCE, useLibraryStore } from '../state/library';
 import { usePlaybackStore } from '../state/playback';
 import { useSettingsStore, EQ_FREQUENCIES } from '../state/settings';
-import { revokeTrackUrls } from '../lib/importer';
+import { revokeTrackUrls } from '../lib/mediaFiles';
 import { useSleepTimerStore } from '../state/sleepTimer';
 
 const SEEK_STEP = 10;

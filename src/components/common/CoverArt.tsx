@@ -26,6 +26,9 @@ export function CoverArt({ track, className = '', alt = '', eager = false, showK
           src={track.cover}
           alt={alt}
           loading={eager ? 'eager' : 'lazy'}
+          fetchPriority={eager ? 'high' : 'low'}
+          width={640}
+          height={640}
           decoding="async"
           draggable={false}
           onError={() => setFailed(true)}

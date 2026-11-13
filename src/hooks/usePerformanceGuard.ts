@@ -6,6 +6,7 @@ import { useSettingsStore } from '../state/settings';
 const DISMISS_KEY = 'asteria-performance-hint-dismissed';
 const WARMUP_MS = 5_500;
 const SAMPLE_MS = 2_800;
+const IDLE_MS = 7_000;
 const MIN_FPS = 38;
 
 function hardwareIsWeak(): boolean {
@@ -24,16 +25,15 @@ function storageDismissed(): boolean {
 
 export interface PerformanceGuard {
   open: boolean;
-  recommend: () => void;
   applyRecommendation: () => void;
   dismiss: () => void;
   dismissPermanently: () => void;
 }
 
 /**
- * Detects sustained low frame rate or video decode drops while media is
- * playing. Network buffering is deliberately ignored: only rendering cadence
- * (requestAnimationFrame) and decoded-frame drops are sampled.
+ * Samples short render windows instead of keeping a permanent 60 fps monitor.
+ * Network buffering is deliberately ignored: only rendering cadence and
+ * decoded-video frame drops are considered.
  */
 export function usePerformanceGuard(enabled: boolean): PerformanceGuard {
   const isPlaying = usePlaybackStore((state) => state.isPlaying);
@@ -41,12 +41,6 @@ export function usePerformanceGuard(enabled: boolean): PerformanceGuard {
   const [open, setOpen] = useState(false);
   const prompted = useRef(false);
   const sessionDismissed = useRef(false);
-
-  const recommend = useCallback(() => {
-    if (prompted.current || sessionDismissed.current || storageDismissed()) return;
-    prompted.current = true;
-    setOpen(true);
-  }, []);
 
   const dismiss = useCallback(() => {
     sessionDismissed.current = true;
@@ -77,78 +71,66 @@ export function usePerformanceGuard(enabled: boolean): PerformanceGuard {
 
   useEffect(() => {
     if (!isPlaying || !enabled || prompted.current || sessionDismissed.current || storageDismissed()) return;
+    let disposed = false;
+    let timer = 0;
     let raf = 0;
-    let started = performance.now();
-    let warmupUntil = started + WARMUP_MS;
-    let measuring = false;
-    let frames = 0;
-    let longFrames = 0;
-    let previous = started;
-    let videoDropped = 0;
-    let baseDropped: number | null = null;
-    let sampleStart = performance.now();
     const video = document.querySelector('video') as HTMLVideoElement | null;
 
-    const tick = (time: number): void => {
+    const schedule = (delay: number): void => {
+      if (disposed) return;
+      window.clearTimeout(timer);
+      timer = window.setTimeout(sample, delay);
+    };
+
+    const sample = (): void => {
+      if (disposed || prompted.current || sessionDismissed.current) return;
       if (document.hidden) {
-        started = time;
-        warmupUntil = time + WARMUP_MS;
-        measuring = false;
-        frames = 0;
-        longFrames = 0;
-        previous = time;
-        raf = requestAnimationFrame(tick);
+        schedule(2_000);
         return;
       }
+      const started = performance.now();
+      const baseDropped = video?.getVideoPlaybackQuality?.().droppedVideoFrames ?? 0;
+      let frames = 0;
+      let longFrames = 0;
+      let previous = started;
 
-      frames += 1;
-      if (time - previous > 42) longFrames += 1;
-      previous = time;
-
-      if (video) {
-        const quality = video.getVideoPlaybackQuality?.();
-        if (quality) {
-          if (baseDropped === null) baseDropped = quality.droppedVideoFrames;
-          videoDropped = quality.droppedVideoFrames - baseDropped;
-        }
-      }
-
-      if (!measuring && time >= warmupUntil) {
-        measuring = true;
-        warmupUntil = time + SAMPLE_MS;
-        started = time;
-        sampleStart = time;
-        frames = 0;
-        longFrames = 0;
-        videoDropped = 0;
-        baseDropped = null;
-        raf = requestAnimationFrame(tick);
-        return;
-      }
-
-      if (measuring && time >= warmupUntil) {
-        const elapsed = time - started;
-        const fps = frames > 0 ? (frames * 1000) / Math.max(1, elapsed) : 60;
-        const longRatio = frames > 0 ? longFrames / frames : 0;
-        const droppedPerSecond = videoDropped / Math.max(1, (time - sampleStart) / 1000);
-        const weak = hardwareIsWeak();
-        if (fps < MIN_FPS || longRatio > 0.3 || droppedPerSecond > 8 || weak) {
-          recommend();
+      const tick = (time: number): void => {
+        if (disposed) return;
+        if (document.hidden) {
+          schedule(2_000);
           return;
         }
-        frames = 0;
-        longFrames = 0;
-        measuring = false;
-        started = time;
-        warmupUntil = time + 6_000;
-        sampleStart = time;
-      }
+        frames += 1;
+        if (time - previous > 42) longFrames += 1;
+        previous = time;
+        const elapsed = time - started;
+        if (elapsed < SAMPLE_MS) {
+          raf = requestAnimationFrame(tick);
+          return;
+        }
+
+        const dropped = (video?.getVideoPlaybackQuality?.().droppedVideoFrames ?? baseDropped) - baseDropped;
+        const seconds = Math.max(1, elapsed / 1000);
+        const fps = (frames * 1000) / seconds;
+        const longRatio = frames > 0 ? longFrames / frames : 0;
+        if (fps < MIN_FPS || longRatio > 0.3 || dropped / seconds > 8 || hardwareIsWeak()) {
+          prompted.current = true;
+          setOpen(true);
+          return;
+        }
+        schedule(IDLE_MS);
+      };
+
       raf = requestAnimationFrame(tick);
     };
 
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [currentId, enabled, isPlaying, recommend]);
+    schedule(WARMUP_MS);
+    return () => {
+      disposed = true;
+      window.clearTimeout(timer);
+      cancelAnimationFrame(raf);
+    };
+  }, [currentId, enabled, isPlaying]);
 
-  return { open, recommend, applyRecommendation, dismiss, dismissPermanently };
+  return { open, applyRecommendation, dismiss, dismissPermanently };
 }

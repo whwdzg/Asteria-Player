@@ -11,7 +11,7 @@ describe('high-resolution artwork', () => {
 
   it('leaves local and unknown URLs untouched', () => {
     expect(highResolutionCover('blob:http://localhost/cover')).toBe('blob:http://localhost/cover');
-    expect(highResolutionCover('demo/covers/aurora-drift.jpg')).toBe('demo/covers/aurora-drift.jpg');
+    expect(highResolutionCover('demo/covers/aurora-drift.webp')).toBe('demo/covers/aurora-drift.webp');
     expect(highResolutionCover(undefined)).toBeUndefined();
   });
 });

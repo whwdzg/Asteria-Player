@@ -24,7 +24,7 @@ describe('embedded media tags', () => {
     expect(tags.title).toBe('纸飞机穿过清晨');
     expect(tags.artist).toBe('Kite Ensemble');
     expect(tags.sampleRate).toBe(48000);
-    expect(tags.bitDepth).toBe(24);
+    expect(tags.bitDepth).toBe(16);
     expect(tags.duration).toBeGreaterThan(70);
     expect(tags.lyrics).toContain('纸飞机');
     expect(tags.cover?.startsWith('data:image/jpeg;base64,')).toBe(true);

@@ -33,7 +33,7 @@ import { findUnreadableTracks } from './lib/mediaIntegrity';
 import { isPwaStandalone, restorePwaLibrary, startPwaLibraryPersistence } from './lib/pwaLibrary';
 import { coverThemeColor, NEUTRAL_PLAYER_ACCENT } from './lib/coverTheme';
 import { clamp } from './lib/format';
-import { collectDroppedFiles } from './lib/importer';
+import { collectDroppedFiles } from './lib/mediaFiles';
 import { player } from './player/engine';
 import { useImporter } from './player/ImportProvider';
 import { useLibraryStore } from './state/library';
@@ -70,7 +70,7 @@ function AmbientBackdrop({ track, accent }: { track?: Track; accent: string }): 
 
     let disposed = false;
     const update = (): void => {
-      if (disposed || video.readyState < 2 || !video.videoWidth) return;
+      if (disposed || document.hidden || video.readyState < 2 || !video.videoWidth) return;
       try {
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         const frame = canvas.toDataURL('image/jpeg', 0.55);

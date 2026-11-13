@@ -1,3 +1,4 @@
+import '../../styles/queue.css';
 import {
   Add24Regular,
   ArrowImport24Regular,

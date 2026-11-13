@@ -112,7 +112,7 @@ def write_wav(path: Path, data: np.ndarray, sr: int, bits: int = 16) -> None:
 
 
 def make_cover(path: Path, palette: list[tuple[int, int, int]], seed: int, label: str) -> None:
-    w = h = 900
+    w = h = 640
     local = np.random.default_rng(seed)
     yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
     nx, ny = xx / w, yy / h
@@ -138,7 +138,7 @@ def make_cover(path: Path, palette: list[tuple[int, int, int]], seed: int, label
     # Grain.
     noise = (local.normal(0, 4, (h, w, 1))).repeat(3, axis=2)
     arr = np.clip(np.asarray(pil, np.float32) + noise, 0, 255).astype(np.uint8)
-    Image.fromarray(arr).save(path, quality=90)
+    Image.fromarray(arr).save(path, format="WEBP", quality=82, method=6)
     print("cover", path.name, label)
 
 
@@ -626,7 +626,7 @@ def tag_files() -> None:
     tags.add(TIT2(encoding=3, text="Aurora Drift"))
     tags.add(TPE1(encoding=3, text="Asteria"))
     tags.add(TALB(encoding=3, text="Neon Meridian"))
-    tags.add(APIC(encoding=3, mime="image/jpeg", type=3, desc="Cover", data=(COVERS / "aurora-drift.jpg").read_bytes()))
+    tags.add(APIC(encoding=3, mime="image/webp", type=3, desc="Cover", data=(COVERS / "aurora-drift.webp").read_bytes()))
     tags.save(aurora, v2_version=3)
 
     glass = AUDIO / "liquid-glass.mp3"
@@ -639,7 +639,7 @@ def tag_files() -> None:
     tags.add(TIT2(encoding=3, text="Liquid Glass"))
     tags.add(TPE1(encoding=3, text="Mira Voss"))
     tags.add(TALB(encoding=3, text="Refraction"))
-    tags.add(APIC(encoding=3, mime="image/jpeg", type=3, desc="Cover", data=(COVERS / "liquid-glass.jpg").read_bytes()))
+    tags.add(APIC(encoding=3, mime="image/jpeg", type=3, desc="Cover", data=(COVERS / "liquid-glass.webp").read_bytes()))
     tags.add(USLT(encoding=3, lang="eng", desc="", text=GLASS_LRC))
     tags.save(glass, v2_version=3)
 
@@ -652,24 +652,24 @@ def tag_files() -> None:
     flac.clear_pictures()
     pic = Picture()
     pic.type = 3
-    pic.mime = "image/jpeg"
+    pic.mime = "image/webp"
     pic.desc = "Cover"
-    pic.data = (COVERS / "paper-planes.jpg").read_bytes()
+    pic.data = (COVERS / "paper-planes.webp").read_bytes()
     flac.add_picture(pic)
     flac.save()
     print("embedded tags for 3 tracks")
 
 
 def main() -> None:
-    make_cover(COVERS / "aurora-drift.jpg", [(60, 220, 210), (96, 80, 220), (24, 40, 120)], 11, "Aurora Drift")
-    make_cover(COVERS / "liquid-glass.jpg", [(255, 120, 190), (90, 210, 255), (40, 30, 90)], 22, "Liquid Glass")
-    make_cover(COVERS / "paper-planes.jpg", [(255, 210, 140), (240, 140, 110), (80, 120, 190)], 33, "Paper Skies")
-    make_cover(COVERS / "chromatic-fields.jpg", [(30, 210, 180), (80, 70, 220), (220, 60, 150)], 44, "Chromatic Fields")
+    make_cover(COVERS / "aurora-drift.webp", [(60, 220, 210), (96, 80, 220), (24, 40, 120)], 11, "Aurora Drift")
+    make_cover(COVERS / "liquid-glass.webp", [(255, 120, 190), (90, 210, 255), (40, 30, 90)], 22, "Liquid Glass")
+    make_cover(COVERS / "paper-planes.webp", [(255, 210, 140), (240, 140, 110), (80, 120, 190)], 33, "Paper Skies")
+    make_cover(COVERS / "chromatic-fields.webp", [(30, 210, 180), (80, 70, 220), (220, 60, 150)], 44, "Chromatic Fields")
 
     for name, arr, sr, bits in (
         ("aurora-drift.wav", render_aurora(), SR, 24),
         ("liquid-glass.wav", render_glass(), 44100, 24),
-        ("paper-planes.wav", render_paper(), 48000, 24),
+        ("paper-planes.wav", render_paper(), 48000, 16),
     ):
         write_wav(AUDIO / name, arr, sr, bits)
         print("wav", name, f"{arr.shape[0] / sr:.1f}s")
@@ -684,7 +684,7 @@ def main() -> None:
     ], check=True)
     subprocess.run([
         "ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-i", str(AUDIO / "paper-planes.wav"),
-        "-codec:a", "flac", "-sample_fmt", "s32", "-bits_per_raw_sample", "24", str(AUDIO / "paper-planes.flac"),
+        "-codec:a", "flac", "-sample_fmt", "s16", str(AUDIO / "paper-planes.flac"),
     ], check=True)
 
     write_text(AUDIO / "aurora-drift.spl", AURORA_SPL)
@@ -715,7 +715,7 @@ def main() -> None:
                 "artist": "Asteria",
                 "album": "Neon Meridian",
                 "src": "demo/audio/aurora-drift.mp3",
-                "cover": "demo/covers/aurora-drift.jpg",
+                "cover": "demo/covers/aurora-drift.webp",
                 "lyrics": "demo/audio/aurora-drift.spl",
                 "lyricsFormat": "spl",
                 "duration": 96,
@@ -733,7 +733,7 @@ def main() -> None:
                 "artist": "Mira Voss",
                 "album": "Refraction",
                 "src": "demo/audio/liquid-glass.mp3",
-                "cover": "demo/covers/liquid-glass.jpg",
+                "cover": "demo/covers/liquid-glass.webp",
                 "duration": 84,
                 "bpm": 112,
                 "sampleRate": 44100,
@@ -749,13 +749,13 @@ def main() -> None:
                 "artist": "Kite Ensemble",
                 "album": "Paper Skies",
                 "src": "demo/audio/paper-planes.flac",
-                "cover": "demo/covers/paper-planes.jpg",
+                "cover": "demo/covers/paper-planes.webp",
                 "lyrics": "demo/audio/paper-planes.lrc",
                 "duration": 78,
                 "bpm": 84,
                 "sampleRate": 48000,
-                "bitDepth": 24,
-                "bitrate": 1200000,
+                "bitDepth": 16,
+                "bitrate": 774000,
                 "format": "FLAC",
                 "accent": "#ffc37a"
             },
@@ -766,7 +766,7 @@ def main() -> None:
                 "artist": "Asteria Visual Lab",
                 "album": "Motion Studies",
                 "src": "demo/video/chromatic-fields.mp4",
-                "cover": "demo/covers/chromatic-fields.jpg",
+                "cover": "demo/covers/chromatic-fields.webp",
                 "duration": 32,
                 "bpm": 96,
                 "width": 960,

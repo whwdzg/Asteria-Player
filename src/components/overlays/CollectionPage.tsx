@@ -1,3 +1,4 @@
+import '../../styles/collection.css';
 import { ArrowLeft24Regular, ArrowShuffle24Regular, ChevronDown24Regular, Play24Filled } from '@fluentui/react-icons';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Track } from '../../lib/types';
