@@ -7,7 +7,7 @@ export async function refreshWithLatest(language: string, localeFile?: string | 
   const base = document.baseURI;
   const token = Date.now().toString();
   // Always refresh the built-in dictionaries, plus the active remote pack.
-  const locales = new Set(['en.json', 'zh-CN.json', 'zh-TW.json']);
+  const locales = new Set(['en.json', 'zh-CN.json', 'zh-TW.json', 'ja.json']);
   if (localeFile && /^[a-zA-Z0-9_.-]+\.json$/.test(localeFile)) locales.add(localeFile);
   else if (localeFile === undefined && /^[a-zA-Z0-9_-]+$/.test(language)) locales.add(`${language}.json`);
   const paths = [

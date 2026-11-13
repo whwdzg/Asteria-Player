@@ -74,7 +74,7 @@
 ### 设置
 
 - 主题：深色 / 浅色 / 跟随系统。
-- 语言：简体中文 / 繁體中文 / English / 跟随系统，语言包来自外部 JSON；当前语言包优先请求，英文回退包在之后加载。下拉菜单使用 Fluent 自定义列表，支持键盘与选中态。
+- 语言：简体中文 / 繁體中文 / English / 日本語 / 跟随系统，语言包来自外部 JSON；当前语言包优先请求，英文回退包在之后加载。下拉菜单使用 Fluent 自定义列表，支持键盘与选中态。
 - 液态玻璃开关：开启后增强折射高光、饱和度与背景模糊。
 - 播放器主题色：从当前封面 / 视频缩略图提取并去色，用于当前歌词、逐字高亮、进度条、可视化与播放控件；不再使用随机色。设置与播放列表保持固定的蓝色控件色。
 - 动态背景：根据封面 / 视频缩略图生成柔和的动态环境色；可关闭为静态模糊，并可选择「随 BPM 轻柔律动」与「视频画面跟随视频内容」两个子选项。
@@ -257,7 +257,8 @@ SPL 语法按 [Salt Player Lyrics 标准](https://moriafly.com/standards/spl.htm
   "languages": [
     { "code": "zh-CN", "label": "简体中文", "nativeLabel": "简体中文", "file": "zh-CN.json" },
     { "code": "zh-TW", "label": "繁體中文", "nativeLabel": "繁體中文", "file": "zh-TW.json" },
-    { "code": "en", "label": "English", "nativeLabel": "English", "file": "en.json" }
+    { "code": "en", "label": "English", "nativeLabel": "English", "file": "en.json" },
+    { "code": "ja", "label": "日本語", "nativeLabel": "日本語", "file": "ja.json" }
   ]
 }
 ```

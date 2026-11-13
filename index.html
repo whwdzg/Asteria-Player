@@ -30,7 +30,7 @@
       try {
         var settings = JSON.parse(localStorage.getItem('asteria-settings') || '{}').state || {};
         var pref = settings.language || 'system';
-        var builtIn = { 'zh-CN': 1, 'zh-TW': 1, en: 1 };
+        var builtIn = { 'zh-CN': 1, 'zh-TW': 1, en: 1, ja: 1 };
         if (pref === 'system') {
           var langs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || 'en'];
           pref = 'en';
@@ -38,6 +38,7 @@
             var tag = String(langs[i]).toLowerCase();
             if (tag.indexOf('zh') === 0) { pref = /hant|tw|hk|mo/.test(tag) ? 'zh-TW' : 'zh-CN'; break; }
             if (tag.indexOf('en') === 0) { pref = 'en'; break; }
+            if (tag.indexOf('ja') === 0) { pref = 'ja'; break; }
           }
         }
         if (builtIn[pref]) {

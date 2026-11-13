@@ -20,6 +20,7 @@ const FALLBACK_LANGUAGES: LanguagePack[] = [
   { code: 'zh-CN', label: '简体中文', nativeLabel: '简体中文', file: 'zh-CN.json' },
   { code: 'zh-TW', label: '繁體中文', nativeLabel: '繁體中文', file: 'zh-TW.json' },
   { code: 'en', label: 'English', nativeLabel: 'English', file: 'en.json' },
+  { code: 'ja', label: '日本語', nativeLabel: '日本語', file: 'ja.json' },
 ];
 
 export interface I18nValue {
