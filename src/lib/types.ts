@@ -4,6 +4,7 @@ export type PlayMode = 'one' | 'all' | 'none' | 'shuffle';
 export type FontChoice = 'display' | 'sans' | 'serif' | 'rounded' | 'mono';
 export type DanmakuArea = 'quarter' | 'half' | 'threeQuarter' | 'full';
 export type VideoFit = 'contain' | 'cover' | 'fill';
+export type VideoHudPosition = 'centerTop' | 'centerBottom' | 'topLeft' | 'bottomLeft' | 'topRight' | 'bottomRight';
 
 export type ShortcutAction =
   | 'playPause'
@@ -201,6 +202,8 @@ export interface Settings {
   mirrorVideo: boolean;
   colorVisionAssist: boolean;
   videoFit: VideoFit;
+  videoHudPosition: VideoHudPosition;
+  showVideoPauseIcon: boolean;
   danmuApiBase: string;
   shortcuts: ShortcutMap;
   lastTrackId?: string;

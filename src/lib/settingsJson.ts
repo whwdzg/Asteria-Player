@@ -15,6 +15,7 @@ const PLAY_MODES = new Set<PlayMode>(['one', 'all', 'none', 'shuffle']);
 const FONTS = new Set<FontChoice>(['display', 'sans', 'serif', 'rounded', 'mono']);
 const DANMAKU_AREAS = new Set<Settings['danmakuArea']>(['quarter', 'half', 'threeQuarter', 'full']);
 const VIDEO_FITS = new Set<Settings['videoFit']>(['contain', 'cover', 'fill']);
+const VIDEO_HUD_POSITIONS = new Set<Settings['videoHudPosition']>(['centerTop', 'centerBottom', 'topLeft', 'bottomLeft', 'topRight', 'bottomRight']);
 
 type RawSettings = Record<string, unknown>;
 
@@ -76,6 +77,8 @@ const FALLBACK_SETTINGS: Settings = {
   mirrorVideo: false,
   colorVisionAssist: false,
   videoFit: 'contain',
+  videoHudPosition: 'centerTop',
+  showVideoPauseIcon: true,
   danmuApiBase: '',
   shortcuts: normalizeShortcuts(undefined),
   lastPosition: 0,
@@ -125,6 +128,9 @@ export function normalizeSettings(input: unknown, base: Settings = DEFAULT_SETTI
   const videoFit = typeof raw.videoFit === 'string' && VIDEO_FITS.has(raw.videoFit as Settings['videoFit'])
     ? raw.videoFit as Settings['videoFit']
     : base.videoFit;
+  const videoHudPosition = typeof raw.videoHudPosition === 'string' && VIDEO_HUD_POSITIONS.has(raw.videoHudPosition as Settings['videoHudPosition'])
+    ? raw.videoHudPosition as Settings['videoHudPosition']
+    : base.videoHudPosition;
   const gains = Array.isArray(raw.eqGains) && raw.eqGains.length === 5
     ? raw.eqGains.map((gain) => clamp(Number(gain) || 0, -12, 12))
     : [...base.eqGains];
@@ -174,6 +180,8 @@ export function normalizeSettings(input: unknown, base: Settings = DEFAULT_SETTI
     mirrorVideo: booleanValue(raw.mirrorVideo, base.mirrorVideo),
     colorVisionAssist: booleanValue(raw.colorVisionAssist, base.colorVisionAssist),
     videoFit,
+    videoHudPosition,
+    showVideoPauseIcon: booleanValue(raw.showVideoPauseIcon, base.showVideoPauseIcon),
     danmuApiBase: stringValue(raw.danmuApiBase, base.danmuApiBase),
     shortcuts: raw.shortcuts === undefined ? { ...base.shortcuts } : normalizeShortcuts(raw.shortcuts),
     lastTrackId: typeof raw.lastTrackId === 'string' ? raw.lastTrackId : base.lastTrackId,
@@ -239,6 +247,8 @@ export function settingsDocument(settings: Settings): SettingsJsonDocument {
       mirrorVideo: settings.mirrorVideo,
       colorVisionAssist: settings.colorVisionAssist,
       videoFit: settings.videoFit,
+      videoHudPosition: settings.videoHudPosition,
+      showVideoPauseIcon: settings.showVideoPauseIcon,
       danmuApiBase: settings.danmuApiBase,
       shortcuts: settings.shortcuts,
       reduceMotion: settings.reduceMotion ?? false,

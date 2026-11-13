@@ -55,6 +55,8 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
   const mirror = useSettingsStore((state) => state.mirrorVideo);
   const colorVision = useSettingsStore((state) => state.colorVisionAssist);
   const videoFit = useSettingsStore((state) => state.videoFit);
+  const videoHudPosition = useSettingsStore((state) => state.videoHudPosition);
+  const showVideoPauseIcon = useSettingsStore((state) => state.showVideoPauseIcon);
   const setDetailsTrackId = useUiStore((state) => state.setDetailsTrackId);
   const updateTrack = useLibraryStore((state) => state.updateTrack);
   const { t } = useI18n();
@@ -434,7 +436,7 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
         <div className="video-center-control" onClick={(event) => event.stopPropagation()}>
           {isLoading ? (
             <span className="video-loading" aria-label={t('loading')}><SpinnerIos20Regular /></span>
-          ) : !isPlaying ? (
+          ) : !isPlaying && showVideoPauseIcon ? (
             <button
               type="button"
               className="video-play-toggle"
@@ -451,7 +453,7 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
         {fullscreen ? <FullscreenClock /> : null}
 
         {hud ? (
-          <div className={`gesture-hud is-${hud.kind}`} aria-live="polite">
+          <div className={`gesture-hud is-${hud.kind} hud-pos-${videoHudPosition}`} aria-live="polite">
             {hud.kind === 'seek' ? (
               <>
                 <strong>{formatTime(hud.current)}</strong>
@@ -476,7 +478,7 @@ export function VideoStage({ onToggleFullscreen }: { onToggleFullscreen: () => v
             )}
           </div>
         ) : tempSpeed ? (
-          <div className="gesture-hud is-speed" aria-live="polite">
+          <div className={`gesture-hud is-speed hud-pos-${videoHudPosition}`} aria-live="polite">
             <strong>2×</strong><span>{t('player.tempSpeed')}</span>
           </div>
         ) : null}

@@ -569,3 +569,61 @@
   top: 18px;
   right: 22px;
 }
+
+/* Configurable gesture / keyboard HUD anchor. */
+.gesture-hud[class*="hud-pos-"] {
+  animation-name: gesture-fade;
+}
+
+.gesture-hud.hud-pos-centerTop {
+  top: 12%;
+  bottom: auto;
+  left: 50%;
+  right: auto;
+  transform: translate(-50%, 0);
+}
+
+.gesture-hud.hud-pos-centerBottom {
+  top: auto;
+  bottom: 12%;
+  left: 50%;
+  right: auto;
+  transform: translate(-50%, 0);
+}
+
+.gesture-hud.hud-pos-topLeft {
+  top: 12%;
+  right: auto;
+  bottom: auto;
+  left: 10%;
+  transform: none;
+}
+
+.gesture-hud.hud-pos-bottomLeft {
+  top: auto;
+  right: auto;
+  bottom: 12%;
+  left: 10%;
+  transform: none;
+}
+
+.gesture-hud.hud-pos-topRight {
+  top: 12%;
+  right: 10%;
+  bottom: auto;
+  left: auto;
+  transform: none;
+}
+
+.gesture-hud.hud-pos-bottomRight {
+  top: auto;
+  right: 10%;
+  bottom: 12%;
+  left: auto;
+  transform: none;
+}
+
+@keyframes gesture-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

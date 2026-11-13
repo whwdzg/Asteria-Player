@@ -458,5 +458,15 @@
   "sleep.afterTrackShort": "播完目前內容",
   "sleep.remaining": "將在 {time} 後暫停",
   "sleep.finished": "定時關閉已暫停播放",
-  "mobile.dlnaShortHint": "複製目前串流位址，用於 DLNA 接收裝置。"
+  "mobile.dlnaShortHint": "複製目前串流位址，用於 DLNA 接收裝置。",
+  "settings.videoHudPosition": "手勢 / 鍵盤彈窗位置",
+  "settings.videoHudPositionHint": "設定影片手勢與鍵盤 HUD 回饋的顯示位置。",
+  "settings.videoHud.centerTop": "中上",
+  "settings.videoHud.centerBottom": "中下",
+  "settings.videoHud.topLeft": "左上",
+  "settings.videoHud.bottomLeft": "左下",
+  "settings.videoHud.topRight": "右上",
+  "settings.videoHud.bottomRight": "右下",
+  "settings.videoPauseIcon": "顯示影片暫停中間圖示",
+  "settings.videoPauseIconHint": "影片暫停時顯示中間的圓形播放按鈕。"
 }

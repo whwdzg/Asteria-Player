@@ -458,5 +458,15 @@
   "sleep.afterTrackShort": "after this track",
   "sleep.remaining": "Pausing in {time}",
   "sleep.finished": "Sleep timer paused playback",
-  "mobile.dlnaShortHint": "Copy the current stream address for a DLNA renderer."
+  "mobile.dlnaShortHint": "Copy the current stream address for a DLNA renderer.",
+  "settings.videoHudPosition": "Gesture / keyboard popup position",
+  "settings.videoHudPositionHint": "Choose where video gesture and keyboard HUD feedback appears.",
+  "settings.videoHud.centerTop": "Top centre",
+  "settings.videoHud.centerBottom": "Bottom centre",
+  "settings.videoHud.topLeft": "Top left",
+  "settings.videoHud.bottomLeft": "Bottom left",
+  "settings.videoHud.topRight": "Top right",
+  "settings.videoHud.bottomRight": "Bottom right",
+  "settings.videoPauseIcon": "Show central pause icon",
+  "settings.videoPauseIconHint": "Show the round play button in the middle of a paused video."
 }

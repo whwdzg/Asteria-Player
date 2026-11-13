@@ -51,6 +51,8 @@
     "mirrorVideo": false,
     "colorVisionAssist": false,
     "videoFit": "contain",
+    "videoHudPosition": "centerTop",
+    "showVideoPauseIcon": true,
     "danmuApiBase": "",
     "shortcuts": {
       "playPause": {

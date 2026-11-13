@@ -113,6 +113,38 @@ export function VideoSettings(): React.ReactElement {
 
       <div className="setting-row">
         <div className="setting-label">
+          <span>{t('settings.videoHudPosition')}</span>
+          <small>{t('settings.videoHudPositionHint')}</small>
+        </div>
+        <Dropdown
+          value={settings.videoHudPosition}
+          onChange={(value) => set('videoHudPosition', value as Settings['videoHudPosition'])}
+          options={[
+            { value: 'centerTop', label: t('settings.videoHud.centerTop') },
+            { value: 'centerBottom', label: t('settings.videoHud.centerBottom') },
+            { value: 'topLeft', label: t('settings.videoHud.topLeft') },
+            { value: 'bottomLeft', label: t('settings.videoHud.bottomLeft') },
+            { value: 'topRight', label: t('settings.videoHud.topRight') },
+            { value: 'bottomRight', label: t('settings.videoHud.bottomRight') },
+          ]}
+          ariaLabel={t('settings.videoHudPosition')}
+          menuLabel={t('settings.videoHudPosition')}
+        />
+      </div>
+      <div className="setting-row">
+        <div className="setting-label">
+          <span>{t('settings.videoPauseIcon')}</span>
+          <small>{t('settings.videoPauseIconHint')}</small>
+        </div>
+        <Switch
+          checked={settings.showVideoPauseIcon}
+          onChange={(value) => set('showVideoPauseIcon', value)}
+          label={t('settings.videoPauseIcon')}
+        />
+      </div>
+
+      <div className="setting-row">
+        <div className="setting-label">
           <span><Chat24Regular className="inline-icon" /> {t('settings.danmaku')}</span>
           <small>{t('settings.danmakuHint')}</small>
         </div>

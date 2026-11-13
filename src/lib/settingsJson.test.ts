@@ -26,6 +26,8 @@ describe('settings JSON', () => {
     expect(DEFAULT_SETTINGS.fullscreenClock).toBe(false);
     expect(DEFAULT_SETTINGS.fullscreenClockOpacity).toBe(0.72);
     expect(DEFAULT_SETTINGS.videoFit).toBe('contain');
+    expect(DEFAULT_SETTINGS.videoHudPosition).toBe('centerTop');
+    expect(DEFAULT_SETTINGS.showVideoPauseIcon).toBe(true);
     expect(DEFAULT_SETTINGS.danmuApiBase).toBe('');
   });
 
@@ -57,6 +59,8 @@ describe('settings JSON', () => {
     expect(bare.settings.audioVisualizerOpacity).toBe(0.1);
     expect(bare.settings.fullscreenClockOpacity).toBe(0.1);
     expect(bare.settings.theme).toBe('dark');
+    expect(bare.settings.videoHudPosition).toBe('centerTop');
+    expect(bare.settings.showVideoPauseIcon).toBe(true);
     expect(bare.settings.language).toBe('en');
   });
 
