@@ -385,7 +385,7 @@
   margin: 0 auto;
   /* Keeps the play button at the exact centre of the bar while the mode
      button sits to its right. */
-  padding-left: 42px;
+  padding-left: 0;
 }
 
 .transport-main {
@@ -409,7 +409,8 @@
   height: 19px;
 }
 
-.transport-mode {
+.transport-mode,
+.transport-collapse {
   flex: none;
   width: 36px;
   height: 36px;
@@ -418,8 +419,67 @@
   background: color-mix(in srgb, var(--surface-1) 42%, transparent);
 }
 
-.mode-button.is-active {
-  color: var(--track-accent);
+.transport-collapse {
+  color: var(--text-3);
+}
+
+/* Collapse state: reserve no bar space anywhere and reveal the artwork restore button. */
+.is-bar-collapsed {
+  --bottom-bar-height: 0px;
+}
+
+.is-bar-collapsed .bottom-bar {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(calc(100% + 24px));
+}
+
+.bar-restore {
+  position: fixed;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  left: max(14px, env(safe-area-inset-left));
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 3px;
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--chrome-bg) 90%, transparent);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(24px) saturate(150%);
+  transition: transform 180ms var(--ease-swift), background 180ms var(--ease-fluent);
+}
+
+.bar-restore:hover {
+  background: var(--surface-3);
+  transform: translateY(-2px) scale(1.03);
+}
+
+.bar-restore-cover {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+}
+
+.bar-restore-chevron {
+  position: absolute;
+  right: -4px;
+  top: -4px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--surface-solid);
+  color: var(--text-2);
+}
+
+.bar-restore-chevron svg {
+  width: 12px;
+  height: 12px;
 }
 
 .play-button {

@@ -517,5 +517,8 @@
   "settings.lyricAlignHint": "可選擇左對齊或沿中軸線居中顯示。",
   "settings.lyricAlignLeft": "左對齊",
   "settings.lyricAlignCenter": "居中對齊（中軸線）",
-  "mobile.mediaInfo": "媒體資訊"
+  "mobile.mediaInfo": "媒體資訊",
+  "player.collapseBar": "收起底部列",
+  "player.expandBar": "展開底部列",
+  "player.cycleMode": "循環模式"
 }

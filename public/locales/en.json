@@ -517,5 +517,8 @@
   "settings.lyricAlignHint": "Left-aligned text or centred on the middle axis.",
   "settings.lyricAlignLeft": "Left aligned",
   "settings.lyricAlignCenter": "Centre aligned",
-  "mobile.mediaInfo": "Media information"
+  "mobile.mediaInfo": "Media information",
+  "player.collapseBar": "Collapse player bar",
+  "player.expandBar": "Show player bar",
+  "player.cycleMode": "Playback mode"
 }

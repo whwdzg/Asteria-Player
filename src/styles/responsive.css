@@ -1287,12 +1287,6 @@
     gap: 4px;
   }
 
-  .transport-controls::before {
-    content: "";
-    display: block;
-    flex: 0 0 var(--transport-btn);
-  }
-
   .transport-main {
     display: grid;
     flex: 1;
@@ -1311,7 +1305,8 @@
     height: clamp(17px, 4.4vw, 20px);
   }
 
-  .transport-controls .transport-mode {
+  .transport-controls .transport-mode,
+  .transport-controls .transport-collapse {
     width: var(--transport-btn);
     height: var(--transport-btn);
     justify-self: end;

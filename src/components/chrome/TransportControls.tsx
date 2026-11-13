@@ -3,6 +3,7 @@ import {
   ArrowRepeatAll24Regular,
   ArrowRepeatAllOff24Regular,
   ArrowShuffle24Regular,
+  ChevronDown24Regular,
   Next24Filled,
   Pause24Filled,
   Play24Filled,
@@ -35,6 +36,7 @@ export function TransportControls(): React.ReactElement {
   const isLoading = usePlaybackStore((state) => state.isLoading);
   const mode = useSettingsStore((state) => state.playMode);
   const patch = useSettingsStore((state) => state.patch);
+  const setBarCollapsed = useUiStore((state) => state.setBarCollapsed);
   const { t } = useI18n();
   const previousHint = useShortcutHint('previous');
   const rewindHint = useShortcutHint('rewind10');
@@ -54,6 +56,14 @@ export function TransportControls(): React.ReactElement {
 
   return (
     <div className={`transport-controls ${hasTrack ? '' : 'is-empty'}`.trim()} role="group" aria-label={t('player.play')}>
+      <IconButton
+        label={t('player.collapseBar')}
+        tooltip={t('player.collapseBar')}
+        className="transport-collapse"
+        onClick={() => setBarCollapsed(true)}
+      >
+        <ChevronDown24Regular />
+      </IconButton>
       <div className="transport-main">
         <IconButton
           label={`${t('player.previous')}${previousHint}`}
@@ -102,7 +112,6 @@ export function TransportControls(): React.ReactElement {
       <IconButton
         label={`${t(`player.mode.${mode}`)}${modeHint}`}
         tooltip={`${t(`player.mode.${mode}`)}${modeHint}`}
-        active={mode !== 'all'}
         onClick={cycleMode}
         className="mode-button transport-mode"
       >

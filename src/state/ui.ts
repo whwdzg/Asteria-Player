@@ -20,6 +20,7 @@ interface UiState {
   playlistDialogOpen: boolean;
   playlistDialogTrackIds: string[];
   fullscreen: boolean;
+  barCollapsed: boolean;
   chromeVisible: boolean;
   videoLocked: boolean;
   dragActive: boolean;
@@ -37,6 +38,7 @@ interface UiState {
   openPlaylistDialog: (trackIds?: string[]) => void;
   closePlaylistDialog: () => void;
   setFullscreen: (fullscreen: boolean) => void;
+  setBarCollapsed: (collapsed: boolean) => void;
   setVideoLocked: (locked: boolean) => void;
   setChromeVisible: (visible: boolean) => void;
   setDragActive: (active: boolean) => void;
@@ -59,6 +61,7 @@ export const useUiStore = create<UiState>()((set) => ({
   playlistDialogOpen: false,
   playlistDialogTrackIds: [],
   fullscreen: false,
+  barCollapsed: false,
   chromeVisible: true,
   videoLocked: false,
   dragActive: false,
@@ -82,6 +85,7 @@ export const useUiStore = create<UiState>()((set) => ({
   openPlaylistDialog: (playlistDialogTrackIds = []) => set({ playlistDialogOpen: true, playlistDialogTrackIds }),
   closePlaylistDialog: () => set({ playlistDialogOpen: false, playlistDialogTrackIds: [] }),
   setFullscreen: (fullscreen) => set({ fullscreen, chromeVisible: true }),
+  setBarCollapsed: (barCollapsed) => set({ barCollapsed }),
   setVideoLocked: (videoLocked) => set({ videoLocked }),
   setChromeVisible: (chromeVisible) => set({ chromeVisible }),
   setDragActive: (dragActive) => set({ dragActive }),

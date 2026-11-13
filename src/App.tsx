@@ -7,6 +7,7 @@ import { ArrowDownload24Regular, ArrowImport24Regular, FolderOpen24Regular, Link
 import './styles/index.css';
 import type { Track } from './lib/types';
 import { BottomBar } from './components/chrome/BottomBar';
+import { CollapsedBarButton } from './components/chrome/CollapsedBarButton';
 import { TooltipLayer } from './components/common/TooltipLayer';
 import { NowPlaying } from './components/nowplaying/NowPlaying';
 import { MobilePlayer } from './components/mobile/MobilePlayer';
@@ -214,6 +215,7 @@ export default function App(): React.ReactElement {
   const sleepEndsAt = useSleepTimerStore((state) => state.endsAt);
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const [bootReady, setBootReady] = useState(false);
+  const barCollapsed = useUiStore((state) => state.barCollapsed);
   const bootStarted = useRef(false);
   const dragCounter = useRef(0);
 
@@ -431,6 +433,7 @@ export default function App(): React.ReactElement {
     isTouch ? 'is-touch' : 'is-desktop',
     useMobilePlayer ? 'is-mobile-player' : '',
     collectionView ? 'is-collection-open' : '',
+    barCollapsed ? 'is-bar-collapsed' : '',
     videoLocked && isVideo ? 'is-video-locked' : '',
   ].filter(Boolean).join(' ');
 
@@ -449,6 +452,7 @@ export default function App(): React.ReactElement {
       </main>
 
       <BottomBar onToggleFullscreen={toggleFullscreen} />
+      <CollapsedBarButton />
       <ScanMediaDialog />
       <ScanMediaPrompt />
       {welcomeOpen ? (

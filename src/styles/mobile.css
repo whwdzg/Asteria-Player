@@ -730,12 +730,6 @@
     font-size: 10px;
   }
 
-  .queue-mode-pill.is-active {
-    border-color: color-mix(in srgb, var(--accent) 48%, transparent);
-    background: color-mix(in srgb, var(--accent) 16%, transparent);
-    color: var(--text);
-  }
-
   .queue-mode-pill svg {
     width: 14px;
     height: 14px;

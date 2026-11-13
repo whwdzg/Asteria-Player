@@ -2,14 +2,13 @@ import {
   Add24Regular,
   ArrowImport24Regular,
   ArrowNext24Regular,
-  ArrowShuffle24Regular,
   Delete24Regular,
   Info24Regular,
   MusicNote224Regular,
   TextBulletListAdd24Regular,
 } from '@fluentui/react-icons';
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
-import type { Track } from '../../lib/types';
+import type { PlayMode, Track } from '../../lib/types';
 import { ALL_SEQUENCE, useLibraryStore } from '../../state/library';
 import { usePlaybackStore } from '../../state/playback';
 import { useSettingsStore } from '../../state/settings';
@@ -18,12 +17,15 @@ import { player } from '../../player/engine';
 import { useI18n } from '../../i18n/I18nProvider';
 import { useImporter } from '../../player/ImportProvider';
 import { Menu, type MenuAnchor } from '../common/Menu';
+import { PlayModeIcon } from '../chrome/TransportControls';
 import { QueueList } from './QueueList';
 import { QueueToolbar } from './QueueToolbar';
 
 interface QueuePanelProps {
   variant: 'sidebar' | 'full';
 }
+
+const PLAY_MODES: PlayMode[] = ['all', 'one', 'none', 'shuffle'];
 
 export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
   const { t } = useI18n();
@@ -77,6 +79,12 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
       return next.size === current.size ? current : next;
     });
   }, [allQueueTracks]);
+
+  const cycleQueueMode = (): void => {
+    const next = PLAY_MODES[(PLAY_MODES.indexOf(playMode) + 1) % PLAY_MODES.length];
+    patchSettings({ playMode: next });
+    useUiStore.getState().pushToast(t('player.modeChanged', { mode: t(`player.mode.${next}`) }));
+  };
 
   const close = (): void => setQueueView('closed');
   const expand = (): void => setQueueView('full');
@@ -261,11 +269,12 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
         <footer className="queue-mobile-footer">
           <button
             type="button"
-            className={`queue-mode-pill ${playMode === 'shuffle' ? 'is-active' : ''}`.trim()}
-            onClick={() => patchSettings({ playMode: playMode === 'shuffle' ? 'all' : 'shuffle' })}
+            className="queue-mode-pill"
+            onClick={cycleQueueMode}
+            aria-label={t('player.cycleMode')}
           >
-            <ArrowShuffle24Regular />
-            {playMode === 'shuffle' ? t('player.mode.shuffle') : t('mobile.shuffleMode')}
+            <PlayModeIcon mode={playMode} />
+            {t(`player.mode.${playMode}`)}
           </button>
         </footer>
       </aside>
