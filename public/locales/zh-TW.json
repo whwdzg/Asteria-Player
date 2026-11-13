@@ -468,5 +468,19 @@
   "settings.videoHud.topRight": "右上",
   "settings.videoHud.bottomRight": "右下",
   "settings.videoPauseIcon": "顯示影片暫停中間圖示",
-  "settings.videoPauseIconHint": "影片暫停時顯示中間的圓形播放按鈕。"
+  "settings.videoPauseIconHint": "影片暫停時顯示中間的圓形播放按鈕。",
+  "settings.storageUsage": "儲存占用",
+  "settings.storageMeasuring": "正在計算…",
+  "settings.storageRefresh": "重新整理",
+  "settings.storageQuota": "已用 {used} / 配額 {quota}",
+  "settings.storageUsed": "已用 {used}",
+  "settings.storagePersisted": "持久化儲存",
+  "settings.storageBestEffort": "盡力保留",
+  "settings.storageMedia": "媒體檔案",
+  "settings.storageCovers": "封面圖片",
+  "settings.storageSidecars": "歌詞 / 字幕 / 彈幕",
+  "settings.storagePwa": "PWA 離線副本",
+  "settings.storageCache": "離線快取",
+  "settings.storageSettings": "設定與歌單",
+  "settings.storageOther": "其他瀏覽器儲存"
 }

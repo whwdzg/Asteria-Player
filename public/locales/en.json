@@ -468,5 +468,19 @@
   "settings.videoHud.topRight": "Top right",
   "settings.videoHud.bottomRight": "Bottom right",
   "settings.videoPauseIcon": "Show central pause icon",
-  "settings.videoPauseIconHint": "Show the round play button in the middle of a paused video."
+  "settings.videoPauseIconHint": "Show the round play button in the middle of a paused video.",
+  "settings.storageUsage": "Storage usage",
+  "settings.storageMeasuring": "Measuring…",
+  "settings.storageRefresh": "Refresh",
+  "settings.storageQuota": "{used} of {quota}",
+  "settings.storageUsed": "{used} used",
+  "settings.storagePersisted": "Persistent storage",
+  "settings.storageBestEffort": "Best-effort storage",
+  "settings.storageMedia": "Media files",
+  "settings.storageCovers": "Cover images",
+  "settings.storageSidecars": "Lyrics / subtitles / danmaku",
+  "settings.storagePwa": "PWA offline copies",
+  "settings.storageCache": "Offline cache",
+  "settings.storageSettings": "Settings & playlists",
+  "settings.storageOther": "Other browser storage"
 }

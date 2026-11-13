@@ -22,6 +22,12 @@ interface StoredSession {
   savedAt: number;
 }
 
+export interface PwaLibraryUsage {
+  media: number;
+  covers: number;
+  metadata: number;
+}
+
 export interface RestoredPwaLibrary {
   tracks: Track[];
   session: StoredSession | null;
@@ -164,6 +170,25 @@ export async function restorePwaLibrary(): Promise<RestoredPwaLibrary | null> {
  * session-only import behaviour. Writes are serialised so a quick add/remove
  * cannot resurrect a deleted track.
  */
+export async function getPwaLibraryUsage(): Promise<PwaLibraryUsage> {
+  const empty: PwaLibraryUsage = { media: 0, covers: 0, metadata: 0 };
+  try {
+    const db = await openDatabase();
+    const transaction = db.transaction(TRACK_STORE, 'readonly');
+    const records = await requestResult(
+      transaction.objectStore(TRACK_STORE).getAll() as IDBRequest<StoredTrack[]>,
+    );
+    for (const record of records) {
+      empty.media += record.media?.size ?? 0;
+      empty.covers += record.coverBlob?.size ?? 0;
+      empty.metadata += new Blob([JSON.stringify(record.track)]).size;
+    }
+  } catch {
+    return empty;
+  }
+  return empty;
+}
+
 export async function clearPwaLibrary(): Promise<void> {
   try {
     const db = await openDatabase();

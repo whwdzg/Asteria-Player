@@ -468,5 +468,19 @@
   "settings.videoHud.topRight": "右上",
   "settings.videoHud.bottomRight": "右下",
   "settings.videoPauseIcon": "显示视频暂停中间图标",
-  "settings.videoPauseIconHint": "视频暂停时显示中间的圆形播放按钮。"
+  "settings.videoPauseIconHint": "视频暂停时显示中间的圆形播放按钮。",
+  "settings.storageUsage": "存储占用",
+  "settings.storageMeasuring": "正在计算…",
+  "settings.storageRefresh": "刷新",
+  "settings.storageQuota": "已用 {used} / 配额 {quota}",
+  "settings.storageUsed": "已用 {used}",
+  "settings.storagePersisted": "持久化存储",
+  "settings.storageBestEffort": "尽力保留",
+  "settings.storageMedia": "媒体文件",
+  "settings.storageCovers": "封面图片",
+  "settings.storageSidecars": "歌词 / 字幕 / 弹幕",
+  "settings.storagePwa": "PWA 离线副本",
+  "settings.storageCache": "离线缓存",
+  "settings.storageSettings": "设置与歌单",
+  "settings.storageOther": "其他浏览器存储"
 }
