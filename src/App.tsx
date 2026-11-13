@@ -227,6 +227,9 @@ export default function App(): React.ReactElement {
   const [welcomePwaHint, setWelcomePwaHint] = useState(false);
   const [bootReady, setBootReady] = useState(false);
   const barCollapsed = useUiStore((state) => state.barCollapsed);
+  const playMode = useSettingsStore((state) => state.playMode);
+  const sequenceId = useLibraryStore((state) => state.sequenceId);
+  const queueLength = useLibraryStore((state) => state.queue.length);
   const bootStarted = useRef(false);
   const dragCounter = useRef(0);
 
@@ -326,6 +329,17 @@ export default function App(): React.ReactElement {
     if (!bootReady) return;
     return startPwaLibraryPersistence();
   }, [bootReady]);
+
+  useEffect(() => {
+    if (!bootReady) return;
+    const library = useLibraryStore.getState();
+    if (playMode === 'shuffle') {
+      if (library.shuffleBackup?.sequenceId === sequenceId) return;
+      library.shuffleQueue();
+    } else {
+      library.restoreShuffledQueue();
+    }
+  }, [bootReady, playMode, queueLength, sequenceId]);
 
   const useDemoContent = useCallback(() => {
     markAppUsed();

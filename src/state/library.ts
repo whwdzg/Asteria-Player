@@ -5,12 +5,18 @@ import { uid } from '../lib/format';
 import { clearMediaCaches } from '../lib/media';
 import { sortQueueTracks, type QueueSort } from '../lib/queueSort';
 
+interface ShuffleBackup {
+  sequenceId: string;
+  queue: string[];
+}
+
 interface LibraryState {
   tracks: Track[];
   queue: string[];
   currentId: string | null;
   sequenceId: string;
   queueSort: QueueSort;
+  shuffleBackup: ShuffleBackup | null;
   playlists: Playlist[];
   loaded: boolean;
   setLoaded: (loaded: boolean) => void;
@@ -23,6 +29,8 @@ interface LibraryState {
   setQueue: (ids: string[], sequenceId?: string) => void;
   setSequence: (id: string) => void;
   sortQueue: (sort: QueueSort) => void;
+  shuffleQueue: () => void;
+  restoreShuffledQueue: () => void;
   addPlaylist: (name: string, trackIds?: string[]) => Playlist;
   deletePlaylist: (id: string) => void;
   addToPlaylist: (playlistId: string, trackIds: string[]) => void;
@@ -41,6 +49,7 @@ export const useLibraryStore = create<LibraryState>()(persist((set, get) => ({
   currentId: null,
   sequenceId: ALL_SEQUENCE,
   queueSort: 'title',
+  shuffleBackup: null,
   playlists: [],
   loaded: false,
   setLoaded: (loaded) => set({ loaded }),
@@ -78,6 +87,9 @@ export const useLibraryStore = create<LibraryState>()(persist((set, get) => ({
     set((state) => ({
       tracks: state.tracks.filter((track) => !idSet.has(track.id)),
       queue: state.queue.filter((id) => !idSet.has(id)),
+      shuffleBackup: state.shuffleBackup
+        ? { ...state.shuffleBackup, queue: state.shuffleBackup.queue.filter((id) => !idSet.has(id)) }
+        : null,
       playlists: state.playlists.map((playlist) => ({
         ...playlist,
         trackIds: playlist.trackIds.filter((id) => !idSet.has(id)),
@@ -112,6 +124,42 @@ export const useLibraryStore = create<LibraryState>()(persist((set, get) => ({
     if (!playlist) return;
     const known = new Set(state.tracks.map((track) => track.id));
     set({ sequenceId: id, queue: playlist.trackIds.filter((trackId) => known.has(trackId)) });
+  },
+  shuffleQueue: () => {
+    const state = get();
+    if (!state.queue.length) return;
+    const sameSequence = state.shuffleBackup?.sequenceId === state.sequenceId;
+    const original = sameSequence && state.shuffleBackup ? [...state.shuffleBackup.queue] : [...state.queue];
+    if (sameSequence) {
+      const known = new Set(original);
+      for (const id of state.queue) {
+        if (!known.has(id)) {
+          original.push(id);
+          known.add(id);
+        }
+      }
+    }
+    const shuffled = [...original];
+    // Fisher–Yates, then keep the playing track first so playback continues
+    // from the current item through the shuffled order.
+    for (let index = shuffled.length - 1; index > 0; index -= 1) {
+      const swap = Math.floor(Math.random() * (index + 1));
+      [shuffled[index], shuffled[swap]] = [shuffled[swap], shuffled[index]];
+    }
+    if (state.currentId && shuffled.includes(state.currentId)) {
+      const currentId = state.currentId;
+      const currentIndex = shuffled.indexOf(currentId);
+      shuffled.splice(currentIndex, 1);
+      shuffled.unshift(currentId);
+    }
+    set({ shuffleBackup: { sequenceId: state.sequenceId, queue: original }, queue: shuffled });
+  },
+  restoreShuffledQueue: () => {
+    const state = get();
+    const backup = state.shuffleBackup;
+    if (!backup) return;
+    const known = new Set(state.tracks.map((track) => track.id));
+    set({ queue: backup.queue.filter((id) => known.has(id)), shuffleBackup: null });
   },
   sortQueue: (sort) => {
     const state = get();

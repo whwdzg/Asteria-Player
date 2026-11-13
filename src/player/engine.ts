@@ -378,20 +378,9 @@ export class PlayerEngine {
     }
 
     let nextId: string | undefined;
-    if (mode === 'shuffle') {
-      if (queue.length === 1) nextId = queue[0];
-      else {
-        let candidate = queue[Math.floor(Math.random() * queue.length)];
-        let attempts = 0;
-        while (candidate === currentId && attempts < 8) {
-          candidate = queue[Math.floor(Math.random() * queue.length)];
-          attempts += 1;
-        }
-        nextId = candidate;
-      }
-    } else if (direction === 1) {
+    if (direction === 1) {
       if (index < queue.length - 1) nextId = queue[index + 1];
-      else if (!fromEnded || mode === 'all') nextId = queue[0];
+      else if (!fromEnded || mode === 'all' || mode === 'shuffle') nextId = queue[0];
     } else {
       if (index > 0) nextId = queue[index - 1];
       else nextId = queue[queue.length - 1];

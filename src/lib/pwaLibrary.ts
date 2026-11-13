@@ -122,7 +122,9 @@ async function saveSession(): Promise<void> {
   const db = await openDatabase();
   const session: StoredSession = {
     key: SESSION_KEY,
-    queue: state.queue,
+    // Persist the unshuffled source while shuffle mode is active so restoring
+    // the app can rebuild and reshuffle instead of treating a shuffle as source.
+    queue: state.shuffleBackup?.sequenceId === state.sequenceId ? state.shuffleBackup.queue : state.queue,
     currentId: state.currentId,
     sequenceId: state.sequenceId,
     savedAt: Date.now(),
