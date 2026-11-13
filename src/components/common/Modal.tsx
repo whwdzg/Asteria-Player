@@ -10,11 +10,13 @@ interface ModalProps {
   title: string;
   children: ReactNode;
   footer?: ReactNode;
+  backdrop?: ReactNode;
+  className?: string;
   size?: 'sm' | 'md' | 'lg';
   closeLabel: string;
 }
 
-export function Modal({ open, onClose, title, children, footer, size = 'md', closeLabel }: ModalProps): React.ReactElement | null {
+export function Modal({ open, onClose, title, children, footer, backdrop, className = '', size = 'md', closeLabel }: ModalProps): React.ReactElement | null {
   const panelRef = useRef<HTMLDivElement>(null);
   const root = useOverlayRoot();
 
@@ -62,11 +64,12 @@ export function Modal({ open, onClose, title, children, footer, size = 'md', clo
       <div className="modal-backdrop" onClick={onClose} aria-hidden="true" />
       <div
         ref={panelRef}
-        className={`modal-panel size-${size}`}
+        className={`modal-panel size-${size} ${className}`.trim()}
         role="dialog"
         aria-modal="true"
         aria-label={title}
       >
+        {backdrop}
         <header className="modal-header">
           <h2>{title}</h2>
           <IconButton label={closeLabel} variant="subtle" onClick={onClose}><Dismiss24Regular /></IconButton>

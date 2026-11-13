@@ -17,6 +17,7 @@ import { ArtistLinks, AlbumLink } from '../common/CollectionLinks';
 import { Menu, type MenuAnchor } from '../common/Menu';
 import { CoverArt } from '../common/CoverArt';
 import { ScrollText } from '../common/ScrollText';
+import { BlurredBackdrop } from '../common/BlurredBackdrop';
 
 function TrackRow({ track, entry }: { track: Track; entry?: { disc: number; number: number } }): React.ReactElement {
   const { t } = useI18n();
@@ -118,6 +119,7 @@ export function CollectionPage(): React.ReactElement | null {
 
   return (
     <section className="collection-page" aria-label={t('collection.page')}>
+      <BlurredBackdrop cover={data.cover} />
       <div className="collection-scroll" ref={scrollRef}>
         <header className="collection-header">
           <button type="button" className="fluent-button" onClick={close}>

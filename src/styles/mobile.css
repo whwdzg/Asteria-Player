@@ -1015,3 +1015,10 @@
     background: var(--bg);
   }
 }
+
+@media (max-width: 700px) {
+  .mobile-sheet > :not(.blurred-backdrop) {
+    position: relative;
+    z-index: 1;
+  }
+}

@@ -13,6 +13,7 @@ import { useUiStore } from '../../state/ui';
 import { CoverArt } from '../common/CoverArt';
 import { AlbumLink, ArtistLinks } from '../common/CollectionLinks';
 import { ScrollText } from '../common/ScrollText';
+import { BlurredBackdrop } from '../common/BlurredBackdrop';
 
 interface MobileDetailsSheetProps {
   onClose: () => void;
@@ -76,6 +77,7 @@ export function MobileDetailsSheet({ onClose, onSwipeBack, onImmersive }: Mobile
       onTouchEnd={onBackTouchEnd}
       onTouchCancel={() => { backStart.current = null; }}
     >
+      <BlurredBackdrop cover={track.cover} />
       <header className="mobile-sheet-head">
         <button type="button" className="icon-button subtle" onClick={onClose} aria-label={t('common.back')}>
           <ArrowLeft24Regular />

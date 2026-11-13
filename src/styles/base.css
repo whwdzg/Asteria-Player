@@ -1616,3 +1616,59 @@ a:focus:not(:focus-visible),
 .queue-scrim {
   --track-accent: var(--accent);
 }
+
+/* Shared cover-art blur used by collection, details and mobile sheets. */
+.blurred-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--bg-deep);
+}
+
+.blurred-backdrop-cover {
+  position: absolute;
+  inset: -22%;
+  background-position: center;
+  background-size: cover;
+  filter: blur(110px) saturate(1.5) brightness(calc(0.55 * var(--media-brightness)));
+  transform: scale(1.12);
+  opacity: 0.52;
+}
+
+.blurred-backdrop-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--bg-deep) 54%, transparent), color-mix(in srgb, var(--bg) 72%, transparent)),
+    radial-gradient(80% 60% at 50% 0%, color-mix(in srgb, var(--track-accent) 10%, transparent), transparent 70%);
+}
+
+[data-theme="light"] .blurred-backdrop-cover {
+  opacity: 0.34;
+  filter: blur(110px) saturate(1.4) brightness(calc(1.05 * var(--media-brightness)));
+}
+
+.modal-panel > .blurred-backdrop {
+  z-index: 0;
+}
+
+.modal-panel > :not(.blurred-backdrop) {
+  position: relative;
+  z-index: 1;
+}
+
+.collection-page > .collection-scroll {
+  position: relative;
+  z-index: 1;
+}
+
+.details-modal {
+  background: color-mix(in srgb, var(--bg) 42%, transparent);
+}
+
+.details-modal .modal-header,
+.details-modal .modal-footer {
+  background: color-mix(in srgb, var(--bg) 28%, transparent);
+}

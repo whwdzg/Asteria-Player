@@ -17,6 +17,7 @@ import { ArtworkLightbox } from '../nowplaying/ArtworkLightbox';
 import { highResolutionCover } from '../../lib/cover';
 import { AlbumLink, ArtistLinks } from '../common/CollectionLinks';
 import { ScrollText } from '../common/ScrollText';
+import { BlurredBackdrop } from '../common/BlurredBackdrop';
 
 export function DetailsDialog(): React.ReactElement | null {
   const trackId = useUiStore((state) => state.detailsTrackId);
@@ -83,6 +84,8 @@ export function DetailsDialog(): React.ReactElement | null {
       title={track.kind === 'video' ? t('details.videoTitle') : t('details.title')}
       closeLabel={t('details.close')}
       size="lg"
+      className="details-modal"
+      backdrop={<BlurredBackdrop cover={track.cover} />}
       footer={
         <>
           <button type="button" className="fluent-button" onClick={addToQueue}>

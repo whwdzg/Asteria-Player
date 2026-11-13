@@ -16,6 +16,7 @@ import { CoverArt } from '../common/CoverArt';
 import { AlbumLink, ArtistLinks } from '../common/CollectionLinks';
 import { ScrollText } from '../common/ScrollText';
 import { ArtworkLightbox } from '../nowplaying/ArtworkLightbox';
+import { BlurredBackdrop } from '../common/BlurredBackdrop';
 import { highResolutionCover } from '../../lib/cover';
 import { AudioVisualizer } from '../nowplaying/AudioVisualizer';
 import { LyricsView } from '../nowplaying/LyricsView';
@@ -240,6 +241,7 @@ export function MobilePlayer({ onToggleFullscreen }: MobilePlayerProps): React.R
           onTouchEnd={onLyricBackEnd}
           onTouchCancel={() => { lyricBackStart.current = null; }}
         >
+          <BlurredBackdrop cover={track.cover} />
           <header className="mobile-sheet-head">
             <button type="button" className="icon-button subtle" onClick={() => setSheet('none')} aria-label={t('common.back')}>
               <ArrowLeft24Regular />
