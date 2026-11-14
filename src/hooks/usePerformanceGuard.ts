@@ -2,12 +2,26 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLibraryStore } from '../state/library';
 import { usePlaybackStore } from '../state/playback';
 import { useSettingsStore } from '../state/settings';
+import { player } from '../player/engine';
 
 const DISMISS_KEY = 'asteria-performance-hint-dismissed';
 const WARMUP_MS = 5_500;
 const SAMPLE_MS = 2_800;
 const IDLE_MS = 7_000;
 const MIN_FPS = 38;
+
+interface RenderCapacityEvent extends Event {
+  averageLoad: number;
+  peakLoad: number;
+  underrunRatio: number;
+}
+
+interface RenderCapacity extends EventTarget {
+  start: (options?: { updateInterval?: number }) => void;
+  stop: () => void;
+}
+
+type AudioContextWithCapacity = AudioContext & { renderCapacity?: RenderCapacity };
 
 function hardwareIsWeak(): boolean {
   const cores = navigator.hardwareConcurrency ?? 8;
@@ -74,6 +88,7 @@ export function usePerformanceGuard(enabled: boolean): PerformanceGuard {
     let disposed = false;
     let timer = 0;
     let raf = 0;
+    let stopProbe = (): void => {};
     const video = document.querySelector('video') as HTMLVideoElement | null;
 
     const schedule = (delay: number): void => {
@@ -90,6 +105,42 @@ export function usePerformanceGuard(enabled: boolean): PerformanceGuard {
       }
       const started = performance.now();
       const baseDropped = video?.getVideoPlaybackQuality?.().droppedVideoFrames ?? 0;
+      const media = player.currentElement;
+      const audioStart = media?.currentTime ?? 0;
+      let buffering = false;
+      let underrun = 0;
+      let averageLoad = 0;
+      const onBuffer = (): void => { buffering = true; };
+      media?.addEventListener('waiting', onBuffer);
+      media?.addEventListener('stalled', onBuffer);
+      media?.addEventListener('seeking', onBuffer);
+      const context = player.analyserNode?.context as AudioContextWithCapacity | undefined;
+      let capacity: RenderCapacity | undefined;
+      const onCapacity = (event: Event): void => {
+        const update = event as RenderCapacityEvent;
+        underrun = Math.max(underrun, update.underrunRatio ?? 0);
+        averageLoad = Math.max(averageLoad, update.averageLoad ?? 0);
+      };
+      if (context?.renderCapacity) {
+        capacity = context.renderCapacity;
+        capacity.addEventListener('update', onCapacity);
+        try {
+          capacity.start({ updateInterval: 0.25 });
+        } catch {
+          capacity.removeEventListener('update', onCapacity);
+          capacity = undefined;
+        }
+      }
+      const stop = (): void => {
+        media?.removeEventListener('waiting', onBuffer);
+        media?.removeEventListener('stalled', onBuffer);
+        media?.removeEventListener('seeking', onBuffer);
+        if (capacity) {
+          capacity.stop?.();
+          capacity.removeEventListener('update', onCapacity);
+        }
+      };
+      stopProbe = stop;
       let frames = 0;
       let longFrames = 0;
       let previous = started;
@@ -97,6 +148,7 @@ export function usePerformanceGuard(enabled: boolean): PerformanceGuard {
       const tick = (time: number): void => {
         if (disposed) return;
         if (document.hidden) {
+          stopProbe();
           schedule(2_000);
           return;
         }
@@ -113,7 +165,22 @@ export function usePerformanceGuard(enabled: boolean): PerformanceGuard {
         const seconds = Math.max(1, elapsed / 1000);
         const fps = (frames * 1000) / seconds;
         const longRatio = frames > 0 ? longFrames / frames : 0;
-        if (fps < MIN_FPS || longRatio > 0.3 || dropped / seconds > 8 || hardwareIsWeak()) {
+        const isAudio = media instanceof HTMLAudioElement;
+        const progressed = media ? media.currentTime - audioStart : 0;
+        const expected = seconds * (media?.playbackRate ?? 1);
+        const audioStalled = Boolean(
+          isAudio
+          && media
+          && !buffering
+          && !media.paused
+          && !media.seeking
+          && media.readyState >= 3
+          && progressed < expected * 0.55,
+        );
+        const audioContextIssue = Boolean(context && context.state !== 'running');
+        const renderIssue = !buffering && (underrun > 0.01 || averageLoad > 0.92);
+        stopProbe();
+        if (fps < MIN_FPS || longRatio > 0.3 || dropped / seconds > 8 || audioStalled || audioContextIssue || renderIssue || hardwareIsWeak()) {
           prompted.current = true;
           setOpen(true);
           return;
@@ -127,6 +194,7 @@ export function usePerformanceGuard(enabled: boolean): PerformanceGuard {
     schedule(WARMUP_MS);
     return () => {
       disposed = true;
+      stopProbe();
       window.clearTimeout(timer);
       cancelAnimationFrame(raf);
     };

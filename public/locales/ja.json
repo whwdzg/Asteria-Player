@@ -541,7 +541,7 @@
   "queue.deleteSequenceConfirm": "シーケンス一覧から「{name}」を削除しますか？メディアファイルはライブラリに残ります。",
   "queue.sequenceDeleted": "シーケンスを削除しました",
   "performance.title": "パフォーマンスのヒント",
-  "performance.message": "再生時の描画が遅くなっています（ネットワークのバッファリングは含みません）。以下の効果をオフにすると滑らかになる場合があります。",
+  "performance.message": "再生時の描画または音声処理が遅くなっています（ネットワークのバッファリングは含みません）。以下の効果をオフにすると滑らかになる場合があります。",
   "performance.note": "変更されるのは外観設定のみです。音質、ライブラリ、再生位置には影響しません。",
   "performance.disableAll": "これらの効果をオフにする",
   "performance.later": "後で",

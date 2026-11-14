@@ -541,7 +541,7 @@
   "queue.deleteSequenceConfirm": "Delete the sequence “{name}” from the sequence list? The media files remain in the library.",
   "queue.sequenceDeleted": "Sequence deleted",
   "performance.title": "Performance tip",
-  "performance.message": "Playback rendering is running slowly (network buffering is not counted). Turning off these effects can improve smoothness.",
+  "performance.message": "Playback rendering or audio processing is running slowly (network buffering is not counted). Turning off these effects can improve smoothness.",
   "performance.note": "Only appearance settings change; audio quality, your library and playback position are untouched.",
   "performance.disableAll": "Turn off these effects",
   "performance.later": "Not now",
