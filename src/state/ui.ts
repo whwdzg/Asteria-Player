@@ -27,6 +27,7 @@ interface UiState {
   importing: { done: number; total: number } | null;
   scanMediaOpen: boolean;
   scanPromptCount: number | null;
+  mobileOverlay: boolean;
   toasts: Toast[];
   openQueue: (view?: QueueView) => void;
   setQueueView: (view: QueueView) => void;
@@ -47,6 +48,7 @@ interface UiState {
   closeScanMedia: () => void;
   promptScanMedia: (count: number) => void;
   dismissScanPrompt: () => void;
+  setMobileOverlay: (open: boolean) => void;
   pushToast: (message: string, tone?: Toast['tone']) => void;
   dismissToast: (id: string) => void;
   closeOverlays: () => void;
@@ -68,6 +70,7 @@ export const useUiStore = create<UiState>()((set) => ({
   importing: null,
   scanMediaOpen: false,
   scanPromptCount: null,
+  mobileOverlay: false,
   toasts: [],
   openQueue: (view = 'sidebar') => set({ queueView: view, settingsOpen: false, popover: null }),
   setQueueView: (queueView) => set({ queueView }),
@@ -94,6 +97,7 @@ export const useUiStore = create<UiState>()((set) => ({
   closeScanMedia: () => set({ scanMediaOpen: false }),
   promptScanMedia: (scanPromptCount) => set({ scanPromptCount }),
   dismissScanPrompt: () => set({ scanPromptCount: null }),
+  setMobileOverlay: (mobileOverlay) => set({ mobileOverlay }),
   pushToast: (message, tone = 'default') => {
     const id = uid('toast');
     set((state) => ({ toasts: [...state.toasts.slice(-2), { id, message, tone }] }));

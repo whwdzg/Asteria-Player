@@ -26,6 +26,7 @@ import { useTouchDevice } from './hooks/useTouchDevice';
 import { usePerformanceGuard } from './hooks/usePerformanceGuard';
 import { useMediaQuery } from './hooks/useMediaQuery';
 import { useOrientationFullscreen } from './hooks/useOrientationFullscreen';
+import { MOBILE_BACK_EVENT, useMobileBackNavigation } from './hooks/useMobileBackNavigation';
 import { useI18n } from './i18n/I18nProvider';
 import { loadDemoLibrary } from './lib/demo';
 import { getDemoPreference, hasUsedApp, markAppUsed, setDemoPreference } from './lib/demoPreference';
@@ -201,6 +202,9 @@ export default function App(): React.ReactElement {
   const tracks = useLibraryStore((state) => state.tracks);
   const loaded = useLibraryStore((state) => state.loaded);
   const queueView = useUiStore((state) => state.queueView);
+  const settingsOpen = useUiStore((state) => state.settingsOpen);
+  const scanMediaOpen = useUiStore((state) => state.scanMediaOpen);
+  const mobileOverlay = useUiStore((state) => state.mobileOverlay);
   const detailsTrackId = useUiStore((state) => state.detailsTrackId);
   const playlistDialogOpen = useUiStore((state) => state.playlistDialogOpen);
   const collectionView = useUiStore((state) => state.collectionView);
@@ -403,6 +407,22 @@ export default function App(): React.ReactElement {
   const isTouch = useTouchDevice();
   const isMobileViewport = useMediaQuery('(max-width: 700px)');
   const useMobilePlayer = isTouch && isMobileViewport && !isVideo && !fullscreen;
+
+  useMobileBackNavigation(
+    isTouch && isMobileViewport,
+    Boolean(queueView !== 'closed' || settingsOpen || collectionView || detailsTrackId || playlistDialogOpen || scanMediaOpen || mobileOverlay),
+    () => {
+      window.dispatchEvent(new Event(MOBILE_BACK_EVENT));
+      const ui = useUiStore.getState();
+      ui.setSettingsOpen(false);
+      ui.setQueueView('closed');
+      ui.setPopover(null);
+      ui.closeCollection();
+      ui.setDetailsTrackId(null);
+      ui.closePlaylistDialog();
+      if (ui.scanMediaOpen) ui.closeScanMedia();
+    },
+  );
 
   useEffect(() => {
     // Selecting a video returns to its main surface instead of leaving the

@@ -7,7 +7,7 @@ import {
   Info24Regular,
   MusicNote224Regular,
 } from '@fluentui/react-icons';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDismiss } from '../../hooks/useDismiss';
 import { useI18n } from '../../i18n/I18nProvider';
 import { useLibraryStore } from '../../state/library';
@@ -19,6 +19,7 @@ import { ArtworkLightbox } from '../nowplaying/ArtworkLightbox';
 import { BlurredBackdrop } from '../common/BlurredBackdrop';
 import { highResolutionCover } from '../../lib/cover';
 import { useSwipeBackGesture } from '../../hooks/useSwipeBackGesture';
+import { MOBILE_BACK_EVENT } from '../../hooks/useMobileBackNavigation';
 import { AudioVisualizer } from '../nowplaying/AudioVisualizer';
 import { LyricsView } from '../nowplaying/LyricsView';
 import { MobileDetailsSheet } from './MobileDetailsSheet';
@@ -51,6 +52,26 @@ export function MobilePlayer({ onToggleFullscreen }: MobilePlayerProps): React.R
   const [dragging, setDragging] = useState(false);
   const [techOpen, setTechOpen] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const setMobileOverlay = useUiStore((state) => state.setMobileOverlay);
+  useEffect(() => {
+    setMobileOverlay(sheet !== 'none' || lightboxOpen || techOpen);
+  }, [lightboxOpen, setMobileOverlay, sheet, techOpen]);
+  useEffect(() => () => setMobileOverlay(false), [setMobileOverlay]);
+  useEffect(() => {
+    const closeTop = (): void => {
+      if (lightboxOpen) {
+        setLightboxOpen(false);
+        return;
+      }
+      if (sheet !== 'none') {
+        setSheet('none');
+        return;
+      }
+      setTechOpen(false);
+    };
+    window.addEventListener(MOBILE_BACK_EVENT, closeTop);
+    return () => window.removeEventListener(MOBILE_BACK_EVENT, closeTop);
+  }, [lightboxOpen, sheet]);
   const lyricSwipe = useSwipeBackGesture({
     direction: 'right',
     active: sheet === 'lyrics',
