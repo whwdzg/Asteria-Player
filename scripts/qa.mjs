@@ -2,6 +2,7 @@ import { chromium } from 'playwright-core';
 import path from 'node:path';
 
 const root = path.resolve('.');
+const url = process.env.ASTERIA_URL ?? 'http://localhost:4173/';
 const exe = process.env.EDGE_PATH ?? 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
 const browser = await chromium.launch({
   executablePath: exe,
@@ -20,7 +21,7 @@ const check = (condition, message) => {
   log('ok:', message);
 };
 
-await page.goto('http://localhost:4173/', { waitUntil: 'networkidle' });
+await page.goto(url, { waitUntil: 'networkidle' });
 await page.waitForSelector('.welcome-dialog');
 await page.locator('.modal-footer .fluent-button').click();
 await page.waitForTimeout(900);

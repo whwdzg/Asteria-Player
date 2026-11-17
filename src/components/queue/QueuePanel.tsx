@@ -22,6 +22,7 @@ import { ConfirmDialog } from '../common/ConfirmDialog';
 import { PlayModeIcon } from '../chrome/TransportControls';
 import { QueueList } from './QueueList';
 import { QueueToolbar } from './QueueToolbar';
+import { ExportPackDialog } from './ExportPackDialog';
 
 interface QueuePanelProps {
   variant: 'sidebar' | 'full';
@@ -51,6 +52,7 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
   const [searchOpen, setSearchOpen] = useState(false);
   const [deleteSequenceOpen, setDeleteSequenceOpen] = useState(false);
   const [pendingRemoval, setPendingRemoval] = useState<string[] | null>(null);
+  const [exportPackOpen, setExportPackOpen] = useState(false);
   const [query, setQuery] = useState('');
   const deferredQuery = useDeferredValue(query);
   const [batch, setBatch] = useState(false);
@@ -274,6 +276,7 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
           onNewPlaylist={(trackIds) => openPlaylistDialog(trackIds)}
           onScanMedia={openScanMedia}
           onSortChange={changeSort}
+          onExportPack={() => setExportPackOpen(true)}
           onDeleteSequence={() => setDeleteSequenceOpen(true)}
           onSequenceChange={(id) => {
             setSequence(id);
@@ -307,6 +310,12 @@ export function QueuePanel({ variant }: QueuePanelProps): React.ReactElement {
           </button>
         </footer>
       </aside>
+
+      <ExportPackDialog
+        open={exportPackOpen}
+        initialSequenceId={sequenceId}
+        onClose={() => setExportPackOpen(false)}
+      />
 
       <ConfirmDialog
         open={Boolean(pendingRemoval)}

@@ -1,5 +1,6 @@
 import {
   Add24Regular,
+  ArrowDownload24Regular,
   ArrowImport24Regular,
   ArrowSort24Regular,
   ArrowSync24Regular,
@@ -46,6 +47,7 @@ interface QueueToolbarProps {
   onNewPlaylist: (trackIds: string[]) => void;
   onScanMedia: () => void;
   onSortChange: (sort: QueueSort) => void;
+  onExportPack: () => void;
   onDeleteSequence: () => void;
   onSequenceChange: (id: string) => void;
   onExpand: () => void;
@@ -74,6 +76,7 @@ export function QueueToolbar({
   onNewPlaylist,
   onScanMedia,
   onSortChange,
+  onExportPack,
   onDeleteSequence,
   onSequenceChange,
   onExpand,
@@ -227,6 +230,13 @@ export function QueueToolbar({
                 <Delete24Regular />
               </IconButton>
             ) : null}
+            <IconButton
+              label={t('queue.exportPack')}
+              tooltip={t('queue.exportPack')}
+              onClick={onExportPack}
+            >
+              <ArrowDownload24Regular />
+            </IconButton>
             <IconButton
               label={t('queue.scanMedia')}
               tooltip={t('queue.scanMedia')}

@@ -31,7 +31,7 @@ const ImportContext = createContext<ImportContextValue | null>(null);
 const ACCEPT = [
   'audio/*',
   'video/*',
-  '.mp3', '.flac', '.wav', '.m4a', '.aac', '.ogg', '.opus', '.webm',
+  '.mp3', '.flac', '.wav', '.m4a', '.aac', '.ogg', '.opus', '.webm', '.astpp',
   '.mp4', '.m4v', '.mkv', '.mov',
   '.lrc', '.spl', '.srt', '.vtt', '.ass', '.ssa', '.xml', '.json',
   '.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif',
@@ -44,9 +44,9 @@ export function ImportProvider({ children }: { children: ReactNode }): ReactNode
   const [busy, setBusy] = useState(false);
   const [urlOpen, setUrlOpen] = useState(false);
 
-  const addImportedTrack = useCallback((track: Track): boolean => {
+  const addImportedTrack = useCallback((track: Track): Track | null => {
     const accepted = useLibraryStore.getState().addTracks([track]);
-    if (!accepted.length) return false;
+    if (!accepted.length) return null;
     markAppUsed();
     setDemoPreference('import');
 
@@ -61,7 +61,7 @@ export function ImportProvider({ children }: { children: ReactNode }): ReactNode
       const first = accepted[0];
       if (first) player.load(first, { autoplay: false });
     }
-    return true;
+    return accepted[0] ?? null;
   }, []);
 
   const importFiles = useCallback(async (files: File[]) => {
@@ -70,18 +70,42 @@ export function ImportProvider({ children }: { children: ReactNode }): ReactNode
     useUiStore.getState().setImporting({ done: 0, total: files.length });
     try {
       let imported = 0;
+      const warnings: string[] = [];
+      const packFiles = files.filter((file) => /\.astpp$/i.test(file.name));
+      const mediaFiles = files.filter((file) => !/\.astpp$/i.test(file.name));
+      for (const packFile of packFiles) {
+        try {
+          const { readAsteriaPack } = await import('../lib/asteriaPack');
+          const pack = await readAsteriaPack(packFile);
+          const ids: string[] = [];
+          for (const track of pack.tracks) {
+            const added = addImportedTrack(track);
+            if (added) {
+              ids.push(added.id);
+              imported += 1;
+            }
+          }
+          if (ids.length) {
+            const playlist = useLibraryStore.getState().addPlaylist(pack.name, ids);
+            useLibraryStore.getState().setSequence(playlist.id);
+          }
+        } catch (error) {
+          warnings.push(`${packFile.name}: ${error instanceof Error ? error.message : String(error)}`);
+        }
+      }
       const { importFiles: readFiles } = await import('../lib/importer');
-      const result = await readFiles(files, (done, total) => {
+      const result = mediaFiles.length ? await readFiles(mediaFiles, (done, total) => {
         useUiStore.getState().setImporting({ done, total });
       }, (track) => {
         if (addImportedTrack(track)) imported += 1;
-      });
+      }) : { warnings: [] as string[] };
+      warnings.push(...result.warnings);
       if (!imported) {
-        useUiStore.getState().pushToast(result.warnings[0] ?? t('toast.importEmpty'), 'error');
+        useUiStore.getState().pushToast(warnings[0] ?? t('toast.importEmpty'), 'error');
       } else {
         useUiStore.getState().pushToast(t('toast.imported', { count: imported }));
-        if (result.warnings.length) {
-          useUiStore.getState().pushToast(t('toast.importSkipped', { count: result.warnings.length }));
+        if (warnings.length) {
+          useUiStore.getState().pushToast(t('toast.importSkipped', { count: warnings.length }));
         }
       }
     } catch (error) {

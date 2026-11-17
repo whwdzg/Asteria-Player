@@ -1,7 +1,7 @@
 {
   "name": "asteria-player",
   "private": true,
-  "version": "0.9.9",
+  "version": "0.10.0",
   "type": "module",
   "description": "A Fluent Design web player for music and video",
   "scripts": {
@@ -17,6 +17,7 @@
   "dependencies": {
     "@fluentui/react-icons": "^2.0.321",
     "@tanstack/react-virtual": "^3.14.26",
+    "fflate": "^0.8.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "zustand": "^5.1.0"
