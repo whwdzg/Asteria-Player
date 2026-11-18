@@ -23,7 +23,7 @@ interface ImportContextValue {
   openFolder: () => void;
   openUrl: () => void;
   importFiles: (files: File[]) => Promise<void>;
-  importUrls: (urls: string[], kind: UrlKind) => Promise<boolean>;
+  importUrls: (urls: string[], kind: UrlKind, autoplay?: boolean) => Promise<boolean>;
   busy: boolean;
 }
 
@@ -117,13 +117,14 @@ export function ImportProvider({ children }: { children: ReactNode }): ReactNode
     }
   }, [addImportedTrack, busy, t]);
 
-  const importUrls = useCallback(async (urls: string[], kind: UrlKind): Promise<boolean> => {
+  const importUrls = useCallback(async (urls: string[], kind: UrlKind, autoplay = false): Promise<boolean> => {
     if (!urls.length || busy) return false;
     setBusy(true);
     useUiStore.getState().setImporting({ done: 0, total: urls.length });
     try {
       const { importRemoteUrls } = await import('../lib/urlImport');
       let imported = 0;
+      const firstImported: { track: Track | null } = { track: null };
       const result = await importRemoteUrls(urls, {
         kind,
         proxy: useSettingsStore.getState().bilibiliProxy,
@@ -131,7 +132,11 @@ export function ImportProvider({ children }: { children: ReactNode }): ReactNode
           useUiStore.getState().setImporting({ done, total });
         },
         onTrack: (track) => {
-          if (addImportedTrack(track)) imported += 1;
+          const added = addImportedTrack(track);
+          if (added) {
+            imported += 1;
+            firstImported.track ??= added;
+          }
         },
       });
       if (!imported) {
@@ -139,6 +144,7 @@ export function ImportProvider({ children }: { children: ReactNode }): ReactNode
         return false;
       }
       useUiStore.getState().pushToast(t('toast.imported', { count: imported }));
+      if (autoplay && firstImported.track) player.playTrack(firstImported.track.id);
       if (result.tracks.some((track) => track.source === 'bilibili')) {
         const settings = useSettingsStore.getState();
         const patch: Partial<typeof settings> = {};
