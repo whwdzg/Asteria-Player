@@ -1,9 +1,12 @@
 import type { SubtitleSource } from './types';
 import { parseDanmaku } from './danmaku';
 import { uid } from './format';
+import { wbiQuery } from './wbi';
 
 /**
  * Bilibili integration notes
+ * API reference: https://github.com/realysy/bili-apis
+ * WBI signing reference: docs/misc/sign/wbi.md in that repository.
  * -------------------------
  * Bilibili's public APIs do not send permissive CORS headers (and often apply
  * risk-control to unauthenticated requests). A static web app therefore needs
@@ -44,6 +47,18 @@ interface BilibiliSearchItem {
   duration?: string;
   play?: number;
   description?: string;
+}
+
+interface BilibiliNavPayload {
+  code?: number;
+  data?: {
+    wbi_img?: { img_url?: string; sub_url?: string };
+  };
+}
+
+interface WbiKeys {
+  imgKey: string;
+  subKey: string;
 }
 
 interface BilibiliSearchPayload {
@@ -128,6 +143,43 @@ async function json<T>(url: string, proxy: string, signal?: AbortSignal): Promis
   return (await response.json()) as T;
 }
 
+const wbiCache = new Map<string, { expires: number; promise: Promise<WbiKeys> }>();
+
+function keyFromUrl(url: string | undefined): string {
+  if (!url) return '';
+  try {
+    return new URL(url).pathname.split('/').pop()?.replace(/\.[^.]+$/, '') ?? '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Fetch the current WBI keys from the documented nav endpoint. The endpoint
+ * also returns a not-logged-in code, but keeps wbi_img in data; only the two
+ * image names are needed for signing.
+ */
+async function getWbiKeys(proxy: string, signal?: AbortSignal): Promise<WbiKeys> {
+  const cacheKey = proxy.trim();
+  const cached = wbiCache.get(cacheKey);
+  if (cached && cached.expires > Date.now()) return cached.promise;
+  const promise = json<BilibiliNavPayload>('https://api.bilibili.com/x/web-interface/nav', proxy, signal)
+    .then((payload) => {
+      const imgKey = keyFromUrl(payload.data?.wbi_img?.img_url);
+      const subKey = keyFromUrl(payload.data?.wbi_img?.sub_url);
+      if (!imgKey || !subKey) throw new Error('Bilibili did not return WBI keys.');
+      return { imgKey, subKey };
+    });
+  wbiCache.set(cacheKey, { expires: Date.now() + 10 * 60_000, promise });
+  promise.catch(() => wbiCache.delete(cacheKey));
+  return promise;
+}
+
+async function signedQuery(params: Record<string, string | number>, proxy: string, signal?: AbortSignal): Promise<string> {
+  const keys = await getWbiKeys(proxy, signal);
+  return wbiQuery(params, keys.imgKey, keys.subKey);
+}
+
 function parseDuration(value: string | undefined): number | undefined {
   if (!value) return undefined;
   const parts = value.split(':').map(Number);
@@ -142,12 +194,24 @@ function parseDuration(value: string | undefined): number | undefined {
 export async function searchBilibiliVideos(query: string, proxy: string, signal?: AbortSignal): Promise<BilibiliVideo[]> {
   const keyword = query.trim();
   if (!keyword) return [];
-  const params = new URLSearchParams({ search_type: 'video', keyword, page: '1' });
-  const payload = await json<BilibiliSearchPayload>(
-    `https://api.bilibili.com/x/web-interface/search/type?${params.toString()}`,
-    proxy,
-    signal,
-  );
+  const params = { search_type: 'video', keyword, page: '1' };
+  let payload: BilibiliSearchPayload;
+  try {
+    const query = await signedQuery(params, proxy, signal);
+    payload = await json<BilibiliSearchPayload>(
+      `https://api.bilibili.com/x/web-interface/wbi/search/type?${query}`,
+      proxy,
+      signal,
+    );
+    if (payload.code !== 0) throw new Error(payload.message || `Bilibili search returned ${payload.code}`);
+  } catch {
+    // Older/direct API remains a useful fallback when WBI keys are blocked.
+    payload = await json<BilibiliSearchPayload>(
+      `https://api.bilibili.com/x/web-interface/search/type?${new URLSearchParams(params).toString()}`,
+      proxy,
+      signal,
+    );
+  }
   if (payload.code !== 0) {
     throw new Error(payload.message || `Bilibili search returned ${payload.code ?? 'an error'}`);
   }
@@ -210,7 +274,7 @@ export async function fetchBilibiliPages(bvid: string, proxy: string, signal?: A
  * proxy; the html5 MP4 itself could be played without a Referer in testing.
  */
 export async function fetchBilibiliPlayUrl(bvid: string, cid: number, proxy: string): Promise<string> {
-  const params = new URLSearchParams({
+  const params = {
     bvid,
     cid: String(cid),
     qn: '64',
@@ -219,16 +283,19 @@ export async function fetchBilibiliPlayUrl(bvid: string, cid: number, proxy: str
     fourk: '1',
     platform: 'html5',
     high_quality: '1',
-  });
-  const endpoints = [
-    'https://api.bilibili.com/x/player/wbi/playurl',
-    'https://api.bilibili.com/x/player/playurl',
-  ];
+  };
+  const endpoints: string[] = [];
+  try {
+    endpoints.push(`https://api.bilibili.com/x/player/wbi/playurl?${await signedQuery(params, proxy)}`);
+  } catch {
+    // Fall through to the unsigned endpoint for older proxies.
+  }
+  endpoints.push(`https://api.bilibili.com/x/player/playurl?${new URLSearchParams(params).toString()}`);
   let payload: BilibiliPlayUrlPayload | null = null;
   let lastError: unknown;
   for (const endpoint of endpoints) {
     try {
-      const candidate = await json<BilibiliPlayUrlPayload>(`${endpoint}?${params.toString()}`, proxy);
+      const candidate = await json<BilibiliPlayUrlPayload>(endpoint, proxy);
       if (candidate.code === 0 && candidate.data?.durl?.length) {
         payload = candidate;
         break;
@@ -299,10 +366,14 @@ export async function fetchBilibiliSubtitles(
   cid: number,
   proxy: string,
 ): Promise<SubtitleSource[]> {
-  const endpoints = [
-    `https://api.bilibili.com/x/player/v2?cid=${cid}&bvid=${encodeURIComponent(bvid)}`,
-    `https://api.bilibili.com/x/player/wbi/v2?cid=${cid}&bvid=${encodeURIComponent(bvid)}`,
-  ];
+  const params = { cid: String(cid), bvid };
+  const endpoints: string[] = [];
+  try {
+    endpoints.push(`https://api.bilibili.com/x/player/wbi/v2?${await signedQuery(params, proxy)}`);
+  } catch {
+    // Fall back to the unsigned player endpoint.
+  }
+  endpoints.push(`https://api.bilibili.com/x/player/v2?${new URLSearchParams(params).toString()}`);
   let list: Array<{ lan?: string; lan_doc?: string; subtitle_url?: string }> = [];
   let lastError: unknown;
   for (const endpoint of endpoints) {
@@ -310,7 +381,9 @@ export async function fetchBilibiliSubtitles(
       const payload = await json<BilibiliSubtitlePayload>(endpoint, proxy);
       if (payload.code === 0) {
         list = payload.data?.subtitle?.subtitles ?? [];
-        break;
+        if (list.length) break;
+        lastError = new Error('No subtitles found for this page.');
+        continue;
       }
       lastError = new Error(payload.message || `Bilibili player returned ${payload.code}`);
     } catch (error) {
