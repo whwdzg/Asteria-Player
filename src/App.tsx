@@ -35,6 +35,7 @@ import { isPwaStandalone, restorePwaLibrary, startPwaLibraryPersistence } from '
 import { coverThemeColor, NEUTRAL_PLAYER_ACCENT } from './lib/coverTheme';
 import { clamp } from './lib/format';
 import { collectDroppedFiles } from './lib/mediaFiles';
+import { clearDeepLink, parseDeepLink } from './lib/deepLink';
 import { player } from './player/engine';
 import { useImporter } from './player/ImportProvider';
 import { useLibraryStore } from './state/library';
@@ -333,17 +334,26 @@ export default function App(): React.ReactElement {
 
   useEffect(() => {
     if (!bootReady || deepLinkHandled.current) return;
-    const params = new URLSearchParams(window.location.search);
-    const url = params.get('url');
-    if (!url) return;
+    const link = parseDeepLink(window.location.href);
+    if (!link) return;
     deepLinkHandled.current = true;
-    const kind = params.get('kind') === 'video' ? 'video' : params.get('kind') === 'audio' ? 'audio' : 'auto';
-    const clean = new URL(window.location.href);
-    clean.searchParams.delete('url');
-    clean.searchParams.delete('kind');
-    window.history.replaceState(null, '', clean.pathname + clean.search + clean.hash);
+    window.history.replaceState(null, '', clearDeepLink(window.location.href));
     setWelcomeOpen(false);
-    void importUrls([url], kind);
+    const resumeAfterGesture = (): void => {
+      window.removeEventListener('pointerdown', resumeAfterGesture);
+      window.removeEventListener('keydown', resumeAfterGesture);
+      if (!usePlaybackStore.getState().isPlaying) player.play();
+    };
+    void importUrls([link.url], link.kind, true).then((imported) => {
+      if (!imported) {
+        if (!useLibraryStore.getState().tracks.length) setWelcomeOpen(true);
+        return;
+      }
+      // Deep links open in a new tab, so the browser may still block autoplay.
+      // Resume on the first gesture instead of making the user find play again.
+      window.addEventListener('pointerdown', resumeAfterGesture, { once: true });
+      window.addEventListener('keydown', resumeAfterGesture, { once: true });
+    });
   }, [bootReady, importUrls]);
 
   useEffect(() => {
