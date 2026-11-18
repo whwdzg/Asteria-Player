@@ -197,7 +197,7 @@ export default function App(): React.ReactElement {
   const { t } = useI18n();
   const appRef = useRef<HTMLDivElement>(null);
   const { fullscreen, toggleFullscreen, exitFullscreen } = useFullscreen(appRef);
-  const { importFiles, openFiles, openFolder, openUrl } = useImporter();
+  const { importFiles, importUrls, openFiles, openFolder, openUrl } = useImporter();
   const current = useLibraryStore((state) => state.tracks.find((item) => item.id === state.currentId));
   const tracks = useLibraryStore((state) => state.tracks);
   const loaded = useLibraryStore((state) => state.loaded);
@@ -328,6 +328,23 @@ export default function App(): React.ReactElement {
 
     void boot();
   }, [loadDemoContent]);
+
+  const deepLinkHandled = useRef(false);
+
+  useEffect(() => {
+    if (!bootReady || deepLinkHandled.current) return;
+    const params = new URLSearchParams(window.location.search);
+    const url = params.get('url');
+    if (!url) return;
+    deepLinkHandled.current = true;
+    const kind = params.get('kind') === 'video' ? 'video' : params.get('kind') === 'audio' ? 'audio' : 'auto';
+    const clean = new URL(window.location.href);
+    clean.searchParams.delete('url');
+    clean.searchParams.delete('kind');
+    window.history.replaceState(null, '', clean.pathname + clean.search + clean.hash);
+    setWelcomeOpen(false);
+    void importUrls([url], kind);
+  }, [bootReady, importUrls]);
 
   useEffect(() => {
     if (!bootReady) return;
