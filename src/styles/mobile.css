@@ -680,16 +680,12 @@
   }
 
   /* Any queue opened on a phone becomes a full sheet. */
-  .queue-panel.is-sidebar,
-  .queue-panel.is-full {
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
+  body .queue-panel.is-sidebar,
+  body .queue-panel.is-full {
+    inset: 0;
     width: 100%;
     border-radius: 0;
-    background: color-mix(in srgb, var(--bg) 42%, transparent);
-    backdrop-filter: blur(28px) saturate(140%);
+    background: var(--bg);
     z-index: 56;
     animation: none;
     opacity: 1;
@@ -1116,4 +1112,23 @@
     transition: none;
     will-change: transform;
   }
+}
+
+@media (max-width: 700px) {
+  .queue-expand-toggle {
+    display: none !important;
+  }
+}
+
+/* Touch devices always use the expanded, full-screen queue. */
+.is-touch .queue-expand-toggle {
+  display: none !important;
+}
+
+.is-touch .queue-panel.is-full {
+  inset: 0;
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  background: var(--bg);
 }

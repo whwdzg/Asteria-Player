@@ -408,6 +408,12 @@ export default function App(): React.ReactElement {
   const isMobileViewport = useMediaQuery('(max-width: 700px)');
   const useMobilePlayer = isTouch && isMobileViewport && !isVideo && !fullscreen;
 
+  useEffect(() => {
+    if (isTouch && useUiStore.getState().queueView === 'sidebar') {
+      useUiStore.getState().setQueueView('full');
+    }
+  }, [isTouch, queueView]);
+
   useMobileBackNavigation(
     isTouch && isMobileViewport,
     Boolean(queueView !== 'closed' || settingsOpen || collectionView || detailsTrackId || playlistDialogOpen || scanMediaOpen || mobileOverlay),

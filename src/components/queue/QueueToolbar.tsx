@@ -260,11 +260,11 @@ export function QueueToolbar({
               <SelectAllOn24Regular />
             </IconButton>
             {variant === 'sidebar' ? (
-              <IconButton label={t('common.expand')} tooltip={t('common.expand')} onClick={onExpand}>
+              <IconButton className="queue-expand-toggle" label={t('common.expand')} tooltip={t('common.expand')} onClick={onExpand}>
                 <FullScreenMaximize24Regular />
               </IconButton>
             ) : (
-              <IconButton label={t('common.collapse')} tooltip={t('common.collapse')} onClick={onCollapse}>
+              <IconButton className="queue-expand-toggle" label={t('common.collapse')} tooltip={t('common.collapse')} onClick={onCollapse}>
                 <PanelRightContract24Regular />
               </IconButton>
             )}

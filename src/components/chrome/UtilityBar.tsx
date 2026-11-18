@@ -14,6 +14,7 @@ import { useSettingsStore } from '../../state/settings';
 import { useUiStore, type PopoverId } from '../../state/ui';
 import { useI18n } from '../../i18n/I18nProvider';
 import { useDismiss } from '../../hooks/useDismiss';
+import { useTouchDevice } from '../../hooks/useTouchDevice';
 import { useShortcutHint } from '../../hooks/useShortcuts';
 import { IconButton } from '../common/IconButton';
 import { PopoverCard } from '../common/PopoverCard';
@@ -85,6 +86,7 @@ export function UtilityBar({ onToggleFullscreen }: UtilityBarProps): React.React
   const sleepEnabled = useSleepTimerStore((state) => state.enabled);
   const sleepMinutes = useSleepTimerStore((state) => state.minutes);
   const sleepMode = useSleepTimerStore((state) => state.mode);
+  const isTouch = useTouchDevice();
   const { t } = useI18n();
   const fullscreenHint = useShortcutHint('fullscreen');
   const queueHint = useShortcutHint('queue');
@@ -155,7 +157,7 @@ export function UtilityBar({ onToggleFullscreen }: UtilityBarProps): React.React
         label={queueLabel}
         tooltip={queueLabel}
         active={queueView !== 'closed'}
-        onClick={() => (queueView === 'closed' ? openQueue('sidebar') : setQueueView('closed'))}
+        onClick={() => (queueView === 'closed' ? openQueue(isTouch ? 'full' : 'sidebar') : setQueueView('closed'))}
         className="queue-button"
       >
         <TextBulletListLtr24Regular />
