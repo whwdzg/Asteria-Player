@@ -26,6 +26,7 @@ import { useTouchDevice } from './hooks/useTouchDevice';
 import { usePerformanceGuard } from './hooks/usePerformanceGuard';
 import { useMediaQuery } from './hooks/useMediaQuery';
 import { useFileLaunch } from './hooks/useFileLaunch';
+import { useWindowControlsOverlay } from './hooks/useWindowControlsOverlay';
 import { useOrientationFullscreen } from './hooks/useOrientationFullscreen';
 import { MOBILE_BACK_EVENT, useMobileBackNavigation } from './hooks/useMobileBackNavigation';
 import { useI18n } from './i18n/I18nProvider';
@@ -196,6 +197,7 @@ function DropOverlay(): React.ReactElement | null {
 
 export default function App(): React.ReactElement {
   useAppearance();
+  useWindowControlsOverlay();
   const { t } = useI18n();
   const appRef = useRef<HTMLDivElement>(null);
   const { fullscreen, toggleFullscreen, exitFullscreen } = useFullscreen(appRef);
