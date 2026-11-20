@@ -559,5 +559,7 @@
   "queue.exportNoTracks": "このシーケンスには書き出せるメディアがありません",
   "queue.packExported": "Asteria Player Pack を作成しました",
   "queue.packExportFailed": "パックを書き出せませんでした",
-  "queue.exporting": "書き出し中…"
+  "queue.exporting": "書き出し中…",
+  "settings.installBenefitFiles": "インストール後、Windows エクスプローラーから音声・動画・.astpp ファイルを Asteria Player で開けます。初回は Windows がアプリの選択を求める場合があります。",
+  "settings.installUsageOpenWith": "エクスプローラーの「プログラムから開く」または関連付け済みファイルのダブルクリックで開きます。ファイルは PWA にインポートされ、現在の再生項目になります。"
 }

@@ -559,5 +559,7 @@
   "queue.exportNoTracks": "This sequence has no media to export",
   "queue.packExported": "Asteria Player Pack created",
   "queue.packExportFailed": "Could not export the pack",
-  "queue.exporting": "Exporting…"
+  "queue.exporting": "Exporting…",
+  "settings.installBenefitFiles": "Open audio, video and .astpp files with Asteria Player from Windows Explorer after installation. Windows may ask you to choose the app the first time.",
+  "settings.installUsageOpenWith": "Use Explorer’s “Open with” / double-click for an associated media file; the file is imported into the PWA and becomes current."
 }

@@ -25,6 +25,7 @@ import { useAutoHideChrome } from './hooks/useAutoHideChrome';
 import { useTouchDevice } from './hooks/useTouchDevice';
 import { usePerformanceGuard } from './hooks/usePerformanceGuard';
 import { useMediaQuery } from './hooks/useMediaQuery';
+import { useFileLaunch } from './hooks/useFileLaunch';
 import { useOrientationFullscreen } from './hooks/useOrientationFullscreen';
 import { MOBILE_BACK_EVENT, useMobileBackNavigation } from './hooks/useMobileBackNavigation';
 import { useI18n } from './i18n/I18nProvider';
@@ -199,6 +200,7 @@ export default function App(): React.ReactElement {
   const appRef = useRef<HTMLDivElement>(null);
   const { fullscreen, toggleFullscreen, exitFullscreen } = useFullscreen(appRef);
   const { importFiles, importUrls, openFiles, openFolder, openUrl } = useImporter();
+
   const current = useLibraryStore((state) => state.tracks.find((item) => item.id === state.currentId));
   const tracks = useLibraryStore((state) => state.tracks);
   const loaded = useLibraryStore((state) => state.loaded);
@@ -231,6 +233,28 @@ export default function App(): React.ReactElement {
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const [welcomePwaHint, setWelcomePwaHint] = useState(false);
   const [bootReady, setBootReady] = useState(false);
+
+  useFileLaunch((files) => {
+    setWelcomeOpen(false);
+    markAppUsed();
+    void importFiles(files, true).then(() => {
+      if (!useLibraryStore.getState().tracks.length) {
+        setWelcomeOpen(true);
+        return;
+      }
+      // File launches are a user gesture on some platforms but not all.
+      // Resume on the first interaction when autoplay was blocked.
+      const resumeAfterGesture = (): void => {
+        window.removeEventListener('pointerdown', resumeAfterGesture);
+        window.removeEventListener('keydown', resumeAfterGesture);
+        if (!usePlaybackStore.getState().isPlaying) player.play();
+      };
+      if (!usePlaybackStore.getState().isPlaying) {
+        window.addEventListener('pointerdown', resumeAfterGesture, { once: true });
+        window.addEventListener('keydown', resumeAfterGesture, { once: true });
+      }
+    });
+  }, bootReady);
   const barCollapsed = useUiStore((state) => state.barCollapsed);
   const playMode = useSettingsStore((state) => state.playMode);
   const sequenceId = useLibraryStore((state) => state.sequenceId);

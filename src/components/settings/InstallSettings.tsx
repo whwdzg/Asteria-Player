@@ -75,6 +75,7 @@ export function InstallSettings(): React.ReactElement {
             <li>{t('settings.installBenefitProgress')}</li>
             <li>{t('settings.installBenefitWindow')}</li>
             <li>{t('settings.installBenefitOffline')}</li>
+            <li>{t('settings.installBenefitFiles')}</li>
           </ul>
 
           <h4>{t('settings.installUsage')}</h4>
@@ -82,6 +83,7 @@ export function InstallSettings(): React.ReactElement {
             <li>{t('settings.installUsageOpen')}</li>
             <li>{t('settings.installUsageImport')}</li>
             <li>{t('settings.installUsageStorage')}</li>
+            <li>{t('settings.installUsageOpenWith')}</li>
           </ol>
 
           <h4>{t('settings.installBrowser')}</h4>

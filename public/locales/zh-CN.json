@@ -559,5 +559,7 @@
   "queue.exportNoTracks": "该序列没有可导出的媒体",
   "queue.packExported": "已生成 Asteria Player Pack",
   "queue.packExportFailed": "导出失败",
-  "queue.exporting": "正在导出…"
+  "queue.exporting": "正在导出…",
+  "settings.installBenefitFiles": "安装后可在 Windows 资源管理器中用 Asteria Player 打开音频、视频和 .astpp 文件。首次使用时 Windows 可能会要求选择打开方式。",
+  "settings.installUsageOpenWith": "在资源管理器中右键选择「打开方式」或双击已关联的媒体文件；文件会导入 PWA 并成为当前播放项。"
 }

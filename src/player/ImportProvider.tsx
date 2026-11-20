@@ -22,7 +22,7 @@ interface ImportContextValue {
   openFiles: () => void;
   openFolder: () => void;
   openUrl: () => void;
-  importFiles: (files: File[]) => Promise<void>;
+  importFiles: (files: File[], autoplay?: boolean) => Promise<void>;
   importUrls: (urls: string[], kind: UrlKind, autoplay?: boolean) => Promise<boolean>;
   busy: boolean;
 }
@@ -64,12 +64,13 @@ export function ImportProvider({ children }: { children: ReactNode }): ReactNode
     return accepted[0] ?? null;
   }, []);
 
-  const importFiles = useCallback(async (files: File[]) => {
+  const importFiles = useCallback(async (files: File[], autoplay = false) => {
     if (!files.length || busy) return;
     setBusy(true);
     useUiStore.getState().setImporting({ done: 0, total: files.length });
     try {
       let imported = 0;
+      let firstImported: Track | null = null;
       const warnings: string[] = [];
       const packFiles = files.filter((file) => /\.astpp$/i.test(file.name));
       const mediaFiles = files.filter((file) => !/\.astpp$/i.test(file.name));
@@ -83,6 +84,7 @@ export function ImportProvider({ children }: { children: ReactNode }): ReactNode
             if (added) {
               ids.push(added.id);
               imported += 1;
+              firstImported ??= added;
             }
           }
           if (ids.length) {
@@ -97,12 +99,17 @@ export function ImportProvider({ children }: { children: ReactNode }): ReactNode
       const result = mediaFiles.length ? await readFiles(mediaFiles, (done, total) => {
         useUiStore.getState().setImporting({ done, total });
       }, (track) => {
-        if (addImportedTrack(track)) imported += 1;
+        const added = addImportedTrack(track);
+        if (added) {
+          imported += 1;
+          firstImported ??= added;
+        }
       }) : { warnings: [] as string[] };
       warnings.push(...result.warnings);
       if (!imported) {
         useUiStore.getState().pushToast(warnings[0] ?? t('toast.importEmpty'), 'error');
       } else {
+        if (autoplay && firstImported) player.playTrack(firstImported.id);
         useUiStore.getState().pushToast(t('toast.imported', { count: imported }));
         if (warnings.length) {
           useUiStore.getState().pushToast(t('toast.importSkipped', { count: warnings.length }));
