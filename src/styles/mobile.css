@@ -1133,24 +1133,38 @@
   background: var(--bg);
 }
 
-/* Installed Chromium PWA: custom immersive titlebar and window drag area. */
+/* Installed Chromium PWA: custom titlebar, opaque titlebar band and window drag area.
+   Nothing from the app is allowed to paint behind the native titlebar. */
+.is-wco {
+  --wco-titlebar-top: env(titlebar-area-y, 0px);
+  --wco-titlebar-height: env(titlebar-area-height, 40px);
+}
+
+.is-wco .app::before {
+  content: "";
+  position: fixed;
+  top: var(--wco-titlebar-top);
+  right: 0;
+  left: 0;
+  z-index: 79;
+  height: var(--wco-titlebar-height);
+  background: var(--bg-deep);
+  pointer-events: none;
+}
+
 .is-wco .app-header {
   position: fixed;
-  top: env(titlebar-area-y, 0px);
+  top: var(--wco-titlebar-top);
   left: env(titlebar-area-x, 0px);
   right: auto;
   display: flex;
   width: env(titlebar-area-width, 100%);
-  height: env(titlebar-area-height, 40px);
+  height: var(--wco-titlebar-height);
   padding: 0 12px;
   border: 0;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--bg-deep) 74%, transparent),
-    color-mix(in srgb, var(--bg-deep) 18%, transparent)
-  );
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
-  backdrop-filter: blur(18px) saturate(140%);
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
   -webkit-app-region: drag;
   app-region: drag;
   z-index: 80;
@@ -1185,5 +1199,21 @@
 }
 
 .is-wco .app-main {
-  padding-top: calc(env(titlebar-area-height, 40px) + 20px);
+  padding-top: calc(var(--wco-titlebar-height) + 20px);
+}
+
+/* Dialogs, the artwork viewer, drop target and queue are content surfaces too:
+   start them below the native titlebar instead of letting them paint behind it. */
+.is-wco .modal-layer,
+.is-wco .artwork-lightbox,
+.is-wco .drop-overlay {
+  top: var(--wco-titlebar-height);
+}
+
+.is-wco .queue-panel {
+  top: calc(var(--wco-titlebar-height) + 14px);
+}
+
+.is-wco .queue-panel.is-full {
+  top: calc(var(--wco-titlebar-height) + 14px);
 }
