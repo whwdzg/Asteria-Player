@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useRef } from 'react';
 import { Checkmark24Regular, MoreHorizontal24Regular } from '@fluentui/react-icons';
 import type { Track } from '../../lib/types';
 import { formatDuration } from '../../lib/format';
@@ -29,8 +29,16 @@ export const QueueItem = memo(function QueueItem({
   onMenu,
 }: QueueItemProps): React.ReactElement {
   const { t } = useI18n();
+  const moreRef = useRef<HTMLButtonElement>(null);
   return (
-    <div className={`queue-row ${active ? 'is-current' : ''} ${selected ? 'is-selected' : ''}`.trim()}>
+    <div
+      className={`queue-row ${active ? 'is-current' : ''} ${selected ? 'is-selected' : ''}`.trim()}
+      onContextMenu={(event) => {
+        if (batch) return;
+        event.preventDefault();
+        moreRef.current?.click();
+      }}
+    >
       {batch ? (
         <button
           type="button"
@@ -61,6 +69,7 @@ export const QueueItem = memo(function QueueItem({
       <span className="queue-duration">{track.duration ? formatDuration(track.duration) : '--:--'}</span>
       {!batch ? (
         <IconButton
+          ref={moreRef}
           label={t('a11y.openDetails', { title: track.title })}
           variant="subtle"
           size="sm"
