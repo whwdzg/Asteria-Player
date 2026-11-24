@@ -43,5 +43,18 @@ def make(size: int, path: Path) -> None:
     print("icon", path.name)
 
 
-for size in (192, 512, 180):
+for size in (192, 512, 180, 96):
     make(size, OUT / ("apple-touch-icon.png" if size == 180 else f"icon-{size}.png"))
+
+# Maskable icons need their own entries (PWABuilder rejects "any maskable").
+# Keep the mark inside Android's 80% safe circle and fill the rest with the
+# app background so launchers can crop to any shape.
+source = Image.open(OUT / "icon-512.png").convert("RGB")
+for size in (192, 512):
+    canvas = Image.new("RGB", (size, size), "#070a10")
+    # The artwork's A mark already sits inside the 80% safe circle; keep the
+    # full-bleed background instead of shrinking the rounded tile.
+    canvas.paste(source.resize((size, size), Image.LANCZOS), (0, 0))
+    target = OUT / f"icon-maskable-{size}.png"
+    canvas.save(target, "PNG")
+    print("icon", target.name)

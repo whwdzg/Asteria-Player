@@ -357,6 +357,7 @@ export default function App(): React.ReactElement {
   }, [loadDemoContent]);
 
   const deepLinkHandled = useRef(false);
+  const shortcutHandled = useRef(false);
 
   useEffect(() => {
     if (!bootReady || deepLinkHandled.current) return;
@@ -482,6 +483,21 @@ export default function App(): React.ReactElement {
       if (ui.scanMediaOpen) ui.closeScanMedia();
     },
   );
+
+  useEffect(() => {
+    if (!bootReady || shortcutHandled.current) return;
+    const url = new URL(window.location.href);
+    const action = url.searchParams.get('shortcut');
+    if (!action) return;
+    shortcutHandled.current = true;
+    url.searchParams.delete('shortcut');
+    window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+    setWelcomeOpen(false);
+    markAppUsed();
+    if (action === 'queue') useUiStore.getState().openQueue(isTouch ? 'full' : 'sidebar');
+    else if (action === 'settings') useUiStore.getState().setSettingsOpen(true);
+    else if (action === 'import') openFiles();
+  }, [bootReady, isTouch, openFiles]);
 
   useEffect(() => {
     // Selecting a video returns to its main surface instead of leaving the

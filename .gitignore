@@ -6,3 +6,7 @@ screenshots/
 *.tsbuildinfo
 *.tmpdir/
 
+
+# PWABuilder / store assets are deliverables, not QA scratch files.
+!public/screenshots/
+!public/screenshots/**
