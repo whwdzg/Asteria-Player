@@ -18,6 +18,7 @@ interface WelcomeDialogProps {
   onOpenFolder: () => void;
   onOpenUrl: () => void;
   onUseDemo: () => void;
+  onDismiss: () => void;
 }
 
 /** First-run choice: import real content now, or deliberately load the demo. */
@@ -27,6 +28,7 @@ export function WelcomeDialog({
   onOpenFolder,
   onOpenUrl,
   onUseDemo,
+  onDismiss,
 }: WelcomeDialogProps): React.ReactElement {
   const { t } = useI18n();
   const [installAvailable, setInstallAvailable] = useState(false);
@@ -50,7 +52,7 @@ export function WelcomeDialog({
   return (
     <Modal
       open
-      onClose={onUseDemo}
+      onClose={onDismiss}
       title={t('welcome.title')}
       closeLabel={t('common.close')}
       size="md"

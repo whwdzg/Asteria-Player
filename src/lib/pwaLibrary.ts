@@ -36,9 +36,19 @@ export interface RestoredPwaLibrary {
 /** Installed PWA windows only; an ordinary browser tab keeps the old behaviour. */
 export function isPwaStandalone(): boolean {
   if (typeof window === 'undefined') return false;
-  const navigatorWithStandalone = navigator as Navigator & { standalone?: boolean };
-  return window.matchMedia?.('(display-mode: standalone)').matches
-    || navigatorWithStandalone.standalone === true;
+  const navigatorWithStandalone = navigator as Navigator & {
+    standalone?: boolean;
+    windowControlsOverlay?: unknown;
+  };
+  if (navigatorWithStandalone.standalone === true) return true;
+  // window-controls-overlay is a standalone PWA display mode too; matching only
+  // "standalone" would make WCO installs lose persistence and show install UI.
+  const displayModes = ['standalone', 'window-controls-overlay', 'minimal-ui', 'fullscreen'];
+  if (window.matchMedia && displayModes.some((mode) => window.matchMedia('(display-mode: ' + mode + ')').matches)) {
+    return true;
+  }
+  const overlay = navigatorWithStandalone.windowControlsOverlay as { visible?: boolean } | undefined;
+  return Boolean(overlay?.visible);
 }
 
 let databasePromise: Promise<IDBDatabase> | null = null;

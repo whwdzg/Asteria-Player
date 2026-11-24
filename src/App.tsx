@@ -399,6 +399,15 @@ export default function App(): React.ReactElement {
     }
   }, [bootReady, playMode, queueLength, sequenceId]);
 
+  const dismissWelcome = useCallback(() => {
+    setWelcomeOpen(false);
+    setDemoPreference('import');
+    const demoIds = useLibraryStore.getState().tracks
+      .filter((track) => track.source === 'demo')
+      .map((track) => track.id);
+    if (demoIds.length) player.removeTracks(demoIds);
+  }, []);
+
   const useDemoContent = useCallback(() => {
     markAppUsed();
     setDemoPreference('demo');
@@ -596,11 +605,12 @@ export default function App(): React.ReactElement {
       />
       {welcomeOpen ? (
         <WelcomeDialog
-          showPwaHint={welcomePwaHint}
+          showPwaHint={welcomePwaHint && !isPwaStandalone()}
           onOpenFiles={() => { markAppUsed(); setWelcomeOpen(false); openFiles(); }}
           onOpenFolder={() => { markAppUsed(); setWelcomeOpen(false); openFolder(); }}
           onOpenUrl={() => { markAppUsed(); setWelcomeOpen(false); openUrl(); }}
           onUseDemo={useDemoContent}
+          onDismiss={dismissWelcome}
         />
       ) : null}
       {collectionView ? (
